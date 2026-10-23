@@ -65,10 +65,12 @@ describe("collectionQuerySchema roundtrip", () => {
   });
 
   it("in 算子的数组值往返", () => {
-    const q = schema.decode(schema.encode({
-      predicate: { field: "status", op: "in", value: ["running", "degraded"] },
-      window: { size: 8 },
-    }));
+    const q = schema.decode(
+      schema.encode({
+        predicate: { field: "status", op: "in", value: ["running", "degraded"] },
+        window: { size: 8 },
+      }),
+    );
     expect(q.predicate).toEqual({ field: "status", op: "in", value: ["running", "degraded"] });
   });
 });

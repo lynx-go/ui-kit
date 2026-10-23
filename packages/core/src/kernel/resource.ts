@@ -34,8 +34,8 @@ export type SubsRecord = Record<string, SubscriptionDescriptor<any, any>>;
 export interface ResourceSpec<
   T,
   ID = string,
-  C extends CommandsRecord<ID> = {},
-  S extends SubsRecord = {},
+  C extends CommandsRecord<ID> = Record<string, never>,
+  S extends SubsRecord = Record<string, never>,
 > {
   name: string;
   /** 可选——command-only/流式资源无 id 语义；DataTable/绑定的 getRowId 显式传入 */
@@ -62,8 +62,8 @@ export interface ResourceSpec<
 export interface Resource<
   T,
   ID = string,
-  C extends CommandsRecord<ID> = {},
-  S extends SubsRecord = {},
+  C extends CommandsRecord<ID> = Record<string, never>,
+  S extends SubsRecord = Record<string, never>,
 > {
   readonly name: ResourceName;
   readonly getId?: (row: T) => ID;
@@ -94,8 +94,8 @@ export interface Resource<
 export function defineResource<
   T,
   ID,
-  C extends CommandsRecord<ID> = {},
-  S extends SubsRecord = {},
+  C extends CommandsRecord<ID> = Record<string, never>,
+  S extends SubsRecord = Record<string, never>,
 >(spec: ResourceSpec<T, ID, C, S>): Resource<T, ID, C, S> {
   if (!/^[a-z][a-z0-9-]*$/.test(spec.name)) {
     throw new Error(

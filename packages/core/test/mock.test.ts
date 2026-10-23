@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { encodeClientCursor } from "../src/kernel";
 import { clientCollection, mockCollection, mockFetchAll } from "../src/adapters";
-import { defineResource, isApiError } from "../src/kernel";
+import { defineResource, encodeClientCursor, isApiError } from "../src/kernel";
 
 interface Row {
   id: string;
@@ -31,7 +30,9 @@ describe("mockCollection 契约", () => {
       cursor = seg.nextCursor;
     }
     expect(pages).toBe(3);
-    expect((await mock.collection({ window: { size: 10, cursor: encodeClientCursor(20) } }, {})).rows).toHaveLength(5);
+    expect(
+      (await mock.collection({ window: { size: 10, cursor: encodeClientCursor(20) } }, {})).rows,
+    ).toHaveLength(5);
   });
 
   it("offset 方言：附带 total（含过滤后）", async () => {

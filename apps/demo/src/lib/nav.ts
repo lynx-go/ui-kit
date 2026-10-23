@@ -1,0 +1,16 @@
+import type { NavSection } from "@blocks/shell/app-shell";
+
+export const nav: NavSection[] = [
+  {
+    label: "Overview",
+    items: [{ label: "Overview", to: "/" }],
+  },
+  {
+    label: "Recipes",
+    items: [
+      { label: "Widgets (client-evaluated)", to: "/widgets" },
+      { label: "Widgets (keyset)", to: "/widgets/keyset" },
+      { label: "By owner (reference)", to: "/owners" },
+    ],
+  },
+];

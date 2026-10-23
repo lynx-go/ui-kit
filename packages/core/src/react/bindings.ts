@@ -1,18 +1,18 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import {
-  advance,
-  scoped,
-  type CommandsRecord,
-  type SubsRecord,
   type ApiError,
+  advance,
   type CollectionQuery,
+  type CommandsRecord,
   type Order,
   type Predicate,
   type QueryWindow,
   type Resource,
   type ResourceScope,
   type Segment,
+  type SubsRecord,
+  scoped,
 } from "../kernel";
 import type { FlatPatch, QuerySearchSchema } from "../schema";
 import { batchQueryOptions, collectionQueryOptions, recordQueryOptions } from "./options";
@@ -213,7 +213,9 @@ export function useBatch<T, ID, C extends CommandsRecord<ID>, S extends SubsReco
     }),
   });
   const rows = result.data ?? EMPTY_ROWS;
-  const byId = new Map(rows.map((row) => [target.getId ? target.getId(row) : (row as unknown as { id: ID }).id, row]));
+  const byId = new Map(
+    rows.map((row) => [target.getId ? target.getId(row) : (row as unknown as { id: ID }).id, row]),
+  );
   return {
     rows,
     byId,

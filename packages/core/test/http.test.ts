@@ -24,7 +24,7 @@ describe("createHttp（缝 1：错误通道）", () => {
     stubFetch(200, { apps: [{ id: "a1" }] });
     const http = createHttp();
     const out = await http.get<{ apps: Array<{ id: string }> }>("/v1/apps", {
-      decode: (raw) => (raw as { apps: Array<{ id: string }> }),
+      decode: (raw) => raw as { apps: Array<{ id: string }> },
     });
     expect(out.apps[0]!.id).toBe("a1");
   });
@@ -51,8 +51,12 @@ describe("createHttp（缝 1：错误通道）", () => {
   });
 
   it("网络断层 → network（typed failure，非 defect）", async () => {
-    globalThis.fetch = vi.fn().mockRejectedValue(new TypeError("fetch failed")) as unknown as typeof fetch;
-    await expect(createHttp().get("/x")).rejects.toSatisfy((e) => isApiError(e) && e.kind === "network");
+    globalThis.fetch = vi
+      .fn()
+      .mockRejectedValue(new TypeError("fetch failed")) as unknown as typeof fetch;
+    await expect(createHttp().get("/x")).rejects.toSatisfy(
+      (e) => isApiError(e) && e.kind === "network",
+    );
   });
 
   it("repeated 参数序列化为 key=a&key=b（gateway 方言）", async () => {

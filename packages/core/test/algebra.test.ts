@@ -57,9 +57,9 @@ describe("evaluateQuery（客户端求值）", () => {
 
   it("textPredicate 生成 any(contains)", () => {
     const pred = textPredicate(["name"], "ALP");
-    expect(evaluateQuery({ predicate: pred, window: { size: 10 } }, rows).rows.map((r) => r.id)).toEqual([
-      "1",
-    ]);
+    expect(
+      evaluateQuery({ predicate: pred, window: { size: 10 } }, rows).rows.map((r) => r.id),
+    ).toEqual(["1"]);
   });
 });
 
@@ -88,7 +88,22 @@ describe("advance（游标代数）", () => {
   });
 
   it("keyset next 依赖 segment.nextCursor（空页停发 → null）", () => {
-    expect(advance({ size: 2, cursor: "c2" }, { rows: [], nextCursor: "c4" }, "next")!.cursor).toBe("c4");
+    expect(advance({ size: 2, cursor: "c2" }, { rows: [], nextCursor: "c4" }, "next")!.cursor).toBe(
+      "c4",
+    );
     expect(advance({ size: 2, cursor: "c4" }, { rows: [] }, "next")).toBeNull();
+  });
+});
+
+describe("advance：keyset 资源从无游标首窗推进（e2e 修复回归）", () => {
+  it("首窗无 cursor 但 segment 带续读令牌 → next 进游标模式", () => {
+    const next = advance({ size: 8 }, { rows: [], nextCursor: "opaque-token" }, "next");
+    expect(next!.cursor).toBe("opaque-token");
+  });
+
+  it("客户端求值 range 模式（无令牌有 total）→ 保持 range", () => {
+    const next = advance({ size: 8, range: { offset: 0 } }, { rows: [], total: 57 }, "next");
+    expect(next!.range).toEqual({ offset: 8 });
+    expect(next!.cursor).toBeUndefined();
   });
 });

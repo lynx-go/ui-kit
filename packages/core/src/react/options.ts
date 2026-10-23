@@ -1,13 +1,13 @@
 import type { CommandsRecord, SubsRecord } from "../kernel";
 import {
   batchKey,
-  collectionKey,
-  recordKey,
-  scopeOf,
   type CollectionQuery,
+  collectionKey,
   type Resource,
   type ResourceScope,
+  recordKey,
   type Segment,
+  scopeOf,
 } from "../kernel";
 
 /**
@@ -61,7 +61,13 @@ export function recordQueryOptions<T, ID, C extends CommandsRecord<ID>, S extend
   if (!record) {
     throw new Error(`fleet-ui: resource "${String(resource.name)}" has no record query`);
   }
-  if (id === undefined) return { ...options, queryKey: ["record", resource.name, "none"], queryFn: () => Promise.reject(new Error("unreachable")), enabled: false };
+  if (id === undefined)
+    return {
+      ...options,
+      queryKey: ["record", resource.name, "none"],
+      queryFn: () => Promise.reject(new Error("unreachable")),
+      enabled: false,
+    };
   const scope = scopeOf(resource);
   return {
     queryKey: recordKey(resource, id),

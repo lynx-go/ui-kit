@@ -1,6 +1,11 @@
-import type { CommandsRecord, Resource, ResourceScope, SubsRecord } from "./resource";
+import type {
+  CommandsRecord,
+  QuerySelector,
+  Resource,
+  ResourceScope,
+  SubsRecord,
+} from "./resource";
 import { scopeOf } from "./resource";
-import type { QuerySelector } from "./resource";
 import type { CollectionQuery } from "./types";
 
 // ============ 查询键（queryKey 单源；失效选择器在此匹配） ============

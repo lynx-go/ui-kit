@@ -1,0 +1,172 @@
+{
+  "items": [
+    {
+      "name": "values-copy-button",
+      "type": "registry:block",
+      "title": "copy-button",
+      "files": [
+        {
+          "path": "registry/values/copy-button.tsx",
+          "target": "components/fleet/values/copy-button.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "registryDependencies": []
+    },
+    {
+      "name": "values-relative-time",
+      "type": "registry:block",
+      "title": "relative-time",
+      "files": [
+        {
+          "path": "registry/values/relative-time.tsx",
+          "target": "components/fleet/values/relative-time.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "registryDependencies": []
+    },
+    {
+      "name": "values-states",
+      "type": "registry:block",
+      "title": "states",
+      "files": [
+        {
+          "path": "registry/values/states.tsx",
+          "target": "components/fleet/values/states.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "registryDependencies": []
+    },
+    {
+      "name": "values-status-badge",
+      "type": "registry:block",
+      "title": "status-badge",
+      "files": [
+        {
+          "path": "registry/values/status-badge.tsx",
+          "target": "components/fleet/values/status-badge.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "registryDependencies": []
+    },
+    {
+      "name": "query-data-table",
+      "type": "registry:block",
+      "title": "data-table",
+      "files": [
+        {
+          "path": "registry/query/data-table.tsx",
+          "target": "components/fleet/query/data-table.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "registryDependencies": []
+    },
+    {
+      "name": "query-filter-bar",
+      "type": "registry:block",
+      "title": "filter-bar",
+      "files": [
+        {
+          "path": "registry/query/filter-bar.tsx",
+          "target": "components/fleet/query/filter-bar.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "registryDependencies": []
+    },
+    {
+      "name": "query-keyset-pagination",
+      "type": "registry:block",
+      "title": "keyset-pagination",
+      "files": [
+        {
+          "path": "registry/query/keyset-pagination.tsx",
+          "target": "components/fleet/query/keyset-pagination.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "registryDependencies": []
+    },
+    {
+      "name": "query-list-page",
+      "type": "registry:block",
+      "title": "list-page",
+      "files": [
+        {
+          "path": "registry/query/list-page.tsx",
+          "target": "components/fleet/query/list-page.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "registryDependencies": []
+    },
+    {
+      "name": "query-pagination",
+      "type": "registry:block",
+      "title": "pagination",
+      "files": [
+        {
+          "path": "registry/query/pagination.tsx",
+          "target": "components/fleet/query/pagination.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "registryDependencies": []
+    },
+    {
+      "name": "query-reference-select",
+      "type": "registry:block",
+      "title": "reference-select",
+      "files": [
+        {
+          "path": "registry/query/reference-select.tsx",
+          "target": "components/fleet/query/reference-select.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "registryDependencies": []
+    },
+    {
+      "name": "shell-app-shell",
+      "type": "registry:block",
+      "title": "app-shell",
+      "files": [
+        {
+          "path": "registry/shell/app-shell.tsx",
+          "target": "components/fleet/shell/app-shell.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "registryDependencies": []
+    },
+    {
+      "name": "shell-page",
+      "type": "registry:block",
+      "title": "page",
+      "files": [
+        {
+          "path": "registry/shell/page.tsx",
+          "target": "components/fleet/shell/page.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "registryDependencies": []
+    }
+  ]
+}

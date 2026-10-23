@@ -1,10 +1,10 @@
 import {
-  textPredicate,
   type CollectionQuery,
   type Operator,
   type Order,
   type Predicate,
   type QueryWindow,
+  textPredicate,
 } from "../kernel";
 
 /**
@@ -42,7 +42,9 @@ export interface FlatSearchParams {
   size?: number;
 }
 
-export type FlatPatch = Partial<Record<string, string | number | ReadonlyArray<string> | undefined>>;
+export type FlatPatch = Partial<
+  Record<string, string | number | ReadonlyArray<string> | undefined>
+>;
 
 /** Standard Schema v1 的最小结构形状（TanStack Router validateSearch 直收）。 */
 export interface StandardSchemaV1<Input = unknown, Output = Input> {
@@ -96,7 +98,11 @@ export function collectionQuerySchema(spec: QuerySchemaSpec = {}): QuerySearchSc
     const filters: string[] = [];
     let q: string | undefined;
     for (const leaf of flattenLeaves(predicate)) {
-      if (leaf.op === "contains" && textSet.has(leaf.field as string) && typeof leaf.value === "string") {
+      if (
+        leaf.op === "contains" &&
+        textSet.has(leaf.field as string) &&
+        typeof leaf.value === "string"
+      ) {
         q = q === undefined ? leaf.value : q; // 同值多字段（textPredicate 的 any 形）
         continue;
       }
@@ -269,6 +275,10 @@ function toArray(value: unknown): ReadonlyArray<string> {
 
 function positiveInt(value: unknown): number | undefined {
   const n =
-    typeof value === "number" ? value : typeof value === "string" ? Number.parseInt(value, 10) : NaN;
+    typeof value === "number"
+      ? value
+      : typeof value === "string"
+        ? Number.parseInt(value, 10)
+        : NaN;
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : undefined;
 }

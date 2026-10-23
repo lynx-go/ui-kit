@@ -1,24 +1,24 @@
 export {
-  createHttp,
-  runApi,
-  HttpFailure,
-  NetworkFailure,
-  type Http,
-  type HttpOptions,
-  type HttpRequest,
-  type QueryParams,
-} from "./http";
-export {
-  evaluateQuery,
-  encodeClientCursor,
-  decodeClientCursor,
   clientCollection,
+  decodeClientCursor,
+  encodeClientCursor,
+  evaluateQuery,
 } from "./evaluate";
 export {
-  mockCollection,
-  mockFetchAll,
+  createHttp,
+  type Http,
+  HttpFailure,
+  type HttpOptions,
+  type HttpRequest,
+  NetworkFailure,
+  type QueryParams,
+  runApi,
+} from "./http";
+export {
   type MockCollection,
   type MockCollectionOptions,
   type MockDialect,
   type MockHandle,
+  mockCollection,
+  mockFetchAll,
 } from "./mock";

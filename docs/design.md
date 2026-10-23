@@ -36,18 +36,17 @@
 
 数据密集 console UI 的本质状态空间 = **数据 × 意图 × 时间**。把两个真实 console（fleetly / torchwood，合计约 100 条路由）的全部页面拆到底，对后端做的事穷尽为三种**消息**：
 
-| 原语 | 中文 | 语义 | 引擎落点 |
-|---|---|---|---|
-| **Query** | 问 | 参数化缓存读，无副作用 | TanStack Query |
-| **Command** | 令 | 有副作用的意图，可被结构化拒绝 | TanStack Query mutation + 失效 |
-| **Subscription** | 听 | 按游标定位的帧递送 | fleet-ui 自建（Effect 引擎在 /adapters，见 §5） |
+| 原语             | 中文 | 语义                           | 引擎落点                                        |
+| ---------------- | ---- | ------------------------------ | ----------------------------------------------- |
+| **Query**        | 问   | 参数化缓存读，无副作用         | TanStack Query                                  |
+| **Command**      | 令   | 有副作用的意图，可被结构化拒绝 | TanStack Query mutation + 失效                  |
+| **Subscription** | 听   | 按游标定位的帧递送             | fleet-ui 自建（Effect 引擎在 /adapters，见 §5） |
 
 三者同属一个语域（交互消息类型学，CQRS + 订阅的标准词汇），彼此正交（§2 各节论证）。
 
 ### 1.2 引擎借用
 
 缓存/去重/失效（Query）、URL/类型化路由/历史栈（Router）、表格状态机（Table）、表单状态机（Form）已经由 TanStack 提供。fleet-ui 的价值不在重建引擎，而在：
-
 1. 定义**用户实现的契约**（后端交互的统一形状）；
 2. 提供**绑定**（把契约接到引擎与 URL 的 headless hooks + queryOptions 预取工厂）；
 3. 提供**块**（消费绑定输出的 shadcn 风格组件）。
@@ -95,11 +94,11 @@ schema            adapters
 
 **三种形**：
 
-| 形 | 签名 | 服务的场景 |
-|---|---|---|
+| 形         | 签名                                                  | 服务的场景                                          |
+| ---------- | ----------------------------------------------------- | --------------------------------------------------- |
 | collection | `(query: CollectionQuery, ctx) → Promise<Segment<T>>` | 列表页、keyset 审计、事件 backlog、**时序**（见下） |
-| record | `(id: ID, ctx) → Promise<T>` | 详情页 |
-| batch | `(ids: ID[], ctx) → Promise<T[]>` | 外键解析（引用列/ReferenceSelect） |
+| record     | `(id: ID, ctx) → Promise<T>`                          | 详情页                                              |
+| batch      | `(ids: ID[], ctx) → Promise<T[]>`                     | 外键解析（引用列/ReferenceSelect）                  |
 
 **时序与单例的推导（审查补遗）**：metrics 时序 = collection（数据点=行、时间范围=谓词 `{field:"ts",op:"gte"}` 等——时间窗谓词约定成文）；仪表盘单值统计 = 消费方普通 `useQuery` + `select` 聚合（引擎既有能力），或对 collection 派生——**不需要第四种形**，这是配方不是缺口。
 
@@ -107,19 +106,17 @@ schema            adapters
 
 ```ts
 interface CollectionQuery {
-  predicate?: Predicate;   // 谓词树
-  order?: Order[];         // 排序（多键）
-  window: QueryWindow;     // 窗口 —— 分页只是 window 的字段，不是概念
+  predicate?: Predicate; // 谓词树
+  order?: Order[]; // 排序（多键）
+  window: QueryWindow; // 窗口 —— 分页只是 window 的字段，不是概念
 }
 
 type Predicate =
   | { field: FieldKey; op: Operator; value: FieldValue }
-  | { all: Predicate[] }   // AND
-  | { any: Predicate[] };  // OR
+  | { all: Predicate[] } // AND
+  | { any: Predicate[] }; // OR
 
-type Operator =
-  | "eq" | "ne" | "contains" | "in"
-  | "gt" | "lt" | "gte" | "lte" | "exists";
+type Operator = "eq" | "ne" | "contains" | "in" | "gt" | "lt" | "gte" | "lte" | "exists";
 
 /** 构造侧类型化、解码侧宽容的两层结构：
  *  页面/适配器构造时 FieldKey 收窄为 `keyof T & string`；
@@ -129,22 +126,26 @@ type FieldKey<F extends string = string> = F;
 type FieldValue = string | number | boolean | ReadonlyArray<string>;
 // 约定：日期一律 ISO-8601 字符串（encode/decode 往返无损）
 
-interface Order { field: FieldKey; dir: "asc" | "desc" }
+interface Order {
+  field: FieldKey;
+  dir: "asc" | "desc";
+}
 
-interface QueryWindow {          // 原 Window —— 与 DOM 全局撞名，按复合词政策改名
-  size: number;                  // 必传（torchwood 契约：pageSize 缺省即截断事故）
-  cursor?: Cursor;               // keyset 方言：不透明续读令牌
-  range?: { offset: number };    // offset 方言（配合 Segment.total）
+interface QueryWindow {
+  // 原 Window —— 与 DOM 全局撞名，按复合词政策改名
+  size: number; // 必传（torchwood 契约：pageSize 缺省即截断事故）
+  cursor?: Cursor; // keyset 方言：不透明续读令牌
+  range?: { offset: number }; // offset 方言（配合 Segment.total）
 }
 ```
 
-- **QueryWindow 是结构类型而非模式枚举**：三种真实分页方言同构映射——torchwood 全站 keyset 无 total（cursor）、fleetly 全站整取+客户端过滤（无 window，客户端求值）、**leaderboards 的"token 游标 + 附带 total"**（cursor + total 并存，审查修正：不是数值 offset——源码仍走 `page_token`，	prev 靠历史栈）。方言判断交给适配器，类型系统不预设。
+- **QueryWindow 是结构类型而非模式枚举**：三种真实分页方言同构映射——torchwood 全站 keyset 无 total（cursor）、fleetly 全站整取+客户端过滤（无 window，客户端求值）、**leaderboards 的"token 游标 + 附带 total"**（cursor + total 并存，审查修正：不是数值 offset——源码仍走 `page_token`， prev 靠历史栈）。方言判断交给适配器，类型系统不预设。
 - **Segment（查询结果段）**——字段命名刻意与 TanStack Query 的 `getNextPageParam: (lastPage) => lastPage.nextCursor` 对齐：
 
 ```ts
 interface Segment<T> {
   rows: T[];
-  total?: number;      // offset 方言必有；leaderboards 型 keyset 也附带
+  total?: number; // offset 方言必有；leaderboards 型 keyset 也附带
   nextCursor?: Cursor; // 仅还有下页时出现（"返回数<size"不代表到底——torchwood 契约）
 }
 ```
@@ -153,14 +154,14 @@ interface Segment<T> {
 
 **键名定案**（扁平、可读、repeated 形式天然匹配 grpc-gateway 序列化）：
 
-| 语义 | URL 键 | 形态 |
-|---|---|---|
-| 文本搜索 | `q` | 单值（字段白名单在 schema 工厂声明） |
-| 谓词 | `filter` | 重复键 `filter=field:op:value`（AND 语义；OR 树的场景走消费方自定义参数） |
-| 排序 | `sort` | 重复键 `sort=field:dir`（多键有序） |
-| 游标 | `cursor` | 单值（keyset 方言） |
-| 页码 | `page` | 单值 1-based（offset 方言） |
-| 页大小 | `size` | 单值 |
+| 语义     | URL 键   | 形态                                                                      |
+| -------- | -------- | ------------------------------------------------------------------------- |
+| 文本搜索 | `q`      | 单值（字段白名单在 schema 工厂声明）                                      |
+| 谓词     | `filter` | 重复键 `filter=field:op:value`（AND 语义；OR 树的场景走消费方自定义参数） |
+| 排序     | `sort`   | 重复键 `sort=field:dir`（多键有序）                                       |
+| 游标     | `cursor` | 单值（keyset 方言）                                                       |
+| 页码     | `page`   | 单值 1-based（offset 方言）                                               |
+| 页大小   | `size`   | 单值                                                                      |
 
 **真相语义**：**"URL + schema 默认值"即真相**（TanStack Router 实测：validateSearch 产生的默认值出现在 `useSearch` 但**不写回 URL**——分享链接的语义 = URL + 默认值，措辞如此）。
 
@@ -174,17 +175,17 @@ interface Segment<T> {
 ```ts
 // /schema
 interface QuerySchemaSpec {
-  text?: ReadonlyArray<string>;        // q 参与字段白名单
+  text?: ReadonlyArray<string>; // q 参与字段白名单
   filters?: ReadonlyArray<FilterFieldDef>;
-  defaultSize?: number;                // 默认 20
+  defaultSize?: number; // 默认 20
   defaultOrder?: ReadonlyArray<Order>;
 }
 function collectionQuerySchema(spec: QuerySchemaSpec): {
-  toSearchSchema(): StandardSchemaV1;  // 内部经 toStandardSchemaV1 包装（Effect Schema 不能裸传 validateSearch）
+  toSearchSchema(): StandardSchemaV1; // 内部经 toStandardSchemaV1 包装（Effect Schema 不能裸传 validateSearch）
   encode(q: CollectionQuery): Record<string, string | undefined>;
   decode(params: Record<string, unknown>, defaults): CollectionQuery; // 容忍脏输入
   defaults: CollectionQuery;
-}
+};
 ```
 
 **客户端求值方言的两个成文细节**：① `clientCollection(fetchAll)` 适配器在整取后本地求值谓词/排序/窗口，**伪造不透明游标**（把 offset 编进 token）以兑现"游标进 URL、历史即分页栈"；② fetchAll 的取数上限是适配器内部常量（fleetly 现状：projects=100 / apps=200 / deployments=50 参差，照搬即可，但文档不再笼统说"整取即全量"）。
@@ -197,16 +198,16 @@ function collectionQuerySchema(spec: QuerySchemaSpec): {
 // 命令描述符（kernel 纯数据）
 interface CommandDescriptor<Input, Payload, ID = never> {
   run(input: Input, ctx: ResourceScope): Promise<CommandResult<Payload>>;
-  invalidates?: ReadonlyArray<QuerySelector>;   // 跨资源失效声明（纯数据）
+  invalidates?: ReadonlyArray<QuerySelector>; // 跨资源失效声明（纯数据）
   /** 结果覆写钩子：命令作者裁决协议层状态在"结果通道"的语义。
    *  例：delete 已删的资源，服务端 404 → 覆写为 ok（幂等成功）或 rejected。 */
   treatAs?: Partial<Record<"not-found" | "forbidden", CommandResult<Payload>>>;
 }
 
 type QuerySelector =
-  | { resource: ResourceName }                        // 该资源全部查询（默认 ∩ 同 scope，见下）
+  | { resource: ResourceName } // 该资源全部查询（默认 ∩ 同 scope，见下）
   | { resource: ResourceName; kind: "collection" | "record" | "batch"; id?: ID }
-  | { resource: ResourceName; allScopes: true };      // 显式跨作用域失效（罕见，如管理端命令）
+  | { resource: ResourceName; allScopes: true }; // 显式跨作用域失效（罕见，如管理端命令）
 ```
 
 **失效语义（审查补遗）**：
@@ -216,20 +217,20 @@ type QuerySelector =
 
 #### 失败 / 结果两分（划界原则，审查后重写）
 
-| | 失败（Failure） | 结果（Outcome） |
-|---|---|---|
-| 定义 | **无法产出领域可用值**：传输/会话/协议层的封闭状况 | 交互发生，服务端给出**领域语义**的回应 |
-| 词汇 | `ApiError`（**封闭集**） | `CommandResult`（**已知分支 + ok 载荷兜底**） |
-| 通道 | reject（Query/Command/Subscription 三通道统一，见 §5） | 正常返回值，供表单/交互渲染 |
+|      | 失败（Failure）                                            | 结果（Outcome）                                 |
+| ---- | ---------------------------------------------------------- | ----------------------------------------------- |
+| 定义 | **无法产出领域可用值**：传输/会话/协议层的封闭状况         | 交互发生，服务端给出**领域语义**的回应          |
+| 词汇 | `ApiError`（**封闭集**）                                   | `CommandResult`（**已知分支 + ok 载荷兜底**）   |
+| 通道 | reject（Query/Command/Subscription 三通道统一，见 §5）     | 正常返回值，供表单/交互渲染                     |
 | 例子 | 网络断层、401 会话过期、403（无领域语义时）、解码失败、5xx | `rejected`（业务拒绝）、`conflict`（OCC）、`ok` |
 
 ```ts
 // 失败通道：封闭集（kernel）
 type ApiError =
   | { kind: "network"; cause?: unknown }
-  | { kind: "auth" }                            // 401：会话过期（触发全局闭环）
-  | { kind: "forbidden" }                       // 403：无领域语义时（命令可用 treatAs 覆写）
-  | { kind: "not-found" }                       // Query 侧默认；Command 侧经 treatAs 裁决
+  | { kind: "auth" } // 401：会话过期（触发全局闭环）
+  | { kind: "forbidden" } // 403：无领域语义时（命令可用 treatAs 覆写）
+  | { kind: "not-found" } // Query 侧默认；Command 侧经 treatAs 裁决
   | { kind: "server"; status: number; message?: string }
   | { kind: "decode"; detail: string };
 // 取消（abort/interrupt）既非失败也非结果——边界显式吞掉，见 §5 runApi。
@@ -238,10 +239,9 @@ type ApiError =
 
 // 结果通道：已知分支 + ok 载荷（kernel）
 type CommandResult<P = unknown> =
-  | { status: "ok"; payload: P }               // payload 可为一次性 reveal 载荷（token/邀请/webhook URL）
-  | { status: "rejected"; code?: string; message: string;
-      fieldErrors?: Record<string, string> }   // code：机器可判别（双 console 后端都有 code/message——契约不能丢 code）
-  | { status: "conflict"; message: string };   // OCC：输入携带 version，服务端比对失败
+  | { status: "ok"; payload: P } // payload 可为一次性 reveal 载荷（token/邀请/webhook URL）
+  | { status: "rejected"; code?: string; message: string; fieldErrors?: Record<string, string> } // code：机器可判别（双 console 后端都有 code/message——契约不能丢 code）
+  | { status: "conflict"; message: string }; // OCC：输入携带 version，服务端比对失败
 ```
 
 - **网络断层 = typed failure（ApiError.network）**，不是 Effect defect——它是预期中的失败（用户断网/后端重启），必须可捕获、可重试、可渲染三态；**defect 只留给程序错误**（不可预期异常、不变量破坏——边界 catchDefect 归一进监控，见 §5）。此裁决消除 draft-1 §2.2 与 §5 的自相矛盾。
@@ -258,14 +258,14 @@ type CommandResult<P = unknown> =
 // 订阅描述符（kernel；审查补遗——订阅从此有对等的类型化声明）
 interface SubscriptionDescriptor<Params, Frame> {
   open(params: Params, ctx: ResourceScope): Transport<Frame>;
-  policy?: SubscriptionPolicy;   // 流属性默认在资源侧声明；调用点可覆盖
+  policy?: SubscriptionPolicy; // 流属性默认在资源侧声明；调用点可覆盖
 }
 
 interface SubscriptionPolicy {
-  buffer: number;              // 环形缓冲容量（超限丢最旧——Queue.sliding 语义）
+  buffer: number; // 环形缓冲容量（超限丢最旧——Queue.sliding 语义）
   pauseable?: boolean;
   retry?: {
-    backoffMs: ReadonlyArray<number>;  // 例 [1000, 2000, 4000]——fleetly wait 流
+    backoffMs: ReadonlyArray<number>; // 例 [1000, 2000, 4000]——fleetly wait 流
     // 注意：没有 fallbackPollMs —— 退避耗尽转"轮询另一资源查询"是消费方组合（见 stalled）
   };
 }
@@ -293,23 +293,23 @@ interface FrameSource<F> {
 }
 
 type SubscriptionStatus =
-  | "live"           // 正在递送
-  | "reconnecting"   // 传输中断，按策略重连中
-  | "paused"         // 用户手动暂停（从游标续订）
-  | "gapped"         // 断档：需重新定锚（重跑 backlog Query）
-  | "stalled"        // 退避预算耗尽：等待 restart 或消费方接管（如切轮询查询）
-  | "ended"          // 服务端正常收流（终态 ≠ 断流）
-  | "error"          // 不可恢复；携带 ApiError（401 在订阅通道也进全局闭环）
-  ;
+  | "live" // 正在递送
+  | "reconnecting" // 传输中断，按策略重连中
+  | "paused" // 用户手动暂停（从游标续订）
+  | "gapped" // 断档：需重新定锚（重跑 backlog Query）
+  | "stalled" // 退避预算耗尽：等待 restart 或消费方接管（如切轮询查询）
+  | "ended" // 服务端正常收流（终态 ≠ 断流）
+  | "error"; // 不可恢复；携带 ApiError（401 在订阅通道也进全局闭环）
 
 interface SubscriptionHandle<F> {
-  readonly frames: ReadonlyArray<F>;    // 环形缓冲快照（useSyncExternalStore）
+  readonly frames: ReadonlyArray<F>; // 环形缓冲快照（useSyncExternalStore）
   readonly status: SubscriptionStatus;
-  readonly error: ApiError | null;      // status === "error" 时
-  readonly resyncs: number;             // 重锚计数——EventFeed 黄条"发生过 resync"信号
-  pause(): void; resume(): void;
-  restart(): void;                      // 手动重连（fleetly "Reconnect stream" / torchwood 手动重连）
-  resync(): void;                       // gapped 后重锚：清缓冲 + 从新锚点重开
+  readonly error: ApiError | null; // status === "error" 时
+  readonly resyncs: number; // 重锚计数——EventFeed 黄条"发生过 resync"信号
+  pause(): void;
+  resume(): void;
+  restart(): void; // 手动重连（fleetly "Reconnect stream" / torchwood 手动重连）
+  resync(): void; // gapped 后重锚：清缓冲 + 从新锚点重开
   clear(): void;
 }
 ```
@@ -328,32 +328,35 @@ interface SubscriptionHandle<F> {
 
 ```ts
 interface ResourceSpec<
-  T, ID,
+  T,
+  ID,
   C extends Record<string, CommandDescriptor<any, any, ID>> = {},
   S extends Record<string, SubscriptionDescriptor<any, any>> = {},
 > {
-  name: string;                          // defineResource 返回值中变为 branded ResourceName
-  getId?: (row: T) => ID;                // 可选（审查修正）——command-only/流式资源无 id 语义；
-                                         // DataTable/绑定的 getRowId 显式传入（TanStack Table 本就需要）
-  scope?: ReadonlyArray<string>;         // scope 键名（如 ["projectId"]），见 scoped 约定
+  name: string; // defineResource 返回值中变为 branded ResourceName
+  getId?: (row: T) => ID; // 可选（审查修正）——command-only/流式资源无 id 语义；
+  // DataTable/绑定的 getRowId 显式传入（TanStack Table 本就需要）
+  scope?: ReadonlyArray<string>; // scope 键名（如 ["projectId"]），见 scoped 约定
 
   collection?: (q: CollectionQuery, ctx: ResourceScope) => Promise<Segment<T>>;
-  record?:    (id: ID, ctx: ResourceScope) => Promise<T>;
-  batch?:     (ids: ReadonlyArray<ID>, ctx: ResourceScope) => Promise<T[]>;
+  record?: (id: ID, ctx: ResourceScope) => Promise<T>;
+  batch?: (ids: ReadonlyArray<ID>, ctx: ResourceScope) => Promise<T[]>;
 
-  commands?: C;                          // 逐键保留具体 CommandDescriptor<Input, Payload, ID>——
-  subscriptions?: S;                     // 泛型不被擦成 any（审查 P0 修复：defineResource 的
-}                                        // 参数与返回值逐键推断，useCommand(r,'create') 得精确 Input）
+  commands?: C; // 逐键保留具体 CommandDescriptor<Input, Payload, ID>——
+  subscriptions?: S; // 泛型不被擦成 any（审查 P0 修复：defineResource 的
+} // 参数与返回值逐键推断，useCommand(r,'create') 得精确 Input）
 
 interface Resource<T, ID = string, C = {}, S = {}> extends ResourceSpec<T, ID, C, S> {
-  readonly name: ResourceName;           // branded
+  readonly name: ResourceName; // branded
 }
 
 function defineResource<T, ID, C, S>(spec: ResourceSpec<T, ID, C, S>): Resource<T, ID, C, S>;
 
 type ResourceScope = Readonly<Record<string, string | undefined>>; // 原 Scope——与 Effect Scope 撞名，改名
-function scoped<T, ID, C, S>(resource: Resource<T, ID, C, S>,
-                            values: ResourceScope): Resource<T, ID, C, S>;
+function scoped<T, ID, C, S>(
+  resource: Resource<T, ID, C, S>,
+  values: ResourceScope,
+): Resource<T, ID, C, S>;
 // 自由函数而非方法（审查修正）——queryKey 嵌入 scope 段 + ctx 注入；
 // 适配器可在 http 实例上把 ctx 注入 header（torchwood X-Torchwood-Project）
 ```
@@ -406,32 +409,32 @@ function advance(window: QueryWindow, segment: Segment<unknown>,
 
 ## 3. 派生概念（每项附推导式；禁止反向进入 kernel）
 
-| 派生概念 | 推导式 | 落点 |
-|---|---|---|
-| **列表绑定** `useCollection` | CollectionQuery(URL) → collection Query → Query 引擎 → 稳定句柄 | /react |
-| **无限列表** `useCollectionInfinite`（A 类，审查升格） | useInfiniteQuery（`getNextPageParam: s => s.nextCursor` 与 Segment 命名对齐；双向 prev 引擎原生） | /react |
-| **记录绑定** `useRecord` | record(id) → Query | /react |
-| **批解析绑定** `useBatch` | memo(batch(ids)) keyed by (resource, ids)——外键解析 | /react |
-| **命令绑定** `useCommand` | 命令描述符 → mutation + invalidates 执行 + isRetryable 默认 | /react |
-| **表单绑定** `useCommandForm` | TanStack Form 草稿 ∘ useCommand + CommandResult 分支渲染（映射见 §5.1） | /react |
-| **订阅绑定** `useSubscription` | /adapters 订阅引擎句柄 + useSyncExternalStore 接线 | /react |
-| **预取工厂** `collectionQueryOptions` / `recordQueryOptions` / `batchQueryOptions` | 查询 → queryOptions（key 单源；hooks 内部消费同一工厂；route loader `ensureQueryData` + `Link preload="intent"` 接线） | /react |
-| **查询代数** `evaluateQuery` / `clientCollection` | `evaluateQuery(q, rows)` 纯函数；`clientCollection(fetchAll)` 包装为 collection 实现 + 伪造游标——**求值策略，非概念** | /adapters |
-| **scoped 约定** | `scoped(resource, {projectId})` → key 嵌入 scope 段 + ctx 注入 | /adapters |
-| **双通道作用域同步配方** | URL↔localStorage 写方向规则 + synced 守卫 + storage 事件桥 + 防乒乓（torchwood 实证四件套） | 配方 |
-| **权限门控** `useCan` | identity record Query + 纯谓词；fail-closed；页级门控走 beforeLoad（identity 经 loader 预取 + redirect），元素级走 useCan（"未就绪"与"拒绝"两态渲染） | /react |
-| **偏好持久化** `usePreference` | localStorage + schema 的通用受控状态 | /react |
-| **实时失效** `invalidateOnFrame` | 帧到达 → invalidate(选择器) 的组合钩子 | /react |
-| **mock** `mockResource` / `mockTransport` | 内存实现 Resource / Transport 契约——测试工具 + demo 数据源 | /adapters |
-| **401 闭环** | 三通道（Query/Command/Subscription）auth 失败 → createHttp 注册的 handler；管线次序见 §5 | /adapters |
-| **审计页** | keyset CollectionQuery（cursor window）的配方 | 配方 |
-| **backlog→follow** | Query 定锚 × Subscription 续订（共享游标；锚点交接约定见 §2.3） | 配方 |
-| **wait 流降级** | stalled → 消费方切轮询 Query + 帧优先合并 | 配方 |
-| **轮询** | Query 引擎 refetchInterval | 引擎既有 |
-| **fan-out 聚合** | N 个 collection Query + merge——**组合，不升格** | 组合 |
-| **多请求编排** | commands + queries 的 async 序列（quickstart、variables diff 链）；**fresh-read**：queryOptions 工厂 + `queryClient.fetchQuery` 绕过 stale 缓存（app-variables 的绕缓存回读语义） | 组合 |
-| **导出 CSV**（B 类，审查补） | `list.rows` + 消费方 unparse 纯函数（react-admin ExportButton 对应物是配方） | 配方 |
-| **clone**（B 类，审查补） | useRecord 预填 + create 命令提交（refine useForm clone / ra CloneButton 对应物） | 配方 |
+| 派生概念                                                                           | 推导式                                                                                                                                                                            | 落点      |
+| ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| **列表绑定** `useCollection`                                                       | CollectionQuery(URL) → collection Query → Query 引擎 → 稳定句柄                                                                                                                   | /react    |
+| **无限列表** `useCollectionInfinite`（A 类，审查升格）                             | useInfiniteQuery（`getNextPageParam: s => s.nextCursor` 与 Segment 命名对齐；双向 prev 引擎原生）                                                                                 | /react    |
+| **记录绑定** `useRecord`                                                           | record(id) → Query                                                                                                                                                                | /react    |
+| **批解析绑定** `useBatch`                                                          | memo(batch(ids)) keyed by (resource, ids)——外键解析                                                                                                                               | /react    |
+| **命令绑定** `useCommand`                                                          | 命令描述符 → mutation + invalidates 执行 + isRetryable 默认                                                                                                                       | /react    |
+| **表单绑定** `useCommandForm`                                                      | TanStack Form 草稿 ∘ useCommand + CommandResult 分支渲染（映射见 §5.1）                                                                                                           | /react    |
+| **订阅绑定** `useSubscription`                                                     | /adapters 订阅引擎句柄 + useSyncExternalStore 接线                                                                                                                                | /react    |
+| **预取工厂** `collectionQueryOptions` / `recordQueryOptions` / `batchQueryOptions` | 查询 → queryOptions（key 单源；hooks 内部消费同一工厂；route loader `ensureQueryData` + `Link preload="intent"` 接线）                                                            | /react    |
+| **查询代数** `evaluateQuery` / `clientCollection`                                  | `evaluateQuery(q, rows)` 纯函数；`clientCollection(fetchAll)` 包装为 collection 实现 + 伪造游标——**求值策略，非概念**                                                             | /adapters |
+| **scoped 约定**                                                                    | `scoped(resource, {projectId})` → key 嵌入 scope 段 + ctx 注入                                                                                                                    | /adapters |
+| **双通道作用域同步配方**                                                           | URL↔localStorage 写方向规则 + synced 守卫 + storage 事件桥 + 防乒乓（torchwood 实证四件套）                                                                                       | 配方      |
+| **权限门控** `useCan`                                                              | identity record Query + 纯谓词；fail-closed；页级门控走 beforeLoad（identity 经 loader 预取 + redirect），元素级走 useCan（"未就绪"与"拒绝"两态渲染）                             | /react    |
+| **偏好持久化** `usePreference`                                                     | localStorage + schema 的通用受控状态                                                                                                                                              | /react    |
+| **实时失效** `invalidateOnFrame`                                                   | 帧到达 → invalidate(选择器) 的组合钩子                                                                                                                                            | /react    |
+| **mock** `mockResource` / `mockTransport`                                          | 内存实现 Resource / Transport 契约——测试工具 + demo 数据源                                                                                                                        | /adapters |
+| **401 闭环**                                                                       | 三通道（Query/Command/Subscription）auth 失败 → createHttp 注册的 handler；管线次序见 §5                                                                                          | /adapters |
+| **审计页**                                                                         | keyset CollectionQuery（cursor window）的配方                                                                                                                                     | 配方      |
+| **backlog→follow**                                                                 | Query 定锚 × Subscription 续订（共享游标；锚点交接约定见 §2.3）                                                                                                                   | 配方      |
+| **wait 流降级**                                                                    | stalled → 消费方切轮询 Query + 帧优先合并                                                                                                                                         | 配方      |
+| **轮询**                                                                           | Query 引擎 refetchInterval                                                                                                                                                        | 引擎既有  |
+| **fan-out 聚合**                                                                   | N 个 collection Query + merge——**组合，不升格**                                                                                                                                   | 组合      |
+| **多请求编排**                                                                     | commands + queries 的 async 序列（quickstart、variables diff 链）；**fresh-read**：queryOptions 工厂 + `queryClient.fetchQuery` 绕过 stale 缓存（app-variables 的绕缓存回读语义） | 组合      |
+| **导出 CSV**（B 类，审查补）                                                       | `list.rows` + 消费方 unparse 纯函数（react-admin ExportButton 对应物是配方）                                                                                                      | 配方      |
+| **clone**（B 类，审查补）                                                          | useRecord 预填 + create 命令提交（refine useForm clone / ra CloneButton 对应物）                                                                                                  | 配方      |
 
 **消费方自持清单**（0–1 个消费者，抽象不成立，成文拒签）：
 exec 终端（双向有状态会话，Subscription 单向；受理/观测仍可走 Resource，仅 WS 面自持）、分片续传上传状态机（torchwood；底层 REST 上传单片是 FormData raw body 命令）、GitHub manifest 跨站流（整页离站 POST）、确定性 tar 构建器（纯函数）、CliEquivalent 组件（appendix 槽是公共的）、PermissionEditor 的 op:role 预设（通用 ChipsField 进值块）。
@@ -442,15 +445,15 @@ exec 终端（双向有状态会话，Subscription 单向；受理/观测仍可�
 
 ### 4.1 分簇
 
-| 簇 | 成员 | 语境 |
-|---|---|---|
-| 交互原语（消息） | Query / Command / Subscription；CollectionQuery、CommandResult（结果通道，与原语同报）、Frame | 问/令/听——同一消息类型学 |
-| 被寻址面 | Resource（name、getId?、scope、collection/record/batch、commands、subscriptions）、ResourceName（branded） | 实体交互面 |
-| 流几何 | Segment、Cursor、QueryWindow、predicate、order | 序列几何隐喻 |
-| 通道词汇 | Transport（kernel 接口）、FrameSource（终结原因）、ApiError（封闭失败集）、ResourceScope | 线缆/故障/语境 |
-| 绑定 | useCollection / useCollectionInfinite / useRecord / useBatch / useCommand / useCommandForm / useSubscription；工具 useCan / usePreference | **原语（或其形）语域** |
-| 适配器 | evaluateQuery / clientCollection / scoped / mockResource / mockTransport / http / ndjson / sse | 动词语域 |
-| 块 | DataTable / ListPage / Form / LogViewer / EventFeed / Page… | 呈现语域 |
+| 簇               | 成员                                                                                                                                      | 语境                     |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| 交互原语（消息） | Query / Command / Subscription；CollectionQuery、CommandResult（结果通道，与原语同报）、Frame                                             | 问/令/听——同一消息类型学 |
+| 被寻址面         | Resource（name、getId?、scope、collection/record/batch、commands、subscriptions）、ResourceName（branded）                                | 实体交互面               |
+| 流几何           | Segment、Cursor、QueryWindow、predicate、order                                                                                            | 序列几何隐喻             |
+| 通道词汇         | Transport（kernel 接口）、FrameSource（终结原因）、ApiError（封闭失败集）、ResourceScope                                                  | 线缆/故障/语境           |
+| 绑定             | useCollection / useCollectionInfinite / useRecord / useBatch / useCommand / useCommandForm / useSubscription；工具 useCan / usePreference | **原语（或其形）语域**   |
+| 适配器           | evaluateQuery / clientCollection / scoped / mockResource / mockTransport / http / ndjson / sse                                            | 动词语域                 |
+| 块               | DataTable / ListPage / Form / LogViewer / EventFeed / Page…                                                                               | 呈现语域                 |
 
 ### 4.2 命名政策
 
@@ -514,13 +517,13 @@ exec 终端（双向有状态会话，Subscription 单向；受理/观测仍可�
 
 ### 6.1 分族轴：消费哪个绑定的输出（与数据层类型学同构）
 
-| 族 | 消费什么 | 首批成员 |
-|---|---|---|
-| **values/** | 纯值，零绑定知识 | StatusBadge（状态→语义 token，映射可注入）、RelativeTime（时区感知）、CopyButton、SecretReveal（一次性揭示态）、DiffView、JsonField、StatCard、MetricChart（序列治理内置：活跃窗排序/渲染上限+N more/服务端截断披露/protojson 零值=0） |
-| **query/** | useCollection/useRecord/useBatch 输出 | DataTable（TanStack Table v9 `useTable+tableFeatures`；行选择/半选/行展开/**四态**）、Pagination（total 或客户端求值）、KeysetPagination（无 total：显示 x–y、空页仍渲染）、FilterBar、SelectionBar、ListPage、DetailPage（hero + URL tabs）、ReferenceSelect（搜索式选择另一资源记录 + 引用列展示，消费 useBatch/useCollection） |
-| **command/** | useCommand/useCommandForm 输出 | Form 内芯（字段族 × 错误盒 × 提交生命周期；宿主无关——Dialog/Sheet/整页三形态由外壳决定；submit 由内芯渲染，宿主 footer 经 ref 连线）、RowActions、DeleteButton/BulkDelete、ConfirmDialog 接线、行内表单 |
-| **subscription/** | useSubscription 输出 | LogViewer（虚拟滚动+智能跟随+jump-to-live+下载/清空）、EventFeed（倒序+gapped 黄条[resyncs 信号]+暂停指示灯）、StageTimeline——**标注为参照实现** |
-| **shell/** | 无（布局/应用骨架） | AppShell（Sidebar navSections + Topbar + ⌘K 位）、**Page**（title/breadcrumb/actions/宽度三档 wide\|narrow\|flow）、ScopeSwitcher（含陈旧 id 校正）、Stepper、RouteErrorBoundary |
+| 族                | 消费什么                              | 首批成员                                                                                                                                                                                                                                                                                                                          |
+| ----------------- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **values/**       | 纯值，零绑定知识                      | StatusBadge（状态→语义 token，映射可注入）、RelativeTime（时区感知）、CopyButton、SecretReveal（一次性揭示态）、DiffView、JsonField、StatCard、MetricChart（序列治理内置：活跃窗排序/渲染上限+N more/服务端截断披露/protojson 零值=0）                                                                                            |
+| **query/**        | useCollection/useRecord/useBatch 输出 | DataTable（TanStack Table v9 `useTable+tableFeatures`；行选择/半选/行展开/**四态**）、Pagination（total 或客户端求值）、KeysetPagination（无 total：显示 x–y、空页仍渲染）、FilterBar、SelectionBar、ListPage、DetailPage（hero + URL tabs）、ReferenceSelect（搜索式选择另一资源记录 + 引用列展示，消费 useBatch/useCollection） |
+| **command/**      | useCommand/useCommandForm 输出        | Form 内芯（字段族 × 错误盒 × 提交生命周期；宿主无关——Dialog/Sheet/整页三形态由外壳决定；submit 由内芯渲染，宿主 footer 经 ref 连线）、RowActions、DeleteButton/BulkDelete、ConfirmDialog 接线、行内表单                                                                                                                           |
+| **subscription/** | useSubscription 输出                  | LogViewer（虚拟滚动+智能跟随+jump-to-live+下载/清空）、EventFeed（倒序+gapped 黄条[resyncs 信号]+暂停指示灯）、StageTimeline——**标注为参照实现**                                                                                                                                                                                  |
+| **shell/**        | 无（布局/应用骨架）                   | AppShell（Sidebar navSections + Topbar + ⌘K 位）、**Page**（title/breadcrumb/actions/宽度三档 wide\|narrow\|flow）、ScopeSwitcher（含陈旧 id 校正）、Stepper、RouteErrorBoundary                                                                                                                                                  |
 
 **四态**（统一术语，废弃"三态"混用）：loading / empty / error / success——前三者是渲染分支，第四者是数据。渲染归属：四态归 ListPage/页级（DataTable 只渲染 success 态的表体）。
 
@@ -540,7 +543,6 @@ exec 终端（双向有状态会话，Subscription 单向；受理/观测仍可�
 ### 6.3 页面配方（composition，不是原型）
 
 **页面模式只存在于文档与 demo，不存在于框架类型系统**：
-
 - 列表页 = `ListPage[ FilterBar × DataTable × Pagination|KeysetPagination × 四态 ](list)`
 - 详情页 = `DetailPage[ hero × Tabs(URL) × DetailGrid|SectionCard ](record)`
 - 新增/编辑 = `Dialog|Sheet|Page[ Form( fields × error × submit ) ](command)`
@@ -569,29 +571,29 @@ FilterBar/Pagination 等是 ListPage 的**兄弟组件**（示例代码未画 fi
 
 ### 7.1 覆盖矩阵（摘要；修正处以 ★ 标注）
 
-| 交互形状（出处） | 落点 | 判定 |
-|---|---|---|
-| 整取+客户端过滤分页（fleetly 全站） | CollectionQuery + clientCollection（伪造游标 + per-resource limit 常量） | ✓ |
-| keyset 无 total + 换向回首页（torchwood 全站） | cursor window + KeysetPagination + 写入契约 | ✓ |
-| ★ leaderboards"token 游标+附带 total" | cursor + total 并存；prev 走历史（advance 返回 null） | ✓（修正定性） |
-| 服务端过滤（fleetly audit；torchwood 白名单 DSL） | predicate 服务端求值，方言编解码在适配器 | ✓ |
-| 详情/外键 | record / batch（失效矩阵覆盖 batch 键） | ✓ |
-| fan-out 聚合（fleetly 部署流/spec 反引索引） | N 查询 + merge 组合 | ✓ |
-| 轮询（两 console 多处） | refetchInterval | ✓ |
-| 时序/图表/单值统计 | 时序=collection（时间窗谓词）；单值=useQuery+select | ✓（补推导） |
-| 具名动词（两 console 大量） | Command 动词集（泛型逐键推断） | ✓ |
-| 多请求编排（quickstart/variables diff 链） | 消费方组合 + fetchQuery fresh-read + Transport 命令式消费 | ✓ |
-| 表单+错误（两 console 均 message-only 后端） | CommandResult.rejected（code + fieldErrors 可选）→ onSubmitAsync 返回 | ✓ |
-| OCC（torchwood documents） | 输入带 version + conflict 分支（迁移先验证服务端判别） | ✓ |
-| 一次性 secret（两 console ×8） | ok 载荷 + SecretReveal | ✓ |
-| tar 裸上传 / FormData 单片 | raw body 命令；Blob 响应走 raw-response 逃生口 | ✓ |
-| 日志 NDJSON（fleetly） | Subscription + ndjson transport | ✓ |
-| events SSE 票据 + 410 断档（fleetly） | Query 锚 + Subscription + FrameSource closeReason + resync 配方 | ✓（补终态分诊后可写） |
-| wait 流退避→轮询兜底（fleetly） | stalled 状态 + 消费方切轮询查询 + 帧优先合并 | ✓（修正机制） |
-| realtime WS refresh→重订（torchwood） | Transport.beforeReconnect 钩子 + restart | ✓（补钩子后可写） |
-| 401 闭环（bearer 清跳 / cookie 单飞刷新） | 缓 1 管线次序 + 免死 + 断路器 + 三通道统一 | ✓（修正管线） |
-| protojson 方言（两 console） | Effect Schema transform（int64 双策略 + 编码面纪律） | ✓ |
-| 项目作用域（两 console 双通道） | scoped 约定 + 双通道同步配方（写方向/synced 守卫/storage 桥/防乒乓） | ✓（补配方） |
+| 交互形状（出处）                                  | 落点                                                                     | 判定                  |
+| ------------------------------------------------- | ------------------------------------------------------------------------ | --------------------- |
+| 整取+客户端过滤分页（fleetly 全站）               | CollectionQuery + clientCollection（伪造游标 + per-resource limit 常量） | ✓                     |
+| keyset 无 total + 换向回首页（torchwood 全站）    | cursor window + KeysetPagination + 写入契约                              | ✓                     |
+| ★ leaderboards"token 游标+附带 total"             | cursor + total 并存；prev 走历史（advance 返回 null）                    | ✓（修正定性）         |
+| 服务端过滤（fleetly audit；torchwood 白名单 DSL） | predicate 服务端求值，方言编解码在适配器                                 | ✓                     |
+| 详情/外键                                         | record / batch（失效矩阵覆盖 batch 键）                                  | ✓                     |
+| fan-out 聚合（fleetly 部署流/spec 反引索引）      | N 查询 + merge 组合                                                      | ✓                     |
+| 轮询（两 console 多处）                           | refetchInterval                                                          | ✓                     |
+| 时序/图表/单值统计                                | 时序=collection（时间窗谓词）；单值=useQuery+select                      | ✓（补推导）           |
+| 具名动词（两 console 大量）                       | Command 动词集（泛型逐键推断）                                           | ✓                     |
+| 多请求编排（quickstart/variables diff 链）        | 消费方组合 + fetchQuery fresh-read + Transport 命令式消费                | ✓                     |
+| 表单+错误（两 console 均 message-only 后端）      | CommandResult.rejected（code + fieldErrors 可选）→ onSubmitAsync 返回    | ✓                     |
+| OCC（torchwood documents）                        | 输入带 version + conflict 分支（迁移先验证服务端判别）                   | ✓                     |
+| 一次性 secret（两 console ×8）                    | ok 载荷 + SecretReveal                                                   | ✓                     |
+| tar 裸上传 / FormData 单片                        | raw body 命令；Blob 响应走 raw-response 逃生口                           | ✓                     |
+| 日志 NDJSON（fleetly）                            | Subscription + ndjson transport                                          | ✓                     |
+| events SSE 票据 + 410 断档（fleetly）             | Query 锚 + Subscription + FrameSource closeReason + resync 配方          | ✓（补终态分诊后可写） |
+| wait 流退避→轮询兜底（fleetly）                   | stalled 状态 + 消费方切轮询查询 + 帧优先合并                             | ✓（修正机制）         |
+| realtime WS refresh→重订（torchwood）             | Transport.beforeReconnect 钩子 + restart                                 | ✓（补钩子后可写）     |
+| 401 闭环（bearer 清跳 / cookie 单飞刷新）         | 缓 1 管线次序 + 免死 + 断路器 + 三通道统一                               | ✓（修正管线）         |
+| protojson 方言（两 console）                      | Effect Schema transform（int64 双策略 + 编码面纪律）                     | ✓                     |
+| 项目作用域（两 console 双通道）                   | scoped 约定 + 双通道同步配方（写方向/synced 守卫/storage 桥/防乒乓）     | ✓（补配方）           |
 
 ### 7.2 核对修正记录（累计 8 条 + 审查新增）
 
@@ -718,44 +720,44 @@ createHttp({
 
 ## 14. 幻觉诱饵对照表（进 SKILL.md）
 
-| 危险对（训练数据习惯 → 正确姿势） |
-|---|
-| react-admin/refine `<Resource name list create>`（路由注册）→ fleet Resource = 纯数据契约，路由自己写 |
-| dataProvider `getList({pagination:{page,perPage},sort,filter})` → CollectionQuery `{predicate, order, window}` |
+| 危险对（训练数据习惯 → 正确姿势）                                                                                                                      |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| react-admin/refine `<Resource name list create>`（路由注册）→ fleet Resource = 纯数据契约，路由自己写                                                  |
+| dataProvider `getList({pagination:{page,perPage},sort,filter})` → CollectionQuery `{predicate, order, window}`                                         |
 | **refine `useSubscription(channel, params, onEvent)`（帧→失效回调）→ fleet `useSubscription(descriptor)` 返回帧缓冲+状态机（完全同名不同义——最危险）** |
-| refine useTable/useList（tableProps、pagination.current）→ useCollection 返回 list 句柄（window.size） |
-| refine useForm（record 加载+保存一体）→ useCommandForm 只管命令提交，initialValues 另配 useRecord |
-| Zod（validateSearch 训练默认）→ Effect Schema（经 toSearchSchema 包装） |
-| Radix 系 shadcn → Base UI 方言 |
-| react-admin useNotify / notificationProvider → 无内置 toast，onSettled + sonner |
-| Relay pageInfo/endCursor → Segment{rows, total?, nextCursor?} |
+| refine useTable/useList（tableProps、pagination.current）→ useCollection 返回 list 句柄（window.size）                                                 |
+| refine useForm（record 加载+保存一体）→ useCommandForm 只管命令提交，initialValues 另配 useRecord                                                      |
+| Zod（validateSearch 训练默认）→ Effect Schema（经 toSearchSchema 包装）                                                                                |
+| Radix 系 shadcn → Base UI 方言                                                                                                                         |
+| react-admin useNotify / notificationProvider → 无内置 toast，onSettled + sonner                                                                        |
+| Relay pageInfo/endCursor → Segment{rows, total?, nextCursor?}                                                                                          |
 
 ---
 
 ## 附录 A：决策日志（十轮迭代 + 审查裁决）
 
-| # | 裁决 | 依据 |
-|---|---|---|
-| 1 | 不借用旧项目概念设计，从零推演 | 旧项目五死因 |
-| 2 | 分页降级为 window 字段、客户端求值为派生适配器 | 求值策略非元概念 |
-| 3 | Effect 采纳 L1（缝隙派） | 三缝收益 vs 页面零接触边界 |
-| 4 | View 溶解为 CollectionQuery；Source→Resource；Stream→Subscription | 范畴错误修正 + 语域统一 |
-| 5 | 双 console 核对 8 修正 | 真实消费者证据 |
-| 6 | UI 五族 + 判据 + 配方非原型 | 双 console 组件收敛实证 |
-| 7 | 无 CustomPage | 框架不拥有页面类型系统 |
-| 8 | 竞品 A 类补齐 | 交叉审核 |
-| 9 | Resource 三原语可选；失败/结果两分；invalidates 声明；绑定原语语域 | 概念严格审计四修复 |
-| 10 | 设计文档先行 + 多视角审查 + 交叉审核 | 本流程 |
-| 11 | 网络断层=typed failure 非 defect；not-found/forbidden 经 treatAs 裁决 | 概念审计×Effect 审查交叉命中 |
-| 12 | 命令/订阅泛型逐键推断；ResourceName branded；getId 可选；订阅允许裸 Transport | DX×概念审计交叉命中 |
-| 13 | QueryWindow/ResourceScope 改名；EventFeed 块名豁免记录 | 撞名政策自查 |
-| 14 | search 写入契约（函数式/push-replace 纪律/职责单一归属）；"URL+默认值即真相" | Router 三暗规则 |
-| 15 | rejected→onSubmitAsync 返回（弃 setErrorMap）；onSettled+sonner；reveal 不进缓存 | Form v1/v2 实测 |
-| 16 | 订阅引擎挪 /adapters（react 目录级禁 effect）；FrameSource 终态分诊；stalled 态；beforeReconnect 钩子 | 可实现性×Effect 交叉命中 |
-| 17 | leaderboards 定性修正；advance(window,segment,dir)；int64 双策略；raw-response/FormData 逃生口 | 源码对账 |
-| 18 | 竞品 §8 重写（乐观更新矛盾/liveMode manual 校正/kit 诚实对照/useCollectionInfinite 升 A 类） | 竞品审查 |
-| 19 | effect ~4.0 tilde + 漂移矩阵 + bundle 预算；a11y 质量门 | Effect v4 unstable 事实 |
-| 20 | 集中反模式清单 + 幻觉诱饵表 | Agent 可用性审查 |
+| #   | 裁决                                                                                                  | 依据                         |
+| --- | ----------------------------------------------------------------------------------------------------- | ---------------------------- |
+| 1   | 不借用旧项目概念设计，从零推演                                                                        | 旧项目五死因                 |
+| 2   | 分页降级为 window 字段、客户端求值为派生适配器                                                        | 求值策略非元概念             |
+| 3   | Effect 采纳 L1（缝隙派）                                                                              | 三缝收益 vs 页面零接触边界   |
+| 4   | View 溶解为 CollectionQuery；Source→Resource；Stream→Subscription                                     | 范畴错误修正 + 语域统一      |
+| 5   | 双 console 核对 8 修正                                                                                | 真实消费者证据               |
+| 6   | UI 五族 + 判据 + 配方非原型                                                                           | 双 console 组件收敛实证      |
+| 7   | 无 CustomPage                                                                                         | 框架不拥有页面类型系统       |
+| 8   | 竞品 A 类补齐                                                                                         | 交叉审核                     |
+| 9   | Resource 三原语可选；失败/结果两分；invalidates 声明；绑定原语语域                                    | 概念严格审计四修复           |
+| 10  | 设计文档先行 + 多视角审查 + 交叉审核                                                                  | 本流程                       |
+| 11  | 网络断层=typed failure 非 defect；not-found/forbidden 经 treatAs 裁决                                 | 概念审计×Effect 审查交叉命中 |
+| 12  | 命令/订阅泛型逐键推断；ResourceName branded；getId 可选；订阅允许裸 Transport                         | DX×概念审计交叉命中          |
+| 13  | QueryWindow/ResourceScope 改名；EventFeed 块名豁免记录                                                | 撞名政策自查                 |
+| 14  | search 写入契约（函数式/push-replace 纪律/职责单一归属）；"URL+默认值即真相"                          | Router 三暗规则              |
+| 15  | rejected→onSubmitAsync 返回（弃 setErrorMap）；onSettled+sonner；reveal 不进缓存                      | Form v1/v2 实测              |
+| 16  | 订阅引擎挪 /adapters（react 目录级禁 effect）；FrameSource 终态分诊；stalled 态；beforeReconnect 钩子 | 可实现性×Effect 交叉命中     |
+| 17  | leaderboards 定性修正；advance(window,segment,dir)；int64 双策略；raw-response/FormData 逃生口        | 源码对账                     |
+| 18  | 竞品 §8 重写（乐观更新矛盾/liveMode manual 校正/kit 诚实对照/useCollectionInfinite 升 A 类）          | 竞品审查                     |
+| 19  | effect ~4.0 tilde + 漂移矩阵 + bundle 预算；a11y 质量门                                               | Effect v4 unstable 事实      |
+| 20  | 集中反模式清单 + 幻觉诱饵表                                                                           | Agent 可用性审查             |
 
 ## 附录 B：开放问题（draft-2 已全部裁决关闭）
 

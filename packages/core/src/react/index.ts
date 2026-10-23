@@ -1,15 +1,15 @@
 export {
-  useCollection,
-  useRecord,
-  useBatch,
+  type BatchHandle,
   type CollectionHandle,
   type RecordHandle,
-  type BatchHandle,
   type UseCollectionOptions,
+  useBatch,
+  useCollection,
+  useRecord,
 } from "./bindings";
 export {
-  collectionQueryOptions,
-  recordQueryOptions,
   batchQueryOptions,
+  collectionQueryOptions,
   type QueryEngineOptions,
+  recordQueryOptions,
 } from "./options";

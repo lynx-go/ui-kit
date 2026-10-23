@@ -1,5 +1,5 @@
-import { decodeClientCursor, encodeClientCursor, evaluateQuery, isApiError } from "../kernel";
 import type { ApiError, CollectionQuery, ResourceScope, Segment } from "../kernel";
+import { decodeClientCursor, encodeClientCursor, evaluateQuery, isApiError } from "../kernel";
 
 /**
  * mockResource —— Resource/Transport 契约的内存实现。
@@ -62,7 +62,11 @@ class MockHandleImpl<T> implements MockHandle<T> {
 }
 
 export interface MockCollection<T> {
-  collection: (query: CollectionQuery, ctx: ResourceScope, signal?: AbortSignal) => Promise<Segment<T>>;
+  collection: (
+    query: CollectionQuery,
+    ctx: ResourceScope,
+    signal?: AbortSignal,
+  ) => Promise<Segment<T>>;
   record: (id: string, ctx: ResourceScope) => Promise<T>;
   batch: (ids: ReadonlyArray<string>, ctx: ResourceScope) => Promise<ReadonlyArray<T>>;
   handle: MockHandle<T>;

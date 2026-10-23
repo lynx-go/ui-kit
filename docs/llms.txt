@@ -1,0 +1,25 @@
+# fleet-ui
+
+> Data-dense console UI library: three interaction primitives (Query / Command / Subscription) + one interaction surface (Resource), Effect in the seams, five families of UI blocks, on TanStack engines.
+> Built agent-first, for agents guided by humans.
+
+- Design doc (authoritative, audited): [docs/design.md](docs/design.md)
+- Page-author skill: [docs/SKILL.md](docs/SKILL.md)
+- Repo guide: [AGENTS.md](../AGENTS.md)
+
+## Map
+
+- `/kernel` — contracts: CollectionQuery, Segment, ApiError, CommandResult, Resource (defineResource/scoped), Transport/FrameSource, cursor algebra, invalidation selectors
+- `/schema` — CollectionQuery URL codec (q / filter / sort / cursor / page / size), Standard Schema wrapper
+- `/adapters` — createHttp (Effect inside, 401 hook, raw body/blob), clientCollection, mockResource/mockFetchAll
+- `/react` — useCollection / useRecord / useBatch (+ queryOptions factories for loader prefetch)
+- `registry/` — blocks: values / query / command / subscription / shell (shadcn-style, copy-distributed)
+- `apps/demo` — living docs: dual-dialect list pages, custom content page, reference select, four states
+
+## Concepts (all 4 of them)
+
+Ask (Query, cached reads), Tell (Command, named verbs with structured outcomes), Listen (Subscription, cursor-positioned frames) — addressed through Resource. Everything else derives; see design.md §3.
+
+## Status
+
+Vertical slice (Query line) complete: kernel contracts, URL codec, http adapter, client/server dialect bindings, list-page blocks, demo, e2e. Command/Subscription lines are specified in the design doc and land next.

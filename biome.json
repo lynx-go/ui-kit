@@ -15,14 +15,17 @@
     "lineWidth": 100
   },
   "linter": {
-    "preset": "recommended",
     "rules": {
+      "recommended": true,
       "correctness": {
         "noUnusedImports": "warn",
         "noUnusedVariables": "warn"
       },
       "style": {
         "noNonNullAssertion": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "off"
       }
     }
   },
@@ -35,9 +38,7 @@
   },
   "overrides": [
     {
-      "paths": [
-        "**/routeTree.gen.ts"
-      ],
+      "includes": ["**/routeTree.gen.ts"],
       "linter": {
         "enabled": false
       },

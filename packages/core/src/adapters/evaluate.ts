@@ -1,7 +1,7 @@
-import { evaluateQuery } from "../kernel";
 import type { CollectionQuery, ResourceScope, Segment } from "../kernel";
+import { evaluateQuery } from "../kernel";
 
-export { evaluateQuery, encodeClientCursor, decodeClientCursor } from "../kernel";
+export { decodeClientCursor, encodeClientCursor, evaluateQuery } from "../kernel";
 
 /**
  * clientCollection —— 客户端求值方言（求值策略，非概念）。

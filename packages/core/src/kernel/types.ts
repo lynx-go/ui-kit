@@ -12,16 +12,7 @@ export type Cursor = string;
 
 export type FieldValue = string | number | boolean | ReadonlyArray<string>;
 
-export type Operator =
-  | "eq"
-  | "ne"
-  | "contains"
-  | "in"
-  | "gt"
-  | "lt"
-  | "gte"
-  | "lte"
-  | "exists";
+export type Operator = "eq" | "ne" | "contains" | "in" | "gt" | "lt" | "gte" | "lte" | "exists";
 
 /** 构造侧类型化（可收窄为 `keyof T & string`）、解码侧宽容（string）。 */
 type FieldKeyBrand = string & { readonly __fieldKey?: unique symbol };
@@ -74,14 +65,7 @@ export type ApiError =
   | { kind: "server"; status: number; message?: string }
   | { kind: "decode"; detail: string };
 
-const API_ERROR_KINDS = new Set([
-  "network",
-  "auth",
-  "forbidden",
-  "not-found",
-  "server",
-  "decode",
-]);
+const API_ERROR_KINDS = new Set(["network", "auth", "forbidden", "not-found", "server", "decode"]);
 
 export function isApiError(value: unknown): value is ApiError {
   return (

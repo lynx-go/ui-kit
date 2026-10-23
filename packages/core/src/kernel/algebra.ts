@@ -122,8 +122,13 @@ export function advance(
   dir: "next" | "prev",
 ): QueryWindow | null {
   if (dir === "next") {
+    // 服务端续读令牌优先（keyset 无 total / leaderboards 型 token+total）；
+    // 客户端求值的 range 模式不产 nextCursor，自然落回 range 分支。
+    if (segment.nextCursor !== undefined) {
+      return { ...window, cursor: segment.nextCursor };
+    }
     if (window.cursor !== undefined) {
-      return segment.nextCursor ? { ...window, cursor: segment.nextCursor } : null;
+      return null; // 游标模式下无令牌 = 到底
     }
     const offset = offsetOf(window);
     const next = offset + window.size;

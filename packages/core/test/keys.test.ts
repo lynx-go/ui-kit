@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { clientCollection } from "../src/adapters";
 import {
   batchKey,
   collectionKey,
@@ -8,7 +9,6 @@ import {
   scoped,
   selectorMatches,
 } from "../src/kernel";
-import { clientCollection } from "../src/adapters";
 
 const apps = defineResource({
   name: "apps",
@@ -38,9 +38,7 @@ describe("失效矩阵（selector 匹配 + scope 交运算）", () => {
   const appsB = scoped(apps, { projectId: "B" });
 
   const key = (resource: typeof apps, id?: string) =>
-    id === undefined
-      ? collectionKey(resource, { window: { size: 20 } })
-      : recordKey(resource, id);
+    id === undefined ? collectionKey(resource, { window: { size: 20 } }) : recordKey(resource, id);
 
   it("同资源同 scope 命中；跨 scope 默认不命中（交运算）", () => {
     expect(selectorMatches({ resource: "apps" }, key(appsA), { projectId: "A" })).toBe(true);
@@ -58,11 +56,9 @@ describe("失效矩阵（selector 匹配 + scope 交运算）", () => {
       selectorMatches({ resource: "apps", kind: "collection" }, recordKey(appsA, "x"), {}),
     ).toBe(false);
     expect(
-      selectorMatches(
-        { resource: "apps", kind: "record", id: "x" },
-        recordKey(appsA, "x"),
-        { projectId: "A" },
-      ),
+      selectorMatches({ resource: "apps", kind: "record", id: "x" }, recordKey(appsA, "x"), {
+        projectId: "A",
+      }),
     ).toBe(true);
     expect(selectorMatches({ resource: "apps" }, batchKey(appsA, ["x"]), { projectId: "A" })).toBe(
       true,

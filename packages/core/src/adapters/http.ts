@@ -1,5 +1,5 @@
 import { Data, Effect } from "effect";
-import { isApiError, type ApiError } from "../kernel";
+import { type ApiError, isApiError } from "../kernel";
 
 /**
  * 缝 1 —— http 管线（Effect 住在缝里，Promise 站在边界上）。
@@ -41,7 +41,11 @@ function toApiError(failure: AdapterFailure): ApiError {
       if (status === 401) return { kind: "auth" };
       if (status === 403) return { kind: "forbidden" };
       if (status === 404) return { kind: "not-found" };
-      return { kind: "server", status, ...(extractMessage(body) ? { message: extractMessage(body) } : {}) };
+      return {
+        kind: "server",
+        status,
+        ...(extractMessage(body) ? { message: extractMessage(body) } : {}),
+      };
     }
   }
 }
@@ -94,7 +98,10 @@ function buildUrl(baseUrl: string | undefined, path: string, params?: QueryParam
 }
 
 export function createHttp(options: HttpOptions = {}) {
-  function requestJson(path: string, init: RequestInit & { params?: QueryParams }): Effect.Effect<unknown, AdapterFailure> {
+  function requestJson(
+    path: string,
+    init: RequestInit & { params?: QueryParams },
+  ): Effect.Effect<unknown, AdapterFailure> {
     const url = buildUrl(options.baseUrl, path, init.params);
     return Effect.tryPromise({
       // 注意 arity 陷阱：单参数 signal（v4 按函数 length 探测）
@@ -143,7 +150,11 @@ export function createHttp(options: HttpOptions = {}) {
     }).pipe(Effect.orElseSucceed(() => undefined));
   }
 
-  async function request<T>(method: string, path: string, req: HttpRequest & { body?: unknown }): Promise<T> {
+  async function request<T>(
+    method: string,
+    path: string,
+    req: HttpRequest & { body?: unknown },
+  ): Promise<T> {
     const headers: Record<string, string> = { ...req.headers };
     let body: BodyInit | undefined;
     if (req.body !== undefined) {
@@ -170,7 +181,12 @@ export function createHttp(options: HttpOptions = {}) {
       request<T>("PUT", path, { ...req, body }),
     del: <T>(path: string, req: HttpRequest = {}) => request<T>("DELETE", path, req),
     /** raw body 命令（tar 裸上传 / FormData 分片）+ raw response 逃生口（Blob 下载不过 decode）。 */
-    async sendRaw<T>(path: string, body: BodyInit, contentType?: string, req: HttpRequest = {}): Promise<T> {
+    async sendRaw<T>(
+      path: string,
+      body: BodyInit,
+      contentType?: string,
+      req: HttpRequest = {},
+    ): Promise<T> {
       const headers = { ...req.headers, ...(contentType ? { "Content-Type": contentType } : {}) };
       const raw = await runApi(
         requestJson(path, {
