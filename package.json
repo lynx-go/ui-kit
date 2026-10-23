@@ -1,0 +1,19 @@
+{
+  "name": "fleet-ui",
+  "private": true,
+  "packageManager": "pnpm@12.9.1",
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "biome check .",
+    "layer-check": "node scripts/layer-check.mjs",
+    "check": "pnpm layer-check && pnpm typecheck && pnpm test",
+    "demo": "pnpm --filter demo dev",
+    "e2e": "pnpm --filter demo e2e"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:default",
+    "typescript": "catalog:default"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "name": "@fleetly/fleet-ui-core",
+  "version": "0.1.0",
+  "description": "Headless core for data-dense console UIs — Query / Command / Subscription over TanStack engines",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/react/index.ts",
+      "default": "./src/react/index.ts"
+    },
+    "./kernel": {
+      "types": "./src/kernel/index.ts",
+      "default": "./src/kernel/index.ts"
+    },
+    "./schema": {
+      "types": "./src/schema/index.ts",
+      "default": "./src/schema/index.ts"
+    },
+    "./adapters": {
+      "types": "./src/adapters/index.ts",
+      "default": "./src/adapters/index.ts"
+    },
+    "./react": {
+      "types": "./src/react/index.ts",
+      "default": "./src/react/index.ts"
+    }
+  },
+  "files": ["src", "dist"],
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "build": "tsup"
+  },
+  "dependencies": {
+    "effect": "catalog:default"
+  },
+  "peerDependencies": {
+    "react": ">=19",
+    "@tanstack/react-query": ">=5.100",
+    "@tanstack/react-router": ">=1.120"
+  },
+  "peerDependenciesMeta": {
+    "@tanstack/react-router": { "optional": true },
+    "@tanstack/react-query": { "optional": true }
+  },
+  "devDependencies": {
+    "@tanstack/react-query": "catalog:default",
+    "@tanstack/react-router": "catalog:default",
+    "@types/react": "catalog:default",
+    "react": "catalog:default",
+    "typescript": "catalog:default",
+    "vitest": "catalog:default"
+  }
+}
