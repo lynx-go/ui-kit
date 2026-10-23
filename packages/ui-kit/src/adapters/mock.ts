@@ -13,6 +13,8 @@ export type MockFetchAll<T> = ((
   MockHandle<T>;
 
 export interface MockHandle<T> {
+  /** 当前行快照（demo 命令闭包用：create/delete 基于现值改写） */
+  rows(): ReadonlyArray<T>;
   /** 替换全部行（demo 动态数据 / 测试重置） */
   replaceRows(rows: ReadonlyArray<T>): void;
   /** 下一次 collection/record/batch 调用按给定失败 reject（三态与闭环测试） */
@@ -43,12 +45,15 @@ async function maybeFail<T>(
 
 class MockHandleImpl<T> implements MockHandle<T> {
   failureQueue: ApiError[] = [];
-  rows: T[];
+  private store: T[];
   constructor(rows: ReadonlyArray<T>) {
-    this.rows = [...rows];
+    this.store = [...rows];
+  }
+  rows(): ReadonlyArray<T> {
+    return [...this.store];
   }
   replaceRows(rows: ReadonlyArray<T>): void {
-    this.rows = [...rows];
+    this.store = [...rows];
   }
   failNext(error: ApiError): void {
     this.failureQueue.push(error);
@@ -57,7 +62,7 @@ class MockHandleImpl<T> implements MockHandle<T> {
     return this.failureQueue.shift();
   }
   get count(): number {
-    return this.rows.length;
+    return this.store.length;
   }
 }
 
@@ -99,10 +104,10 @@ export function mockCollection<T extends { id: string }>(
         dialect === "keyset" || w.cursor !== undefined
           ? { ...query, window: { size: w.size, cursor: encodeClientCursor(offset) } }
           : { ...query, window: { size: w.size } };
-      const segment = evaluateQuery(serverQuery, handle.rows);
+      const segment = evaluateQuery(serverQuery, handle.rows());
       const out: Segment<T> = { rows: segment.rows };
-      if (dialect === "offset") out.total = segment.total ?? handle.rows.length;
-      else if (segment.rows.length === w.size && offset + w.size < handle.rows.length)
+      if (dialect === "offset") out.total = segment.total ?? handle.rows().length;
+      else if (segment.rows.length === w.size && offset + w.size < handle.rows().length)
         out.nextCursor = encodeClientCursor(offset + w.size);
       return out;
     });
@@ -111,7 +116,7 @@ export function mockCollection<T extends { id: string }>(
   const record = async (id: string): Promise<T> => {
     return maybeFail(handle, async () => {
       await delay(latencyMs);
-      const row = handle.rows.find((r) => r.id === id);
+      const row = handle.rows().find((r) => r.id === id);
       if (!row) throw { kind: "not-found" } satisfies ApiError;
       return row;
     });
@@ -120,7 +125,7 @@ export function mockCollection<T extends { id: string }>(
   const batch = async (ids: ReadonlyArray<string>): Promise<ReadonlyArray<T>> => {
     return maybeFail(handle, async () => {
       await delay(latencyMs);
-      const byId = new Map(handle.rows.map((r) => [r.id, r]));
+      const byId = new Map(handle.rows().map((r) => [r.id, r]));
       return ids.flatMap((id) => {
         const row = byId.get(id);
         return row ? [row] : [];
@@ -133,6 +138,7 @@ export function mockCollection<T extends { id: string }>(
     record,
     batch,
     handle: {
+      rows: () => handle.rows(),
       replaceRows: (rows) => handle.replaceRows(rows),
       failNext: (error) => handle.failNext(error),
       get count() {
@@ -152,9 +158,10 @@ export function mockFetchAll<T>(
     const failure = handle.takeFailure();
     if (failure) throw failure;
     await delay(options.latencyMs ?? 0);
-    return handle.rows;
+    return handle.rows();
   };
   return Object.assign(fn, {
+    rows: () => handle.rows(),
     replaceRows: (rows: ReadonlyArray<T>) => handle.replaceRows(rows),
     failNext: (error: ApiError) => handle.failNext(error),
     get count() {

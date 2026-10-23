@@ -19,7 +19,8 @@
     "lucide-react": "catalog:default",
     "react": "catalog:default",
     "react-dom": "catalog:default",
-    "tailwind-merge": "catalog:default"
+    "tailwind-merge": "catalog:default",
+    "@tanstack/react-form": "catalog:default"
   },
   "devDependencies": {
     "@playwright/test": "catalog:default",

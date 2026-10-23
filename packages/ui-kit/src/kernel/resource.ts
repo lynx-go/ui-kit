@@ -5,6 +5,7 @@ import type {
   SubscriptionPolicy,
   Transport,
 } from "./types";
+import { isApiError } from "./types";
 
 // ============ 交互面：Resource ============
 
@@ -20,6 +21,11 @@ export interface CommandDescriptor<Input, Payload, ID = never> {
   invalidates?: ReadonlyArray<QuerySelector>;
   /** 结果覆写钩子：命令作者裁决协议层状态的领域语义（delete 已删 → 幂等 ok 等） */
   treatAs?: Partial<Record<"not-found" | "forbidden", CommandResult<Payload>>>;
+  /**
+   * @internal 归属资源名——defineResource 注入；缺省 invalidates 时的默认失效目标
+   * （内置动词同资源失效，跨资源声明走 invalidates）。
+   */
+  __resource?: ResourceName;
 }
 
 export interface SubscriptionDescriptor<Params, Frame> {
@@ -29,6 +35,11 @@ export interface SubscriptionDescriptor<Params, Frame> {
 }
 
 export type CommandsRecord<ID> = Record<string, CommandDescriptor<any, any, ID>>;
+
+/** defineResource 注入 __resource 后的命令映射（逐键保留具体 Input/Payload 类型） */
+export type AttachedCommands<C> = {
+  [K in keyof C]: C[K] & { __resource?: ResourceName };
+};
 export type SubsRecord = Record<string, SubscriptionDescriptor<any, any>>;
 
 export interface ResourceSpec<
@@ -81,7 +92,7 @@ export interface Resource<
     signal?: AbortSignal,
   ) => Promise<ReadonlyArray<T>>;
 
-  readonly commands?: C;
+  readonly commands?: AttachedCommands<C>;
   readonly subscriptions?: S;
   /** scoped() 注入的作用域值（内部约定，勿直接读写） */
   readonly __scopeValues?: ResourceScope;
@@ -102,7 +113,36 @@ export function defineResource<
       `fleet-ui: resource name "${spec.name}" must be kebab-case (it lives in query keys and URL diagnostics)`,
     );
   }
-  return { ...spec, name: spec.name as ResourceName };
+  const commands = spec.commands
+    ? (Object.fromEntries(
+        Object.entries(spec.commands).map(([verb, descriptor]) => [
+          verb,
+          { ...descriptor, __resource: spec.name as ResourceName },
+        ]),
+      ) as AttachedCommands<C>)
+    : undefined;
+  return { ...spec, commands, name: spec.name as ResourceName };
+}
+
+/**
+ * runCommand —— 命令执行的单源入口（绑定层与命令式编排共用）。
+ * treatAs 在此裁决：协议层失败（not-found/forbidden）被命令作者覆写为结果分支；
+ * 其余失败（网络/401/5xx）原样出界走错误通道。
+ */
+export async function runCommand<Input, Payload, ID>(
+  descriptor: CommandDescriptor<Input, Payload, ID>,
+  input: Input,
+  ctx: ResourceScope,
+): Promise<CommandResult<Payload>> {
+  try {
+    return await descriptor.run(input, ctx);
+  } catch (error) {
+    if (isApiError(error)) {
+      const remap = descriptor.treatAs?.[error.kind as "not-found" | "forbidden"];
+      if (remap) return remap;
+    }
+    throw error;
+  }
 }
 
 /**

@@ -1,4 +1,5 @@
 import { clientCollection, mockCollection, mockFetchAll } from "@fleetly/fleet-ui-kit/adapters";
+import type { CommandResult } from "@fleetly/fleet-ui-kit/kernel";
 import { defineResource } from "@fleetly/fleet-ui-kit/kernel";
 import { collectionQuerySchema } from "@fleetly/fleet-ui-kit/schema";
 import type { Owner, Widget } from "./mock-data";
@@ -23,12 +24,44 @@ export const widgetsClient = defineResource({
   getId: (row: Widget) => row.id,
   collection: clientCollection(widgetsFetchAll),
   record: (id: string) => {
-    const widget = WIDGETS.find((w) => w.id === id);
+    const widget = widgetsFetchAll.rows().find((w) => w.id === id);
     if (!widget)
       throw { kind: "not-found" } satisfies import("@fleetly/fleet-ui-kit/kernel").ApiError;
     return Promise.resolve(widget);
   },
-  batch: (ids) => Promise.resolve(WIDGETS.filter((w) => ids.includes(w.id))),
+  batch: (ids) => Promise.resolve(widgetsFetchAll.rows().filter((w) => ids.includes(w.id))),
+  commands: {
+    create: {
+      run: (input: { name: string; status: Widget["status"]; replicas: number }) => {
+        if (input.name === "reject-me") {
+          // message-first 拒绝演示（后端只有 code/message 的真实形态）
+          return Promise.resolve({
+            status: "rejected",
+            code: "E_DEMO",
+            message: "Name rejected by server (demo)",
+          } satisfies CommandResult<Widget>);
+        }
+        const widget: Widget = {
+          id: `widget-${Date.now().toString(36)}`,
+          createdAt: new Date().toISOString(),
+          owner: OWNERS[0]!.id,
+          ...input,
+          replicas: Number(input.replicas),
+        };
+        widgetsFetchAll.replaceRows([widget, ...widgetsFetchAll.rows()]);
+        return Promise.resolve({ status: "ok", payload: widget } satisfies CommandResult<Widget>);
+      },
+      // 缺省 invalidates → 同资源全部查询失效（defineResource 注入 __resource）
+    },
+    delete: {
+      run: (id: string) => {
+        widgetsFetchAll.replaceRows(widgetsFetchAll.rows().filter((w) => w.id !== id));
+        return Promise.resolve({ status: "ok", payload: null } satisfies CommandResult<null>);
+      },
+      // 幂等删除演示：delete 已删（404）→ treatAs 覆写为 ok
+      treatAs: { "not-found": { status: "ok", payload: null } },
+    },
+  },
 });
 /** 四态演示：失败注入句柄（demo 专属，消费方代码） */
 export const widgetsFailureHandle = widgetsFetchAll;

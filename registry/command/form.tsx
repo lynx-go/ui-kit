@@ -1,0 +1,65 @@
+import type { CommandResult } from "@fleetly/fleet-ui-kit/kernel";
+import type { ReactNode } from "react";
+import { Button } from "@/components/ui/button";
+
+/**
+ * Form 内芯（command 块）—— 字段族 × 错误盒 × 提交生命周期；宿主无关
+ * （Dialog/Sheet/整页由外壳决定，submit 由内芯渲染，宿主 footer 经 onCancel 协作）。
+ * 结果分支渲染在此：rejected/conflict 展示 message-first 错误盒（结果通道，非异常）。
+ */
+export interface FormProps<Payload> {
+  /**
+   * 结构化：任何带 handleSubmit 的 form api（useCommandForm / 裸 TanStack Form 皆可）。
+   * 注意：TanStack Form 1.33 的 handleSubmit(submitMeta?) 不接收事件、不 preventDefault
+   * ——本块统一在此拦截原生提交（直连 onSubmit={form.handleSubmit} 会导致整页原生 GET 提交）。
+   */
+  form: { handleSubmit: (submitMeta?: unknown) => void | Promise<void> };
+  submitting?: boolean;
+  result?: CommandResult<Payload> | null;
+  submitLabel?: string;
+  onCancel?: () => void;
+  children: ReactNode;
+}
+
+export function Form<Payload>({
+  form,
+  submitting = false,
+  result = null,
+  submitLabel = "Save",
+  onCancel,
+  children,
+}: FormProps<Payload>) {
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        void form.handleSubmit();
+      }}
+      className="space-y-3"
+      noValidate
+    >
+      {children}
+      {result !== null && result.status !== "ok" ? (
+        <div
+          role="alert"
+          className="rounded-md border border-err/40 bg-err/10 px-3 py-2 text-xs text-err"
+        >
+          {result.status === "rejected" && result.code ? (
+            <span className="font-mono">[{result.code}] </span>
+          ) : null}
+          {result.message}
+        </div>
+      ) : null}
+      <div className="flex justify-end gap-2 pt-1">
+        {onCancel ? (
+          <Button type="button" variant="ghost" onClick={onCancel}>
+            Cancel
+          </Button>
+        ) : null}
+        <Button type="submit" disabled={submitting}>
+          {submitting ? "Saving…" : submitLabel}
+        </Button>
+      </div>
+    </form>
+  );
+}

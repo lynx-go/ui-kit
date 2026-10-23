@@ -73,3 +73,30 @@ test.describe("reference select + batch resolution", () => {
     await expect(page.getByRole("row").nth(1)).toContainText("Ada Lovelace");
   });
 });
+
+test.describe("command line: create / rejection / delete", () => {
+  test("create via form refreshes list by invalidation; rejection shows message-first box; delete confirms", async ({
+    page,
+  }) => {
+    await page.goto("/widgets");
+
+    // 新建 → ok → 默认失效刷新列表
+    await page.getByRole("button", { name: "New widget" }).click();
+    await page.getByLabel("Name").fill("widget-e2e");
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(page.getByRole("table")).toContainText("widget-e2e");
+
+    // 拒绝（后端 code/message 形态）→ 表单错误盒；rejected 是结果不是异常
+    await page.getByRole("button", { name: "New widget" }).click();
+    await page.getByLabel("Name").fill("reject-me");
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(page.getByRole("alert").last()).toContainText("rejected by server");
+    await page.getByRole("button", { name: "Cancel" }).click();
+
+    // 行删除：确认框 → 命令 → 失效刷新
+    const row = page.getByRole("row", { name: /widget-e2e/ });
+    await row.getByRole("button", { name: "Delete" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Delete" }).click();
+    await expect(page.getByRole("table")).not.toContainText("widget-e2e");
+  });
+});

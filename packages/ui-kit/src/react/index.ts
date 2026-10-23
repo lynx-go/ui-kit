@@ -8,6 +8,13 @@ export {
   useRecord,
 } from "./bindings";
 export {
+  type CommandHandle,
+  type UseCommandFormOptions,
+  type UseCommandOptions,
+  useCommand,
+  useCommandForm,
+} from "./command";
+export {
   batchQueryOptions,
   collectionQueryOptions,
   type QueryEngineOptions,

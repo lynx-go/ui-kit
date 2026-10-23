@@ -14,18 +14,19 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:default",
-    "typescript": "catalog:default",
-    "react": "catalog:default",
-    "react-dom": "catalog:default",
-    "@types/react": "catalog:default",
-    "@tanstack/react-table": "catalog:default",
+    "@fleetly/fleet-ui-kit": "workspace:*",
+    "@tanstack/react-form": "catalog:default",
     "@tanstack/react-query": "catalog:default",
     "@tanstack/react-router": "catalog:default",
-    "lucide-react": "catalog:default",
-    "clsx": "catalog:default",
-    "tailwind-merge": "catalog:default",
+    "@tanstack/react-table": "catalog:default",
+    "@tanstack/table-core": "catalog:default",
+    "@types/react": "catalog:default",
     "class-variance-authority": "catalog:default",
-    "@fleetly/fleet-ui-kit": "workspace:*",
-    "@tanstack/table-core": "catalog:default"
+    "clsx": "catalog:default",
+    "lucide-react": "catalog:default",
+    "react": "catalog:default",
+    "react-dom": "catalog:default",
+    "tailwind-merge": "catalog:default",
+    "typescript": "catalog:default"
   }
 }

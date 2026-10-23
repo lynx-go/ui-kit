@@ -11,7 +11,9 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
       "registryDependencies": []
     },
     {
@@ -25,7 +27,25 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
+      "registryDependencies": []
+    },
+    {
+      "name": "values-secret-reveal",
+      "type": "registry:block",
+      "title": "secret-reveal",
+      "files": [
+        {
+          "path": "registry/values/secret-reveal.tsx",
+          "target": "components/fleet/values/secret-reveal.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
       "registryDependencies": []
     },
     {
@@ -39,7 +59,9 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
       "registryDependencies": []
     },
     {
@@ -53,7 +75,9 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
       "registryDependencies": []
     },
     {
@@ -67,7 +91,9 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
       "registryDependencies": []
     },
     {
@@ -81,7 +107,9 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
       "registryDependencies": []
     },
     {
@@ -95,7 +123,9 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
       "registryDependencies": []
     },
     {
@@ -109,7 +139,9 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
       "registryDependencies": []
     },
     {
@@ -123,7 +155,9 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
       "registryDependencies": []
     },
     {
@@ -137,7 +171,73 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
+      "registryDependencies": []
+    },
+    {
+      "name": "command-confirm-dialog",
+      "type": "registry:block",
+      "title": "confirm-dialog",
+      "files": [
+        {
+          "path": "registry/command/confirm-dialog.tsx",
+          "target": "components/fleet/command/confirm-dialog.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
+      "registryDependencies": []
+    },
+    {
+      "name": "command-delete-button",
+      "type": "registry:block",
+      "title": "delete-button",
+      "files": [
+        {
+          "path": "registry/command/delete-button.tsx",
+          "target": "components/fleet/command/delete-button.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
+      "registryDependencies": []
+    },
+    {
+      "name": "command-fields",
+      "type": "registry:block",
+      "title": "fields",
+      "files": [
+        {
+          "path": "registry/command/fields.tsx",
+          "target": "components/fleet/command/fields.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
+      "registryDependencies": []
+    },
+    {
+      "name": "command-form",
+      "type": "registry:block",
+      "title": "form",
+      "files": [
+        {
+          "path": "registry/command/form.tsx",
+          "target": "components/fleet/command/form.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
       "registryDependencies": []
     },
     {
@@ -151,7 +251,9 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
       "registryDependencies": []
     },
     {
@@ -165,7 +267,9 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
       "registryDependencies": []
     }
   ]

@@ -6,7 +6,7 @@
 ## 心智模型（就 4 个名词）
 
 - **Query（问）**：缓存读。列表用 `useCollection`，详情 `useRecord`，外键 `useBatch`。
-- **Command（令）**：具名动词写面（后续批次）。结果走返回值不走异常。
+- **Command（令）**：具名动词写面。`useCommand(descriptor, { scope, onSettled })`（rejected/conflict 是结果、失败才走 error 通道、ok 后默认失效同资源查询）；表单用 `useCommandForm(descriptor, { defaultValues, onSettled })` + `<Form>` 块 + `TextField/SelectField`；行删除用 `<DeleteButton descriptor input />`（内置确认框）。
 - **Subscription（听）**：帧流（后续批次）。
 - **Resource**：后端某实体/流的交互面，由适配器作者用 `defineResource` 定义——你在页面上只管 import 它。
 
