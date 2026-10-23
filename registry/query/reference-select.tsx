@@ -1,6 +1,6 @@
-import { collectionQueryOptions } from "@fleetly/fleet-ui-core";
-import type { ApiError, Resource, Segment } from "@fleetly/fleet-ui-core/kernel";
-import { textPredicate } from "@fleetly/fleet-ui-core/kernel";
+import { collectionQueryOptions } from "@fleetly/fleet-ui-kit";
+import type { ApiError, Resource, Segment } from "@fleetly/fleet-ui-kit/kernel";
+import { textPredicate } from "@fleetly/fleet-ui-kit/kernel";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";

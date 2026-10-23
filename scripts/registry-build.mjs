@@ -32,7 +32,7 @@ for (const family of families) {
         },
       ],
       // 块依赖 core 的 semver range（Q8 裁决）；UI 基元假定消费方已 vendored shadcn
-      dependencies: ["@fleetly/fleet-ui-core@^0.1"],
+      dependencies: ["@fleetly/fleet-ui-kit@^0.1"],
       registryDependencies: [],
     });
   }

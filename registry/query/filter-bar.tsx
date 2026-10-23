@@ -1,7 +1,7 @@
-import type { Predicate } from "@fleetly/fleet-ui-core/kernel";
-import { textPredicate } from "@fleetly/fleet-ui-core/kernel";
-import type { CollectionHandle } from "@fleetly/fleet-ui-core/react";
-import type { FilterFieldDef, QuerySearchSchema } from "@fleetly/fleet-ui-core/schema";
+import type { Predicate } from "@fleetly/fleet-ui-kit/kernel";
+import { textPredicate } from "@fleetly/fleet-ui-kit/kernel";
+import type { CollectionHandle } from "@fleetly/fleet-ui-kit/react";
+import type { FilterFieldDef, QuerySearchSchema } from "@fleetly/fleet-ui-kit/schema";
 import { Search, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";

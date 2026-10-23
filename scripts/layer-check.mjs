@@ -7,7 +7,7 @@
  *   schema    允许 kernel + "effect"（公开面零 effect/schema 泄漏由导出审计保证）
  *   adapters  允许 kernel + "effect"
  *   react     允许 kernel + schema + react 系 + @tanstack 系；禁止 "effect"（目录级）
- *   registry  允许 @fleetly/fleet-ui-core* + @/ + @blocks/ + react 系 + @tanstack 系 + lucide/clsx/cva；禁止 effect
+ *   registry  允许 @fleetly/fleet-ui-kit* + @/ + @blocks/ + react 系 + @tanstack 系 + lucide/clsx/cva；禁止 effect
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
@@ -19,22 +19,22 @@ const IMPORT_RE = /(?:from\s+|import\s*\(\s*)["']([^"']+)["']/g;
 
 const LAYER_RULES = {
   kernel: {
-    base: "packages/core/src/kernel",
+    base: "packages/ui-kit/src/kernel",
     allowed: (spec, isRelative) => isRelative, // 只允许相对导入
     label: "kernel（零依赖）",
   },
   schema: {
-    base: "packages/core/src/schema",
+    base: "packages/ui-kit/src/schema",
     allowed: (spec, isRelative) => isRelative || spec === "effect" || spec.startsWith("effect/"),
     label: "schema（kernel + effect）",
   },
   adapters: {
-    base: "packages/core/src/adapters",
+    base: "packages/ui-kit/src/adapters",
     allowed: (spec, isRelative) => isRelative || spec === "effect" || spec.startsWith("effect/"),
     label: "adapters（kernel + effect）",
   },
   react: {
-    base: "packages/core/src/react",
+    base: "packages/ui-kit/src/react",
     allowed: (spec, isRelative) =>
       isRelative ||
       spec === "react" ||
@@ -48,7 +48,7 @@ const LAYER_RULES = {
     base: "registry",
     allowed: (spec, isRelative) =>
       isRelative ||
-      spec.startsWith("@fleetly/fleet-ui-core") ||
+      spec.startsWith("@fleetly/fleet-ui-kit") ||
       spec.startsWith("@/") ||
       spec.startsWith("@blocks/") ||
       spec === "react" ||

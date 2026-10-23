@@ -25,7 +25,7 @@
     "clsx": "catalog:default",
     "tailwind-merge": "catalog:default",
     "class-variance-authority": "catalog:default",
-    "@fleetly/fleet-ui-core": "workspace:*",
+    "@fleetly/fleet-ui-kit": "workspace:*",
     "@tanstack/table-core": "catalog:default"
   }
 }

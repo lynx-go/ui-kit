@@ -1,8 +1,8 @@
 import { Page } from "@blocks/shell/page";
 import { RelativeTime } from "@blocks/values/relative-time";
 import { StatusBadge } from "@blocks/values/status-badge";
-import { collectionQueryOptions } from "@fleetly/fleet-ui-core";
-import type { ApiError, Segment } from "@fleetly/fleet-ui-core/kernel";
+import { collectionQueryOptions } from "@fleetly/fleet-ui-kit";
+import type { ApiError, Segment } from "@fleetly/fleet-ui-kit/kernel";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";

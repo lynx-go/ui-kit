@@ -11,7 +11,7 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
       "registryDependencies": []
     },
     {
@@ -25,7 +25,7 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
       "registryDependencies": []
     },
     {
@@ -39,7 +39,7 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
       "registryDependencies": []
     },
     {
@@ -53,7 +53,7 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
       "registryDependencies": []
     },
     {
@@ -67,7 +67,7 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
       "registryDependencies": []
     },
     {
@@ -81,7 +81,7 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
       "registryDependencies": []
     },
     {
@@ -95,7 +95,7 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
       "registryDependencies": []
     },
     {
@@ -109,7 +109,7 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
       "registryDependencies": []
     },
     {
@@ -123,7 +123,7 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
       "registryDependencies": []
     },
     {
@@ -137,7 +137,7 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
       "registryDependencies": []
     },
     {
@@ -151,7 +151,7 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
       "registryDependencies": []
     },
     {
@@ -165,7 +165,7 @@
           "type": "registry:block"
         }
       ],
-      "dependencies": ["@fleetly/fleet-ui-core@^0.1"],
+      "dependencies": ["@fleetly/fleet-ui-kit@^0.1"],
       "registryDependencies": []
     }
   ]

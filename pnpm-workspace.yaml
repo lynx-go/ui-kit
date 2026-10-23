@@ -35,3 +35,4 @@ minimumReleaseAgeExclude:
   - "@tanstack/router-core@1.171.39"
   - "@tanstack/router-generator@1.167.46"
   - "@tanstack/router-plugin@1.168.48"
+  - effect@4.0.6

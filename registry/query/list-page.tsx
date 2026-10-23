@@ -1,4 +1,4 @@
-import type { CollectionHandle } from "@fleetly/fleet-ui-core/react";
+import type { CollectionHandle } from "@fleetly/fleet-ui-kit/react";
 import type { ReactNode } from "react";
 import { Card } from "@/components/ui/card";
 import { EmptyState, ErrorState, LoadingState } from "../values/states";

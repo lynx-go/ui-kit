@@ -1,5 +1,5 @@
 {
-  "name": "@fleetly/fleet-ui-core",
+  "name": "@fleetly/fleet-ui-kit",
   "version": "0.1.0",
   "description": "Headless core for data-dense console UIs — Query / Command / Subscription over TanStack engines",
   "type": "module",

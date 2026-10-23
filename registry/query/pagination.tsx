@@ -1,4 +1,4 @@
-import type { CollectionHandle } from "@fleetly/fleet-ui-core/react";
+import type { CollectionHandle } from "@fleetly/fleet-ui-kit/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";

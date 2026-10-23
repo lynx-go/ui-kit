@@ -5,7 +5,7 @@
 ## 仓库结构
 
 ```
-packages/core   @fleetly/fleet-ui-core（npm）
+packages/ui-kit   @fleetly/fleet-ui-kit（npm）
   src/kernel    元概念契约+纯代数（零依赖、零 react）
   src/schema    CollectionQuery URL 编解码（依赖 effect；公开面零 effect/schema 泄漏）
   src/adapters  http 管线(Effect 内部)/订阅引擎(后续)/evaluate/clientCollection/mock

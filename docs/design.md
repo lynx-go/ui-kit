@@ -15,7 +15,7 @@
 **定位**：
 1. **内部优先、开源友好**——首要消费者是 fleetly console 与 torchwood console 的重写；但无业务残留：英文命名、文案全走 messages 覆盖通道、不含任何业务名词。
 2. **TanStack 原生**——Router（typed file routes + `validateSearch`）、Query、Table、Form 是引擎层，**借用不重建**。fleet-ui 不在引擎上再包一层抽象（refine 的 routerProvider 两次重写是前车之鉴）。
-3. **分发双通道**——无头核心 `@fleetly/fleet-ui-core` 发 npm（semver + changesets）；UI 块走 shadcn registry 拷贝制（open code，归消费方所有）。
+3. **分发双通道**——无头核心 `@fleetly/fleet-ui-kit` 发 npm（semver + changesets）；UI 块走 shadcn registry 拷贝制（open code，归消费方所有）。
 4. **Agent-first**——SKILL.md（TanStack Intent 格式）、llms.txt、AGENTS.md 随包分发；集中反模式清单（§13）与幻觉诱饵对照表（§14）直接进 SKILL.md。
 
 **非目标（持证拒签，理由与重启条件见 §8）**：
@@ -629,7 +629,7 @@ FilterBar/Pagination 等是 ListPage 的**兄弟组件**（示例代码未画 fi
 
 ```
 fleet-ui/                        # pnpm monorepo + catalog（单源版本）
-├── packages/core                # @fleetly/fleet-ui-core
+├── packages/ui-kit                # @fleetly/fleet-ui-kit
 │   ├── src/kernel/              # 契约+类型+查询/游标代数（零依赖，零 react import）
 │   ├── src/schema/              # Effect Schema 工厂（依赖 effect ~4.0；公开面零 effect/schema 泄漏）
 │   ├── src/adapters/            # http 管线(Effect 内部+runApi+401)/订阅引擎(零 React)/
@@ -768,7 +768,7 @@ createHttp({
 - **Q5 scope 类型化**：✅ `ResourceScope` 松散 Record（不进 Resource 泛型——类型噪音大于收益；branded name 已保失效安全，附录 A#9 的"scope 非框架轴"维持）。
 - **Q6 表单映射**：✅ §5.4（onSubmitAsync 返回制；onSettled；重播；v2 监测）。
 - **Q7 FrameSource**：✅ AsyncIterable + closeReason 终态分诊 + AbortError 区分（§2.3）。
-- **Q8 registry 对齐**：块依赖 `@fleetly/fleet-ui-core` 的 semver range 写进 registry item 的 dependencies（shadcn CLI 原生支持 npm range）。
+- **Q8 registry 对齐**：块依赖 `@fleetly/fleet-ui-kit` 的 semver range 写进 registry item 的 dependencies（shadcn CLI 原生支持 npm range）。
 - **Q9 messages 通道**：MessagesProvider（context）+ 块级 props 覆盖（props > context > 内置英文缺省）——形状简单，实现期定稿即可，不再是阻塞项。
 - **Q10 mock 能力边界**：mockResource 需支持——延迟/失败注入（测试三态与闭环）、keyset/offset 双方言模拟（demo）、命令结果分支注入（rejected/conflict/ok+reveal）。实现期定稿验收。
 
