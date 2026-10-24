@@ -18,7 +18,7 @@ export const Route = createFileRoute("/widgets/keyset")({
 const col = legacyCreateColumnHelper<Widget>();
 
 function WidgetsKeysetPage() {
-  const list = useCollection(widgetsKeyset, { from: Route.fullPath, search: widgetsKeysetSearch });
+  const list = useCollection(widgetsKeyset, { from: Route.id, search: widgetsKeysetSearch });
 
   const columns = [
     col.accessor("name", {

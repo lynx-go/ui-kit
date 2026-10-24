@@ -240,7 +240,11 @@ export function collectionQuerySchema(spec: QuerySchemaSpec = {}): QuerySearchSc
     patch(part): FlatPatch {
       const out: FlatPatch = {};
       if ("predicate" in part) {
-        Object.assign(out, encodePredicate(part.predicate ?? undefined));
+        // 清除时必须显式 q/filter = undefined：函数式 search 是 {...prev, ...patch}
+        // 展开，缺席的键会让旧值存活（Clear 后 URL 残留 q——fleetly 试点实咬）。
+        const flat = encodePredicate(part.predicate ?? undefined);
+        out.q = flat.q;
+        out.filter = flat.filter;
         out.cursor = undefined; // 换谓词回第一页
         out.page = undefined;
       }

@@ -40,7 +40,7 @@ export const Route = createFileRoute("/events")({
  * - live 帧回写 backlog 存储，重锚才是推进后的锚（见 lib/streams）。
  */
 function EventsPage() {
-  const list = useCollection(eventsResource, { from: Route.fullPath, search: eventsSearch });
+  const list = useCollection(eventsResource, { from: Route.id, search: eventsSearch });
   const queryClient = useQueryClient();
   const [autoResync, setAutoResync] = usePreference("events.autoResync", false);
 

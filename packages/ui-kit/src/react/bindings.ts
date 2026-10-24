@@ -52,7 +52,7 @@ export interface CollectionHandle<T> {
 const EMPTY_ROWS: ReadonlyArray<never> = [];
 
 export interface UseCollectionOptions {
-  /** 当前路由 fullPath（search 读写都锚定它） */
+  /** 调用方路由 id（Route.id——search 解码锚定活跃 match；pathless 布局下与 fullPath 不同形） */
   from: string;
   /** collectionQuerySchema 的返回值（与路由 validateSearch 共用同一实例） */
   search: QuerySearchSchema;
@@ -70,12 +70,19 @@ export function useCollection<T, ID, C extends CommandsRecord<ID>, S extends Sub
   resource: Resource<T, ID, C, S>,
   options: UseCollectionOptions,
 ): CollectionHandle<T> {
-  // from 是调用方路由的 fullPath（string）；路由注册类型在消费方，库内桥接为泛型注册
+  // from 是调用方路由的 id（useSearch 按路由 id 找活跃 match；pathless
+  // 布局下 Route.fullPath 与 id 不同形——fleetly 试点实咬，契约 = Route.id）。
   const rawSearch = useSearch({ from: options.from as never, strict: false }) as unknown as Record<
     string,
     unknown
   >;
-  const navigate = useNavigate({ from: options.from as never }) as unknown as (opts: {
+  // navigate 不带 from：TanStack Router 的 navigate({to:"."}) 把 from 当路径
+  // 模板解析（pathless 段不在路径里），而 useSearch 的 from 是路由 id——两个
+  // hook 的 from 语义不同。demo 顶层路由 id==path 掩盖了差异；嵌套/带参/
+  // pathless 路由下带 from 的 "." 解析会产出 "_shell/..." 假路径。不带 from
+  // 时 "." 对当前 match 的真实路径解析，全形态正确（写入契约 §2.1.1 不变：
+  // setter 只在事件期调用，不在渲染期）。
+  const navigate = useNavigate() as unknown as (opts: {
     to: string;
     search: (prev: Record<string, unknown>) => Record<string, unknown>;
     replace?: boolean;

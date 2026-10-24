@@ -17,6 +17,10 @@ export type ResourceScope = Readonly<Record<string, string | undefined>>;
 
 export interface CommandDescriptor<Input, Payload, ID = never> {
   run(input: Input, ctx: ResourceScope): Promise<CommandResult<Payload>>;
+  /** ID 类型线程锚：CommandsRecord 依资源 id 类型定位（optional 永不出现，
+   *  运行时无形状——发布 .ts 源码时消费方 noUnusedLocals 会穿透检查 kit，
+   *  未使用的类型参数必须锚定）。 */
+  readonly __id?: ID;
   /** 跨资源失效声明（纯数据）；默认与命令执行的 ctx scope 相交 */
   invalidates?: ReadonlyArray<QuerySelector>;
   /** 结果覆写钩子：命令作者裁决协议层状态的领域语义（delete 已删 → 幂等 ok 等） */

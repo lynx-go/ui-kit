@@ -19,7 +19,7 @@ export const Route = createFileRoute("/owners")({
 const col = legacyCreateColumnHelper<Widget>();
 
 function OwnersPage() {
-  const list = useCollection(widgetsClient, { from: Route.fullPath, search: ownersSearch });
+  const list = useCollection(widgetsClient, { from: Route.id, search: ownersSearch });
 
   // 批解析绑定：外键 → 名称（react-admin ReferenceField 的对应物）
   const ownerIds = [...new Set(list.rows.map((w) => w.owner))];

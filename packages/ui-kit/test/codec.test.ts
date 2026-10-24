@@ -83,6 +83,19 @@ describe("collectionQuerySchema patch（写入契约：重置语义）", () => {
     expect(patch.page).toBeUndefined();
   });
 
+  it("清除谓词时 q/filter 必须显式 undefined（函数式 search 展开会抹值，缺席则旧值存活）", () => {
+    const patch = schema.patch({ predicate: null });
+    expect("q" in patch).toBe(true);
+    expect(patch.q).toBeUndefined();
+    expect("filter" in patch).toBe(true);
+    expect(patch.filter).toBeUndefined();
+    // 展开语义：旧 q 被覆盖为 undefined（TanStack Router 序列化时丢弃）
+    const next = { q: "web-1", filter: ["status:eq:running"], page: 3, ...patch };
+    expect(next.q).toBeUndefined();
+    expect(next.filter).toBeUndefined();
+    expect(next.page).toBeUndefined();
+  });
+
   it("排序补丁清游标与页码（keyset 游标与方向耦合）", () => {
     const patch = schema.patch({ order: [{ field: "name", dir: "asc" }] });
     expect(patch.sort).toEqual(["name:asc"]);

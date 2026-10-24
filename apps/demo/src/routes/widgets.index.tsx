@@ -79,7 +79,7 @@ function NewWidgetDialog({ open, onClose }: { open: boolean; onClose: () => void
 }
 
 function WidgetsPage() {
-  const list = useCollection(widgetsClient, { from: Route.fullPath, search: widgetsSearch });
+  const list = useCollection(widgetsClient, { from: Route.id, search: widgetsSearch });
   const [creating, setCreating] = useState(false);
 
   // 导出 CSV 配方（§3 派生表）：list.rows + 消费方 unparse 纯函数——导的是当前窗口

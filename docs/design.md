@@ -727,6 +727,36 @@ createHttp({
 
 **执行方式**：每批 = 子代理实现 + 质量门 + 行为等价验收。
 
+### 12.1 fleetly 试点切片：实现期裁决（2026-10-24，垂直切片 = apps 列表页）
+
+按上节 fleetly 路线 1–4 步做的可验收切片（console 仓内），裁决先于实现记录如下：
+
+1. **分发 = tarball vendored**：@fleetly/fleet-ui-kit 未发布，试点经 `pnpm pack` 产 tarball 落消费方仓内 `console/vendor/`，`file:` 协议安装。否决 link/相对路径目录依赖——fleetly 的 `console:verify` 零漂移门禁在 CI 跑 install+build+test，相对路径在无 fleet-ui checkout 的环境必炸；tarball 进仓与该仓 dist 提交文化一致。代价：版本升级 = 重新 pack+commit 双仓手工同步（devtool 痛点 #1）。
+2. **int64 = "string"**：fleetly 生成链（protojson→swagger→openapi-typescript）已把 int64/uint64 钉死为 string，§5.2 双策略取 string 侧，无新决策空间。
+3. **URL 兼容 = 纯增量**：fleetly console 列表页现状**零 URL 参数**（过滤/分页全在 useState）——`q/page/size/sort` 是新键，无存量参数需要兼容解码或 redirect；§2.1.1 键名定案与存量 URL 的边界在本仓 = 空集。既有 `?tab=` 等参数不受影响。
+4. **token 方言 = 类级重写（拷贝适配）**：registry 块说 demo 的自研 token 方言（`text-muted/bg-panel/border-line/text-fg`…），消费方是 shadcn 全量 token。Tailwind v4 里 `--color-muted` 已被消费方 `bg-muted` 占用——**token 覆盖不可行，只能类名重写**（映射：`text-muted→text-muted-foreground`、`bg-panel→bg-card`、`bg-panel-2→bg-muted/50`、`border-line→border-border`、`divide-line→divide-border`、`text-fg→text-foreground`、`text-err→text-[var(--status-danger)]`）。这是拷贝制的机械适配步骤，映射表是 devtool 的第一个确定性需求。
+5. **基元方言缺口本地补**：块基于 demo 基元（Base UI 方言）；消费方 Radix 方言下 Button/Input/Card/Skeleton 名字兼容可直接用，唯一 compound 不匹配是 Select（demo=原生 select 包装、console=Radix compound）——在消费方 `components/fleet/ui/` 落一个原生 select 桥供块 import，不改块源。
+6. **四态文案自持**：块内 ErrorState 是 kind 分支文案（诚实、分状态），消费方另有 describeError 单源契约——拷贝制下消费方拥有副本可自持，试点保持块原样；四态节点的 override 槽（自定义 error/empty 节点）列为块 API 后续议题。
+7. **消费方守卫面天然不咬**：console 的反模式守卫（console.ui.antipattern.test.ts）扫描根为 domain/lib/features/hooks/routes/pages——`components/fleet/**` 与 `components/ui/**` 同为 vendored 层在面外；rule ⑦ 的 `@/components/ui` 精确匹配不咬 `@/components/ui/button` 子路径。无豁免改动。
+
+**痛点清单（devtool 需求雏形，实施后终版）**：
+① tarball 双仓手工同步：改 kit → pack → 拷 vendor → 删 store 目录重装 → 清 vite 缓存重启 dev（回路约 1 分钟，vite 不感知 file: tarball 内容变更——须 rm node_modules/.vite）；
+② token 方言类名映射表人工执行（§12.1-4，5 个块约 10 处类名）；
+③ 基元方言差异人工判别（Select compound 不匹配需本地桥；Button/Input/Card/Skeleton 名字兼容属运气）；
+④ `@/lib/utils` cn 别名 shim 需手工创建（消费方用 `cn` npm 包）；
+⑤ routeTree.gen.ts 加 validateSearch 后须重跑 `tsr generate` 才过 typecheck；
+⑥ 块从 `@tanstack/table-core` 导入 RowData——消费方只装了 react-table，需改主入口导入（registry 上游可直接修）；
+⑦ 块自带页壳（mx-auto max-w-5xl p-6）与页内 header 同消费方"壳/页头单源"架构法冲突——拷贝需结构剥离（上游改进项：块 shell-agnostic 化）；
+⑧ kit 发布 .ts 源码 = 消费方 noUnusedLocals/noUnusedParameters 严格度穿透检查 kit 源（见下 kit 修复 #1）。
+
+**试点挖出的 kit 真 bug（当批已修 + 补测）**：
+1. `CommandDescriptor<Input, Payload, ID>` 的 ID 类型参数体内未使用——消费方严格 flags 下 TS6133 直接阻断安装（demo 自身 tsconfig 较松未暴露）。修复：`__id?: ID` 类型线程锚（运行时无形状）。
+2. **`from` 契约文档错误 + navigate 语义分裂**：文档写 `Route.fullPath`，但 TanStack Router 的 `useSearch({from})` 按**路由 id** 匹配（pathless 布局 `_shell` 进 id 不进 path），`navigate({to:"."})` 又把 from 当**路径模板**解析——demo 顶层路由 id==path 掩盖了两者分裂；fleetly 嵌套+带参+pathless 路由下，fullPath 让 useSearch 炸 invariant、Route.id 让 navigate 产出 `/_shell/...` 假路径。修复：契约改为 **`Route.id`**（useSearch 用），navigate 去掉 from（`.` 对当前 match 真实路径解析，全形态正确）。
+3. **`patch({predicate: null})` 清除残留**：补丁不产 `q: undefined` 键，函数式 search `{...prev, ...patch}` 展开时旧 q 存活——FilterBar Clear 后 URL 残留 `?q=`。修复：清除时显式 `q/filter = undefined` + 单测锁行为（84 单测）。
+
+**行为对照验收（console 无 e2e 基建，stub API + 浏览器实测清单，2026-10-24 全过）**：
+① 列表渲染：25 apps / 首页 20 行 / 页头描述带项目名 ✓；② 快筛 `q=web-1` 进 URL、命中 10 行（web-10..19，name/id 字段集与旧页 fieldsOf 等价）✓；③ Clear 清 q 回 25 行 ✓；④ Next → `?size=20&page=2` push、Showing 21–25、后退回第 1 页（历史=分页栈）✓；⑤ 表头排序 asc/desc 进 URL、行序正确（web-01 ↔ web-25）✓；⑥ 深链 `q+sort+page+size` 重载全还原 ✓；⑦ 过滤空态与源空态两套文案 ✓；⑧ 行点击进 app 详情、后退回列表 ✓；⑨ 错误态（分状态诚实文案 + Retry 一等按钮；stub 停机→恢复实测）✓；⑩ 视觉：token 映射后与 console 暗色主题融合（截图核验：标题/表格/徽章/等宽 id/分页条无对比度问题）。**门禁**：console 153 测试（+6 新：protojson 收敛/空 scope/Bearer 头/错误信封/编解码往返/清除补丁）、tsc、build（dist 再生成）、console:verify 零漂移口径全绿。**新增 URL 能力（行为增量，非等价破坏）**：过滤/分页/排序/页大小全部可分享、可前进后退——旧页这四者全是 useState 本地态。
+
 ---
 
 ## 13. 集中反模式清单（进 SKILL.md）
