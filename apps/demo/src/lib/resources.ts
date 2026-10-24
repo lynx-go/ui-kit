@@ -74,6 +74,32 @@ export const widgetsKeyset = defineResource({
   collection: widgetsKeysetMock.collection,
 });
 
+// ============ identity（useCan 门控演示：record Query + 纯谓词，fail-closed） ============
+
+export interface Identity {
+  id: string;
+  name: string;
+  role: "admin" | "viewer";
+}
+
+const identityMock = mockCollection<Identity>([{ id: "me", name: "Ada Lovelace", role: "admin" }], {
+  latencyMs: 120,
+});
+
+export const identityResource = defineResource({
+  name: "identity",
+  getId: (row) => row.id,
+  record: identityMock.record,
+});
+
+/** demo 数据源开关：切换当前身份角色（消费方代码，配合 record 失效） */
+export function toggleIdentityRole(): "admin" | "viewer" {
+  const current = identityMock.handle.rows()[0]!;
+  const next = current.role === "admin" ? "viewer" : "admin";
+  identityMock.handle.replaceRows([{ ...current, role: next }]);
+  return next;
+}
+
 // ============ search schema（路由与绑定共用同一实例） ============
 
 export const widgetsSearch = collectionQuerySchema({

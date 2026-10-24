@@ -6,6 +6,23 @@ test.describe("overview (custom content page)", () => {
     await expect(page.getByRole("heading", { name: "Overview" })).toBeVisible();
     await expect(page.getByText("Running", { exact: true })).toBeVisible();
   });
+
+  test("useCan gate is fail-closed and follows the identity role", async ({ page }) => {
+    await page.goto("/");
+
+    // admin 身份：门开（pending 先行——fail-closed，占位可渲染但按钮不出）
+    const gate = page.getByTestId("identity-gate");
+    await expect(gate.getByRole("button", { name: "Delete all widgets" })).toBeVisible();
+
+    // 切到 viewer：失效 record → 门关（denied 是渲染态，不是错误）
+    await gate.getByRole("button", { name: "Switch to viewer" }).click();
+    await expect(gate.getByTestId("gate-denied")).toBeVisible();
+    await expect(gate.getByRole("button", { name: "Delete all widgets" })).toHaveCount(0);
+
+    // 切回 admin：门重新打开
+    await gate.getByRole("button", { name: "Switch to admin" }).click();
+    await expect(gate.getByRole("button", { name: "Delete all widgets" })).toBeVisible();
+  });
 });
 
 test.describe("widgets list (client-evaluated dialect, URL is the truth)", () => {

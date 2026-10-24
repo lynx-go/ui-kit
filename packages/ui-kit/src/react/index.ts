@@ -15,6 +15,18 @@ export {
   useCommandForm,
 } from "./command";
 export {
+  type CanHandle,
+  type IdentityLike,
+  permissionState,
+  type PermissionState,
+  useCan,
+} from "./permissions";
+export {
+  decodePreference,
+  type PreferenceCodec,
+  usePreference,
+} from "./preferences";
+export {
   batchQueryOptions,
   collectionQueryOptions,
   type QueryEngineOptions,
