@@ -761,6 +761,20 @@ createHttp({
 
 **分发形态演进（2026-10-24，npm 首发后）**：裁决 1 的 vendored tarball 是未发布期的过渡形态——@lynx-go/ui-kit 0.1.1 公开发布后，console 已切 registry 依赖 `^0.1.1`（vendor/ 目录删除，CI install 不再依赖双仓同步，痛点 #1 随之消解）。发版纪律成文：**必须 `pnpm publish`**——`npm publish` 不解析 pnpm `catalog:` 协议，首发 0.1.0 依赖泄漏 `"effect": "catalog:default"` 不可安装（已 deprecate，净房 install 实证 EUNSUPPORTEDPROTOCOL）；publint + 净房 `npm install` 冒烟是发版门。可见性裁决：组织无付费计划，`publishConfig.access: public`（源码分发模型下 npm 包即源码公开，接受）。
 
+### 12.2 torchwood 批 A：路由换轨 + keyset 切片——实现期裁决（2026-10-24，取证先行）
+
+torchwood console 取证要点（裁决依据）：react-router-dom **v7** 集中式路由表（App.tsx 60+ 路由，React.lazy + RequireAuth/RequireRole 组件守卫 + RouteErrorBoundary key=pathname 技巧）；axios 管线（HttpOnly cookie 会话 + 401 单飞刷新 + `expired=1` 断路器 + **X-Torchwood-Project header 全局注入**（localStorage 单源）+ 全局错误 toast）；keyset 契约 = `Page<T>{rows, nextPageToken}` 空页停 token、换向回第一页（游标与方向耦合）、gateway 枚举名 `SORT_ORDER_ASC/DESC`、repeated 参数需 `key=a&key=b` 串行化；**token 栈在 useState（useServerPaging）——游标不进 URL，深链中栈不可用**（§2.1.1 已成文的边界即此现状）；Tailwind v3 + shadcn classic token（`text-muted-foreground/bg-card/border-border` 全有——token 映射对 torchwood 近恒等）；测试 74 条（vitest + testing-library，10 文件用 MemoryRouter）；无 e2e；dist 不进 git（仅 .gitkeep）。
+
+1. **路由迁移 = 一次性全量换轨 + 过渡兼容层**：TanStack Router **code-based 集中路由表**（src/router.ts 镜像现 App.tsx 表——路由路径形态零变化、lazy 经 `route.lazy()`），不做 file-based 改造（60+ 页文件搬家是纯搬运，收益归后续批）。页面层经 `src/router/compat.tsx` 过渡兼容层（Link/NavLink/useNavigate/useParams/useSearchParams/Outlet/Navigate/useLocation 的 TanStack 薄映射），页面文件只改 import 行（react-router-dom → @/router/compat）——机械可审、低风险；**react-router-dom 依赖移除 + eslint no-restricted-imports 禁回**（守卫执法）。后续批次随各页 fleet-ui 化逐页退 compat（页内改 Route.useParams/useSearch 原生形态），compat 层清空即退役——过渡层有始有终，不是永久拐杖。
+2. **守卫与错误边界映射**：RequireAuth/RequireRole 组件包裹 → TanStack `beforeLoad`（auth context + role 判定 + `throw redirect`）；RouteErrorBoundary 的 key=pathname 重置技巧 → TanStack 原生每路由 `errorComponent`（消费方 ErrorBoundary 组件保留，壳换挂法）。G8-1 路由级权限语义不变。
+3. **数据层切片（audit-logs 先行）**：适配器**复用 axios 管线**（拦截器栈是 torchwood 资产：cookie 刷新/断路器/scope header/toast——kit createHttp 的 onUnauthorized 闭环暂不接入，**接入是后续收敛批**，记挂账）；collection 适配 = `CollectionQuery.window.cursor → page_token`、`order.dir → SORT_ORDER_*`、`predicate → 白名单过滤参数`（action/status/actor_id/resource_id/created_after/created_before/include_platform/all_projects——§2.1.1 `filter=field:op:value` 与存量无冲突：该页现状过滤全在 useState 不进 URL）；`Page<T> → Segment{rows, nextCursor}`（next_page_token 缺席 = 到底；meta.total_count 存在但 keyset 语义不显示——leaderboards 型 total 并存的另一个实证，KeysetPagination 不吃它）。**游标进 URL 是新能力**（现状 token 栈组件态）。
+4. **int64/version = number**（§5.2 number 侧——version 比较是 torchwood 动机，本切片无 version 面）。
+5. **分发 = npm ^0.1.1**（已发布；pnpm 11.20 同样有 minimumReleaseAge 冷却，需 workspace exclude）。
+6. **作用域不接 scoped()**：X-Torchwood-Project header 是 torchwood 作用域单源（axios 拦截器全局注入 + useProjectScopeSync 双通道防乒乓），试点切片保持 header 单源——kit `scoped()` 的 ctx 注入随表单族批次评估（双头作用域是乒乓源）。
+7. **切片页面 = audit-logs**（useServerPaging 注释自指的"先例页"：七过滤 + 换向 + 页大小 + keyset）：fleet 块拷贝（ListPage/DataTable/KeysetPagination/states——token 近恒等映射，Select 复用 fleetly 同款原生 select 桥）；过滤 UI 保留页面自有形态（datetime-local/复选不在 FilterBar 面），谓词经 `filter=` 进 URL。
+
+**批 A 不做（挂账后续批）**：表单族/OCC（B 批）、ListenPanel → useSubscription（C 批）、analytics → MetricChart（D 批）、kit http 管线收敛、file-based 路由改造、compat 全退。
+
 ---
 
 ## 13. 集中反模式清单（进 SKILL.md）
