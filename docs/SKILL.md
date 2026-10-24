@@ -46,8 +46,51 @@ function WidgetsPage() {
 
 ## 详情 / 自定义内容页
 
-- 详情：`useRecord(resource, { id })` + `Page` 外壳（宽三档 wide|narrow|flow）。
+- 详情配方：`useRecord(resource, { id })` + `<DetailPage record title meta actions tabs activeTab onTabChange>`。
+  **tab 进 search、切 tab = replace**（页面形态非分页，不吃历史栈）——页面从 `useSearch` 读、
+  经 `navigate({ to: ".", search: prev => ({...prev, tab}), replace: true })` 写回（函数式 search）。
+  demo：`apps/demo/src/routes/widgets.$id.tsx`。
+- 内容槽组合：字段网格是页面词汇（自己写 dl/grid）；分区用 `<SectionCard title>`（设置页 = SectionCard × n）；
+  结构化 spec 查看/编辑用 `<JsonField value onChange>`——**坏 JSON 不回写**（Apply 只在 parse 成功时 onChange）；
+  字段级旧/新差异用 `<DiffView entries=[{path, old?, new?}]>`（对齐行 + 行内 token 高亮；无 diff 库）。
+- clone 配方：`useCommandForm(create, { defaultValues: 从 record 投影 })` + 提交后 `navigate` 到新记录——demo 详情页 Clone 按钮。
 - **自定义内容页没有特殊机制**：普通文件路由 + `Page` + 任意组合（无 CustomPage——框架不拥有页面类型）。
+
+## 仪表盘（统计 + 图表）
+
+- 统计卡：`<StatCard label value tone? hint?>`（纯文字三段；pending 传 "…"）。
+- 时序图：`<MetricChart series formatValue? maxSeries? serverCap?>`——**时序是 collection**
+  （时间窗谓词 `t >= from`，行分组到序列是页面投影）：
+
+```tsx
+const query = useQuery(collectionQueryOptions(metricsResource, {
+  predicate: { all: [{ field: "metric", op: "eq", value: "cpu" }, { field: "t", op: "gte", value: from }] },
+  order: [{ field: "t", dir: "asc" }], window: { size: 2000 },
+}));
+const series = keys.map(k => ({ key: k, label: k, points: rows.filter(r => r.series === k).map(r => ({ t: r.t, v: r.value })) }));
+<MetricChart series={series} formatValue={formatPercent} maxSeries={10} serverCap={{ shown: 12, total: 34 }} />
+```
+
+- 序列治理四件套块内已带：活跃窗排序 / 渲染上限 + "+N more" / 服务端截断披露 / protojson 零值=0
+  （`v` 缺席按 0 解释；`missingValue: "gap"` 显式断线）。`t` 一律 ms epoch（数值时间轴），
+  刻度格式化经 `formatTick`；单位词表（bytes/percent）经 `formatValue` 注入——块不认单位。
+- 图表依赖 recharts（registry.json dependencies 声明，拷贝制下落消费方）；需要 vendored `components/ui/chart.tsx`。
+
+## 向导（多步 + 等待）
+
+- `<Stepper steps current onStepClick?>`（受控）+ 每步 `<Form>`；步进由事件驱动（提交/终态帧），Stepper 不自决。
+- **fresh-read 步间衔接**：步 1 创建后 `queryClient.fetchQuery(collectionQueryOptions(res, q, { staleTime: 0 }))`
+  绕过 stale 缓存——步 2 的 ReferenceSelect 立刻看到新记录（§3 多请求编排）。
+- 等待步骤：wait 流（`useSubscription` + `onFrame` 看状态，终态帧前进；帧优先于轮询）。
+  demo：`apps/demo/src/routes/quickstart.tsx`（ensure 幂等 + wait 流 3.2s 到 healthy）。
+
+## 配方速记
+
+- **导出 CSV**：`list.rows` + 页面 unparse 纯函数（`toCsv(headers, rows)` RFC4180 最小实现 +
+  `downloadCsv` 触发下载，demo `lib/csv.ts`）——导的是当前窗口（URL 即真相）。
+- **实时失效**：`useInvalidateOnFrame(sub, [{ resource }], { filter?, throttleMs? })`——事件帧到达
+  自动 invalidate 查询（selector 语义同 useCommand 的 invalidates；热流给 throttleMs）。
+- **轮询兜底**：`refetchInterval`（stalled 后切轮询是你的组合）。
 
 ## 外键
 
@@ -79,6 +122,9 @@ const sub = useSubscription(eventsStream, { cursor: anchor ?? undefined, getCurs
 - **gapped 配方**：黄条出现 → 重跑 backlog（`queryClient.fetchQuery` fresh-read）→ `sub.resync(newAnchor)`（resyncs++ 供黄条）。
 - 块内部经 `sub.subscribeFrames/getFrames` 订帧存储——页面级帧到达不重渲染。
 - descriptor 形态（`Resource.subscriptions` 条目）**必须声明 `policy`**（buffer/retry 声明在流侧，兼作运行时判别）。
+- 阶段时间线：`<StageTimeline sub stages onStage>`——页面声明阶段目录（次序+文案），帧经
+  `onStage(frame) → {key, status, at?} | undefined` 投影（undefined = 与时间线无关）。
+- 帧失效查询：见"配方速记"的 `useInvalidateOnFrame`。
 
 ## 反模式（必读）
 
@@ -94,6 +140,9 @@ const sub = useSubscription(eventsStream, { cursor: anchor ?? undefined, getCurs
 10. 禁用换 cursor prop 的方式重锚——gapped 后用 `sub.resync(newAnchor)`（原地重锚 + resyncs 计数）；cursor prop 变化 = 整个订阅重建。
 11. 禁在页面层逐帧消费 `sub.frames` 做渲染——页级只读状态；帧渲染交给 LogViewer/EventFeed（它们订帧存储）。
 12. 禁给 transport 的迭代器写"完成即收流"——完成是终态判据（closeReason），想要重连语义应当**抛错**（§5.3 分诊矩阵）。
+13. 禁详情 tab 用 useState——tab 进 search（切 tab = replace，深链/分享即所得）。
+14. 禁给 MetricChart 传预格式化时间字符串——`t` 一律 ms epoch，刻度格式化经 `formatTick`（torchwood 的类目桶是页面对桶 epoch 的格式化选择）。
+15. 禁 JsonField 外部再包一层校验——Apply 只在 parse 成功时 onChange（坏 JSON 不回写是块契约）。
 
 ## 幻觉诱饵（训练数据 → 正确姿势）
 

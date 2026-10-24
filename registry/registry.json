@@ -17,6 +17,55 @@
       "registryDependencies": []
     },
     {
+      "name": "values-diff-view",
+      "type": "registry:block",
+      "title": "diff-view",
+      "files": [
+        {
+          "path": "registry/values/diff-view.tsx",
+          "target": "components/fleet/values/diff-view.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
+      "registryDependencies": []
+    },
+    {
+      "name": "values-json-field",
+      "type": "registry:block",
+      "title": "json-field",
+      "files": [
+        {
+          "path": "registry/values/json-field.tsx",
+          "target": "components/fleet/values/json-field.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
+      "registryDependencies": []
+    },
+    {
+      "name": "values-metric-chart",
+      "type": "registry:block",
+      "title": "metric-chart",
+      "files": [
+        {
+          "path": "registry/values/metric-chart.tsx",
+          "target": "components/fleet/values/metric-chart.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1",
+        "recharts@catalog:default"
+      ],
+      "registryDependencies": []
+    },
+    {
       "name": "values-relative-time",
       "type": "registry:block",
       "title": "relative-time",
@@ -49,6 +98,22 @@
       "registryDependencies": []
     },
     {
+      "name": "values-stat-card",
+      "type": "registry:block",
+      "title": "stat-card",
+      "files": [
+        {
+          "path": "registry/values/stat-card.tsx",
+          "target": "components/fleet/values/stat-card.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
+      "registryDependencies": []
+    },
+    {
       "name": "values-states",
       "type": "registry:block",
       "title": "states",
@@ -60,7 +125,8 @@
         }
       ],
       "dependencies": [
-        "@fleetly/fleet-ui-kit@^0.1"
+        "@fleetly/fleet-ui-kit@^0.1",
+        "@fleetly/fleet-ui-kit@workspace:*"
       ],
       "registryDependencies": []
     },
@@ -92,7 +158,25 @@
         }
       ],
       "dependencies": [
-        "@fleetly/fleet-ui-kit@^0.1"
+        "@fleetly/fleet-ui-kit@^0.1",
+        "@fleetly/fleet-ui-kit@workspace:*"
+      ],
+      "registryDependencies": []
+    },
+    {
+      "name": "query-detail-page",
+      "type": "registry:block",
+      "title": "detail-page",
+      "files": [
+        {
+          "path": "registry/query/detail-page.tsx",
+          "target": "components/fleet/query/detail-page.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1",
+        "@fleetly/fleet-ui-kit@workspace:*"
       ],
       "registryDependencies": []
     },
@@ -108,7 +192,8 @@
         }
       ],
       "dependencies": [
-        "@fleetly/fleet-ui-kit@^0.1"
+        "@fleetly/fleet-ui-kit@^0.1",
+        "@fleetly/fleet-ui-kit@workspace:*"
       ],
       "registryDependencies": []
     },
@@ -124,7 +209,8 @@
         }
       ],
       "dependencies": [
-        "@fleetly/fleet-ui-kit@^0.1"
+        "@fleetly/fleet-ui-kit@^0.1",
+        "@fleetly/fleet-ui-kit@workspace:*"
       ],
       "registryDependencies": []
     },
@@ -140,7 +226,8 @@
         }
       ],
       "dependencies": [
-        "@fleetly/fleet-ui-kit@^0.1"
+        "@fleetly/fleet-ui-kit@^0.1",
+        "@fleetly/fleet-ui-kit@workspace:*"
       ],
       "registryDependencies": []
     },
@@ -156,7 +243,8 @@
         }
       ],
       "dependencies": [
-        "@fleetly/fleet-ui-kit@^0.1"
+        "@fleetly/fleet-ui-kit@^0.1",
+        "@fleetly/fleet-ui-kit@workspace:*"
       ],
       "registryDependencies": []
     },
@@ -172,7 +260,8 @@
         }
       ],
       "dependencies": [
-        "@fleetly/fleet-ui-kit@^0.1"
+        "@fleetly/fleet-ui-kit@^0.1",
+        "@fleetly/fleet-ui-kit@workspace:*"
       ],
       "registryDependencies": []
     },
@@ -204,7 +293,8 @@
         }
       ],
       "dependencies": [
-        "@fleetly/fleet-ui-kit@^0.1"
+        "@fleetly/fleet-ui-kit@^0.1",
+        "@fleetly/fleet-ui-kit@workspace:*"
       ],
       "registryDependencies": []
     },
@@ -236,7 +326,8 @@
         }
       ],
       "dependencies": [
-        "@fleetly/fleet-ui-kit@^0.1"
+        "@fleetly/fleet-ui-kit@^0.1",
+        "@fleetly/fleet-ui-kit@workspace:*"
       ],
       "registryDependencies": []
     },
@@ -252,7 +343,8 @@
         }
       ],
       "dependencies": [
-        "@fleetly/fleet-ui-kit@^0.1"
+        "@fleetly/fleet-ui-kit@^0.1",
+        "@fleetly/fleet-ui-kit@workspace:*"
       ],
       "registryDependencies": []
     },
@@ -268,7 +360,8 @@
         }
       ],
       "dependencies": [
-        "@fleetly/fleet-ui-kit@^0.1"
+        "@fleetly/fleet-ui-kit@^0.1",
+        "@fleetly/fleet-ui-kit@workspace:*"
       ],
       "registryDependencies": []
     },
@@ -284,7 +377,8 @@
         }
       ],
       "dependencies": [
-        "@fleetly/fleet-ui-kit@^0.1"
+        "@fleetly/fleet-ui-kit@^0.1",
+        "@fleetly/fleet-ui-kit@workspace:*"
       ],
       "registryDependencies": []
     },
@@ -312,6 +406,38 @@
         {
           "path": "registry/shell/page.tsx",
           "target": "components/fleet/shell/page.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
+      "registryDependencies": []
+    },
+    {
+      "name": "shell-section-card",
+      "type": "registry:block",
+      "title": "section-card",
+      "files": [
+        {
+          "path": "registry/shell/section-card.tsx",
+          "target": "components/fleet/shell/section-card.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
+      "registryDependencies": []
+    },
+    {
+      "name": "shell-stepper",
+      "type": "registry:block",
+      "title": "stepper",
+      "files": [
+        {
+          "path": "registry/shell/stepper.tsx",
+          "target": "components/fleet/shell/stepper.tsx",
           "type": "registry:block"
         }
       ],

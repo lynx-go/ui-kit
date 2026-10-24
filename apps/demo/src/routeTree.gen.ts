@@ -13,7 +13,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as LogsRouteImport } from './routes/logs'
 import { Route as OwnersRouteImport } from './routes/owners'
+import { Route as QuickstartRouteImport } from './routes/quickstart'
 import { Route as WidgetsIndexRouteImport } from './routes/widgets.index'
+import { Route as WidgetsIdRouteImport } from './routes/widgets.$id'
 import { Route as WidgetsKeysetRouteImport } from './routes/widgets.keyset'
 
 const IndexRoute = IndexRouteImport.update({
@@ -36,9 +38,19 @@ const OwnersRoute = OwnersRouteImport.update({
   path: '/owners',
   getParentRoute: () => rootRouteImport,
 } as any)
+const QuickstartRoute = QuickstartRouteImport.update({
+  id: '/quickstart',
+  path: '/quickstart',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WidgetsIndexRoute = WidgetsIndexRouteImport.update({
   id: '/widgets/',
   path: '/widgets/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WidgetsIdRoute = WidgetsIdRouteImport.update({
+  id: '/widgets/$id',
+  path: '/widgets/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WidgetsKeysetRoute = WidgetsKeysetRouteImport.update({
@@ -52,6 +64,8 @@ export interface FileRoutesByFullPath {
   '/events': typeof EventsRoute
   '/logs': typeof LogsRoute
   '/owners': typeof OwnersRoute
+  '/quickstart': typeof QuickstartRoute
+  '/widgets/$id': typeof WidgetsIdRoute
   '/widgets/keyset': typeof WidgetsKeysetRoute
   '/widgets/': typeof WidgetsIndexRoute
 }
@@ -60,6 +74,8 @@ export interface FileRoutesByTo {
   '/events': typeof EventsRoute
   '/logs': typeof LogsRoute
   '/owners': typeof OwnersRoute
+  '/quickstart': typeof QuickstartRoute
+  '/widgets/$id': typeof WidgetsIdRoute
   '/widgets/keyset': typeof WidgetsKeysetRoute
   '/widgets': typeof WidgetsIndexRoute
 }
@@ -69,21 +85,40 @@ export interface FileRoutesById {
   '/events': typeof EventsRoute
   '/logs': typeof LogsRoute
   '/owners': typeof OwnersRoute
+  '/quickstart': typeof QuickstartRoute
+  '/widgets/$id': typeof WidgetsIdRoute
   '/widgets/keyset': typeof WidgetsKeysetRoute
   '/widgets/': typeof WidgetsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/events' | '/logs' | '/owners' | '/widgets/keyset' | '/widgets/'
+    | '/'
+    | '/events'
+    | '/logs'
+    | '/owners'
+    | '/quickstart'
+    | '/widgets/$id'
+    | '/widgets/keyset'
+    | '/widgets/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/events' | '/logs' | '/owners' | '/widgets/keyset' | '/widgets'
+  to:
+    | '/'
+    | '/events'
+    | '/logs'
+    | '/owners'
+    | '/quickstart'
+    | '/widgets/$id'
+    | '/widgets/keyset'
+    | '/widgets'
   id:
     | '__root__'
     | '/'
     | '/events'
     | '/logs'
     | '/owners'
+    | '/quickstart'
+    | '/widgets/$id'
     | '/widgets/keyset'
     | '/widgets/'
   fileRoutesById: FileRoutesById
@@ -93,6 +128,8 @@ export interface RootRouteChildren {
   EventsRoute: typeof EventsRoute
   LogsRoute: typeof LogsRoute
   OwnersRoute: typeof OwnersRoute
+  QuickstartRoute: typeof QuickstartRoute
+  WidgetsIdRoute: typeof WidgetsIdRoute
   WidgetsKeysetRoute: typeof WidgetsKeysetRoute
   WidgetsIndexRoute: typeof WidgetsIndexRoute
 }
@@ -127,11 +164,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OwnersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/quickstart': {
+      id: '/quickstart'
+      path: '/quickstart'
+      fullPath: '/quickstart'
+      preLoaderRoute: typeof QuickstartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/widgets/': {
       id: '/widgets/'
       path: '/widgets'
       fullPath: '/widgets/'
       preLoaderRoute: typeof WidgetsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/widgets/$id': {
+      id: '/widgets/$id'
+      path: '/widgets/$id'
+      fullPath: '/widgets/$id'
+      preLoaderRoute: typeof WidgetsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/widgets/keyset': {
@@ -149,6 +200,8 @@ const rootRouteChildren: RootRouteChildren = {
   EventsRoute: EventsRoute,
   LogsRoute: LogsRoute,
   OwnersRoute: OwnersRoute,
+  QuickstartRoute: QuickstartRoute,
+  WidgetsIdRoute: WidgetsIdRoute,
   WidgetsKeysetRoute: WidgetsKeysetRoute,
   WidgetsIndexRoute: WidgetsIndexRoute,
 }

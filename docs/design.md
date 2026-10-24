@@ -538,11 +538,23 @@ exec 终端（双向有状态会话，Subscription 单向；受理/观测仍可�
 | **query/**        | useCollection/useRecord/useBatch 输出 | DataTable（TanStack Table v9 `useTable+tableFeatures`；行选择/半选/行展开/**四态**）、Pagination（total 或客户端求值）、KeysetPagination（无 total：显示 x–y、空页仍渲染）、FilterBar、SelectionBar、ListPage、DetailPage（hero + URL tabs）、ReferenceSelect（搜索式选择另一资源记录 + 引用列展示，消费 useBatch/useCollection） |
 | **command/**      | useCommand/useCommandForm 输出        | Form 内芯（字段族 × 错误盒 × 提交生命周期；宿主无关——Dialog/Sheet/整页三形态由外壳决定；submit 由内芯渲染，宿主 footer 经 ref 连线）、RowActions、DeleteButton/BulkDelete、ConfirmDialog 接线、行内表单                                                                                                                           |
 | **subscription/** | useSubscription 输出                  | LogViewer（虚拟滚动+智能跟随+jump-to-live+下载/清空）、EventFeed（倒序+gapped 黄条[resyncs 信号]+暂停指示灯）、StageTimeline——**标注为参照实现**                                                                                                                                                                                  |
-| **shell/**        | 无（布局/应用骨架）                   | AppShell（Sidebar navSections + Topbar + ⌘K 位）、**Page**（title/breadcrumb/actions/宽度三档 wide\|narrow\|flow）、ScopeSwitcher（含陈旧 id 校正）、Stepper、RouteErrorBoundary                                                                                                                                                  |
+| **shell/**        | 无（布局/应用骨架）                   | AppShell（Sidebar navSections + Topbar + ⌘K 位）、**Page**（title/breadcrumb/actions/宽度三档 wide\|narrow\|flow）、ScopeSwitcher（含陈旧 id 校正）、Stepper、SectionCard（命名政策裁决：呈现布局分区而非值 → shell 族）、RouteErrorBoundary                                                                                                                                                  |
 
 **四态**（统一术语，废弃"三态"混用）：loading / empty / error / success——前三者是渲染分支，第四者是数据。渲染归属：四态归 ListPage/页级（DataTable 只渲染 success 态的表体）。
 
 **DataTable 状态归属切分（Table v9 裁决）**：排序/过滤/窗口归 URL（CollectionQuery 的 order/predicate/window——表内**禁用**内建 sorting/filtering 分支）；行选择/行展开归表内瞬态（受控 state 或 v9 atoms 交消费方）。块基于 v9 新 API 书写（`tableFeatures` tree-shaking；实例方法在原型上——禁止解构）。
+
+#### MetricChart 实现期裁决（2026-10-24，双 console 取证后；批内第一性裁决）
+
+**选型 = recharts（vendored shadcn chart.tsx 基元 + 块直用 recharts 原语）**。取证：两 console 现行同库 recharts ^3.10.1（fleetly shadcn 封装 + torchwood 裸用）；密度上限 240 点/序列 × ≤10 序列/图（fleetly 窗宽定死 240 桶）——uPlot 的百万点性能溢价无落点，且 canvas 渲染丢 CSS 变量主题化、tooltip/图例全要自建；自绘 SVG 需重建时间轴 scale/跟随 tooltip/图例，为省一个消费者已有的依赖重造轮子。**分发影响**：registry 拷贝制下 recharts 落消费方——registry.json item `dependencies` 声明（registry-build 扫描块裸导入自动追加）+ root devDeps 供 demo；不进 @fleetly/fleet-ui-kit core，/adapters 预算门不受影响。
+
+对齐真实消费者的形态裁决（fleetly metric-chart.tsx 实证）：
+
+1. **序列身份 = 稳定 key**：`MetricSeries { key, label, points }`——key 由页面给、跨刷新稳定（fleetly `s{原始下标}` 同款；曾用 index%5 当键 >5 序列碰撞覆写的教训成文）。配色 `var(--chart-N)` 按输入序取色（序列次序稳定则配色稳定）。
+2. **动画/圆点全局关闭**（`isAnimationActive=false`、`dot=false`）：30s 轮询刷新下动画闪烁是实证问题，不是审美选择。
+3. **数值时间轴单形态**：`t` 一律 ms epoch（XAxis `type="number" scale="time"`）；torchwood 的预格式化桶 label 是页面对桶 epoch 的 `formatTick` 选择，类目轴不进块。
+4. **四件套接口化**：`maxSeries`（缺省 10）+ "+N more" 溢出披露；`activeWindowMs`（缺省 5min）活跃窗排序（末样本近窗尾者优先、峰值次之、声明序兜底——fleetly"死副本残骸不淹没活副本"的泛化）；`serverCap { shown, total }` 服务端截断披露条；点对齐统一时间轴行 + protojson 零值缺省（`v` 缺席按 `missingValue` 缺省 0 解释——proto3 零值省略是合法全零序列不是缺数据；"gap" 显式断线）。序列→行折叠是纯函数（`buildMetricRows`，可单测）。
+5. **图例带末值**（每序列最后一个非空值加粗在图例行）；量纲格式化（bytes/percent）经 `formatValue` 注入——块不认单位词表。
 
 ### 6.2 共用 / 特化判据（成文规则）
 
@@ -559,7 +571,7 @@ exec 终端（双向有状态会话，Subscription 单向；受理/观测仍可�
 
 **页面模式只存在于文档与 demo，不存在于框架类型系统**：
 - 列表页 = `ListPage[ FilterBar × DataTable × Pagination|KeysetPagination × 四态 ](list)`
-- 详情页 = `DetailPage[ hero × Tabs(URL) × DetailGrid|SectionCard ](record)`
+- 详情页 = `DetailPage[ hero × Tabs(URL) × DetailGrid|SectionCard ](record)`——**tab 写入语义（实现期裁决，2026-10-24）**：tab 是普通 search 参数（不经 collectionQuerySchema——页面形态不是集合查询）；切 tab = **replace**（页面形态变化不吃历史栈，与谓词/排序同律 §2.1.1）；缺省 tab 不写 URL（"URL + 默认值即真相"同款）；块受控（activeTab/onTabChange），navigate 归页面——块不 import 路由。
 - 新增/编辑 = `Dialog|Sheet|Page[ Form( fields × error × submit ) ](command)`
 - 向导 = `Stepper[ n × Form|等待步骤 ]`；设置页 = `SectionCard × n`
 - 仪表盘 = `StatCard × n + MetricChart × n (queries)`；工作台 = 全屏 `FilterBar × (LogViewer|EventFeed|MetricChart)`

@@ -53,6 +53,28 @@ export const widgetsClient = defineResource({
       },
       // 缺省 invalidates → 同资源全部查询失效（defineResource 注入 __resource）
     },
+    update: {
+      run: (input: {
+        id: string;
+        name: string;
+        status: Widget["status"];
+        replicas: number;
+        owner: string;
+      }) => {
+        const rows = widgetsFetchAll.rows();
+        const widget = rows.find((w) => w.id === input.id);
+        if (!widget) {
+          return Promise.resolve({
+            status: "rejected",
+            code: "E_NOT_FOUND",
+            message: "Widget no longer exists (demo)",
+          } satisfies CommandResult<Widget>);
+        }
+        const next: Widget = { ...widget, ...input, replicas: Number(input.replicas) };
+        widgetsFetchAll.replaceRows(rows.map((w) => (w.id === input.id ? next : w)));
+        return Promise.resolve({ status: "ok", payload: next } satisfies CommandResult<Widget>);
+      },
+    },
     delete: {
       run: (id: string) => {
         widgetsFetchAll.replaceRows(widgetsFetchAll.rows().filter((w) => w.id !== id));

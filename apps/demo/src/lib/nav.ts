@@ -13,6 +13,7 @@ export const nav: NavSection[] = [
       { label: "By owner (reference)", to: "/owners" },
       { label: "Events (backlog × follow)", to: "/events" },
       { label: "Logs (ndjson stream)", to: "/logs" },
+      { label: "Quickstart (wizard)", to: "/quickstart" },
     ],
   },
 ];

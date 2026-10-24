@@ -9,11 +9,12 @@ import { CopyButton } from "@blocks/values/copy-button";
 import { RelativeTime } from "@blocks/values/relative-time";
 import { StatusBadge } from "@blocks/values/status-badge";
 import { useCollection, useCommandForm } from "@fleetly/fleet-ui-kit";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { legacyCreateColumnHelper } from "@tanstack/react-table/legacy";
-import { Plus } from "lucide-react";
+import { Download, Plus } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { downloadCsv, toCsv } from "@/lib/csv";
 import type { Widget } from "@/lib/mock-data";
 import { widgetsClient, widgetsFailureHandle, widgetsSearch } from "@/lib/resources";
 
@@ -81,12 +82,31 @@ function WidgetsPage() {
   const list = useCollection(widgetsClient, { from: Route.fullPath, search: widgetsSearch });
   const [creating, setCreating] = useState(false);
 
+  // 导出 CSV 配方（§3 派生表）：list.rows + 消费方 unparse 纯函数——导的是当前窗口
+  // （URL 即真相：过滤/翻页后导出的就是所见）
+  const exportCsv = () => {
+    downloadCsv(
+      "widgets.csv",
+      toCsv(
+        ["id", "name", "status", "replicas", "owner", "createdAt"],
+        list.rows.map((w) => [w.id, w.name, w.status, w.replicas, w.owner, w.createdAt]),
+      ),
+    );
+  };
+
   const columns = [
     col.accessor("id", {
       header: "ID",
       cell: (info) => (
         <div className="flex items-center gap-1 font-mono text-xs">
-          {info.getValue()}
+          <Link
+            to="/widgets/$id"
+            params={{ id: info.getValue() }}
+            className="hover:text-accent"
+            data-testid="widget-detail-link"
+          >
+            {info.getValue()}
+          </Link>
           <CopyButton value={info.getValue()} />
         </div>
       ),
@@ -128,6 +148,9 @@ function WidgetsPage() {
           <>
             <Button variant="default" size="sm" onClick={() => setCreating(true)}>
               <Plus className="size-3.5" /> New widget
+            </Button>
+            <Button variant="outline" size="sm" onClick={exportCsv} data-testid="export-csv">
+              <Download className="size-3.5" /> Export CSV
             </Button>
             <Button
               variant="outline"
