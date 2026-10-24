@@ -3,11 +3,14 @@ import { EventFeed } from "@blocks/subscription/event-feed";
 import {
   collectionQueryOptions,
   useCollection,
+  useInvalidateOnFrame,
   usePreference,
   useSubscription,
 } from "@fleetly/fleet-ui-kit";
-import type { Cursor, Segment } from "@fleetly/fleet-ui-kit/kernel";
-import { useQueryClient } from "@tanstack/react-query";
+import type { ApiError, Cursor, Segment } from "@fleetly/fleet-ui-kit/kernel";
+import type { Widget } from "@/lib/mock-data";
+import { widgetsClient } from "@/lib/resources";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -51,6 +54,18 @@ function EventsPage() {
     getCursor: (frame: EventFrame) => String(frame.seq),
     onFrame: appendLiveEvent,
   });
+
+  // 实时失效配方（design.md §3 派生表）：事件帧到达 → widgets 全部查询失效。
+  // 本页挂一个 widgets 聚合查询做观测点——staleTime 60s 保证重取只能来自失效。
+  const widgets = useQuery<Segment<Widget>, ApiError>({
+    ...collectionQueryOptions(widgetsClient, { window: { size: 1 } }),
+    staleTime: 60_000,
+  });
+  useInvalidateOnFrame(sub, [{ resource: widgetsClient.name }], { throttleMs: 500 });
+  const [widgetsFetches, setWidgetsFetches] = useState(0);
+  useEffect(() => {
+    setWidgetsFetches((n) => n + 1);
+  }, [widgets.dataUpdatedAt]);
 
   const resyncNow = async (): Promise<void> => {
     // fresh-read：绕过 stale 缓存重跑 backlog（design.md §3 多请求编排）
@@ -130,6 +145,10 @@ function EventsPage() {
       <p className="text-[11px] text-muted">
         Anchor: {anchor ?? "loading backlog…"} · resyncs: {sub.resyncs} · open connections:{" "}
         {eventsMockTransport.opens.length}
+      </p>
+      <p className="text-[11px] text-muted" data-testid="invalidate-counter">
+        invalidateOnFrame: widgets total {widgets.data?.total ?? "…"} · refetched ×
+        {widgetsFetches} (throttle 500ms)
       </p>
     </Page>
   );

@@ -273,6 +273,22 @@
       "registryDependencies": []
     },
     {
+      "name": "subscription-stage-timeline",
+      "type": "registry:block",
+      "title": "stage-timeline",
+      "files": [
+        {
+          "path": "registry/subscription/stage-timeline.tsx",
+          "target": "components/fleet/subscription/stage-timeline.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
+      "registryDependencies": []
+    },
+    {
       "name": "shell-app-shell",
       "type": "registry:block",
       "title": "app-shell",

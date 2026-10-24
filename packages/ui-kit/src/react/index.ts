@@ -26,6 +26,12 @@ export {
   recordQueryOptions,
 } from "./options";
 export {
+  createFrameInvalidator,
+  type FrameInvalidator,
+  type UseInvalidateOnFrameOptions,
+  useInvalidateOnFrame,
+} from "./invalidate";
+export {
   type CanHandle,
   type IdentityLike,
   type PermissionState,

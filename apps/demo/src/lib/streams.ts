@@ -74,6 +74,73 @@ export const eventsStream: SubscriptionDescriptor<void, EventFrame> = {
   policy: { buffer: 60, retry: { backoffMs: [400, 800, 1600] } },
 };
 
+// ============ stages：部署阶段时间线（StageTimeline 参照实现的 demo 数据源） ============
+
+export interface StageFrame {
+  key: string;
+  status: "active" | "done" | "failed";
+  at: string;
+  note?: string;
+}
+
+/** 阶段目录（先验次序；文案走页面——块不认业务名词） */
+export const DEPLOY_STAGES = [
+  { key: "queued", label: "Queued" },
+  { key: "build", label: "Build image" },
+  { key: "push", label: "Push image" },
+  { key: "deploy", label: "Roll out replicas" },
+  { key: "verify", label: "Health checks" },
+] as const;
+
+/** 一次运行的脚本：相对时刻 → 阶段事件；跑完正常收流（closeReason "ended"） */
+const RUN_SCRIPT: ReadonlyArray<{ afterMs: number; event: Omit<StageFrame, "at"> }> = [
+  { afterMs: 200, event: { key: "queued", status: "done", note: "picked up by builder" } },
+  { afterMs: 500, event: { key: "build", status: "active", note: "layer cache warm" } },
+  { afterMs: 2400, event: { key: "build", status: "done" } },
+  { afterMs: 2500, event: { key: "push", status: "active", note: "pushing image" } },
+  { afterMs: 4300, event: { key: "push", status: "done" } },
+  { afterMs: 4400, event: { key: "deploy", status: "active", note: "rolling 3 replicas" } },
+  { afterMs: 6600, event: { key: "deploy", status: "done" } },
+  { afterMs: 6700, event: { key: "verify", status: "active", note: "probes 0/3" } },
+  { afterMs: 7600, event: { key: "verify", status: "done", note: "probes 3/3" } },
+];
+
+/** 脚本驱动器：emit 按时刻表推进，收尾 end()（页面挂载/重启按钮调用） */
+export function createStageScript(transport: { emit(frame: StageFrame): void; end(): void }) {
+  let timers: ReturnType<typeof setTimeout>[] = [];
+  let runId = 0;
+  return {
+    run(): void {
+      runId += 1;
+      const id = runId;
+      for (const timer of timers) clearTimeout(timer);
+      timers = [];
+      for (const step of RUN_SCRIPT) {
+        timers.push(
+          setTimeout(() => {
+            if (id !== runId) return;
+            transport.emit({ ...step.event, at: new Date().toISOString() });
+          }, step.afterMs),
+        );
+      }
+      timers.push(
+        setTimeout(() => {
+          if (id === runId) transport.end();
+        }, 8200),
+      );
+    },
+    stop(): void {
+      runId += 1;
+      for (const timer of timers) clearTimeout(timer);
+      timers = [];
+    },
+  };
+}
+
+/** 阶段流 transport：无自动生成，帧完全由脚本注入 */
+export const stagesMockTransport = mockTransport<StageFrame>();
+
+
 // ============ logs：ndjsonTransport over mock fetch（fleetly 日志流方言模拟） ============
 
 export interface LogFrame {

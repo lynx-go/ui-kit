@@ -8,7 +8,8 @@
     "typecheck": "pnpm -r typecheck",
     "lint": "biome check .",
     "layer-check": "node scripts/layer-check.mjs",
-    "check": "pnpm layer-check && pnpm typecheck && pnpm test",
+    "size-check": "node scripts/size-check.mjs",
+    "check": "pnpm layer-check && pnpm typecheck && pnpm size-check && pnpm test",
     "demo": "pnpm --filter demo dev",
     "e2e": "pnpm --filter demo e2e"
   },
@@ -26,6 +27,7 @@
     "lucide-react": "catalog:default",
     "react": "catalog:default",
     "react-dom": "catalog:default",
+    "rolldown": "catalog:default",
     "tailwind-merge": "catalog:default",
     "typescript": "catalog:default"
   }

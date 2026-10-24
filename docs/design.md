@@ -424,7 +424,7 @@ function advance(window: QueryWindow, segment: Segment<unknown>,
 | **双通道作用域同步配方**                                                           | URL↔localStorage 写方向规则 + synced 守卫 + storage 事件桥 + 防乒乓（torchwood 实证四件套）                                                                                       | 配方      |
 | **权限门控** `useCan`                                                              | identity record Query + 纯谓词；fail-closed；页级门控走 beforeLoad（identity 经 loader 预取 + redirect），元素级走 useCan（"未就绪"与"拒绝"两态渲染）                             | /react    |
 | **偏好持久化** `usePreference`                                                     | localStorage + schema 的通用受控状态                                                                                                                                              | /react    |
-| **实时失效** `invalidateOnFrame`                                                   | 帧到达 → invalidate(选择器) 的组合钩子                                                                                                                                            | /react    |
+| **实时失效** `useInvalidateOnFrame`                                                    | 帧到达 → invalidate(选择器) 的组合钩子（throttle 可选；§5.3 裁决 8）                                                                                                              | /react    |
 | **mock** `mockResource` / `mockTransport`                                          | 内存实现 Resource / Transport 契约——测试工具 + demo 数据源                                                                                                                        | /adapters |
 | **401 闭环**                                                                       | 三通道（Query/Command/Subscription）auth 失败 → createHttp 注册的 handler；管线次序见 §5                                                                                          | /adapters |
 | **审计页**                                                                         | keyset CollectionQuery（cursor window）的配方                                                                                                                                     | 配方      |
@@ -512,6 +512,11 @@ exec 终端（双向有状态会话，Subscription 单向；受理/观测仍可�
 5. **`resync(anchor?)` 增加可选锚点参数**（原案签名 `resync(): void` 不充分）：重跑 backlog 得到的新锚必须能传进引擎（缺省 null = 活尾）；resyncs++ 不变。原地进行，不换 cursor prop——`useSubscription` 的 cursor prop 变化语义 = 重建订阅（清缓冲、resyncs 归零）。
 6. **descriptor | transport 运行时判别 = `policy` 字段**：descriptor 必须声明 policy（流属性默认在资源侧声明本就是约定，兼作判别）；裸 Transport 永不带 policy。
 7. **useSubscription 锚点语义**：cursor 传 `undefined` = 待命不开（backlog→follow 等定锚——引擎在 effect 内创建，锚到位才连接）；显式 `null` = 活尾立即开（日志流）。react 层只订阅状态存储；帧存储（subscribeFrames/getFrames）由帧消费块自行接线。
+
+#### 实现期裁决（subscription 尾款，2026-10-24）
+
+8. **invalidateOnFrame 落地为 `useInvalidateOnFrame`**（工具钩子沿 use 前缀政策，§3 派生表措辞如此对齐）：`useInvalidateOnFrame(sub, selectors, { scope?, filter?, throttleMs? })`。selector 与 useCommand 的 invalidates 同源（invalidationPredicate 单源）；filter 帧级谓词；throttleMs 缺省 0 = 每帧即射（invalidateQueries 幂等 + active 查询去重），热日志流给窗口——trailing 合并调度抽为纯函数 `createFrameInvalidator`（可单测；卸载 cancel 不给已卸载组件补射）。
+9. **StageTimeline 块形态 = 帧投影 × 先验目录**：页面声明 `stages`（次序+文案，实体知识留页面），帧经 `onStage(frame) → StageEvent | undefined` 投影（undefined = 与时间线无关的帧，一条流喂多视图的常态）；目录外 key 追加尾部（动态阶段）。耗时由事件时间戳推出（ended − started；进行中随 tick 走，缺省 1000ms）；时间戳缺席以到达时刻兜底——重放口径由页面选择（带 at 的帧可重放）。
 
 ### 5.4 useCommandForm × TanStack Form 映射（关闭 B-Q6）
 
@@ -688,6 +693,7 @@ createHttp({
 4. `tsc --noEmit` strict + publint/attw。
 5. **bundle 预算**：/adapters 入口 gzip ≤ 35 kB；effect 漂移矩阵 CI。
 6. **不引入**：词表冻结、一致性棘轮、截图基线类重治理。
+7. **size-check 机械门**（2026-10-24 起，挂 `pnpm check`）：scripts/size-check.mjs——rolldown 打包 /adapters 入口（ESM+minify，peer 依赖外置、effect 计入）→ zlib gzip 计量，超 35 kB 非零退出。基线 20.4 kB。
 
 ---
 

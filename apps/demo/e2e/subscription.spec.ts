@@ -28,6 +28,19 @@ test.describe("events composition page (backlog anchor × live follow)", () => {
     await expect.poll(async () => rows.count(), { timeout: 8000 }).toBeGreaterThan(frozen);
   });
 
+  test("invalidateOnFrame: event frames invalidate the widgets query (refetch counter grows)", async ({
+    page,
+  }) => {
+    await page.goto("/events");
+    const counter = page.getByTestId("invalidate-counter");
+    const readCount = async () =>
+      Number.parseInt((await counter.innerText()).match(/refetched ×(\d+)/)?.[1] ?? "0", 10);
+    // staleTime 60s：计数增长只能来自帧失效（throttle 500ms < 帧间隔 1.2s → 每帧一射）
+    await expect.poll(readCount, { timeout: 8000 }).toBeGreaterThan(0);
+    const at = await readCount();
+    await expect.poll(readCount, { timeout: 8000 }).toBeGreaterThan(at);
+  });
+
   test("410 gap: yellow bar appears; manual resync re-anchors (resyncs counter)", async ({
     page,
   }) => {

@@ -23,6 +23,7 @@ catalogs:
     tailwindcss: ^4.3.3
     "@tailwindcss/vite": ^4.3.3
     tsup: ^9.0.0
+    rolldown: ^1.2.15
     lucide-react: ^1.61.0
     clsx: ^2.1.1
     tailwind-merge: ^3.7.0
