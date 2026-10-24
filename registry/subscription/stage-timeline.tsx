@@ -55,7 +55,13 @@ function formatElapsed(ms: number): string {
   return `${minutes}m ${String(seconds % 60).padStart(2, "0")}s`;
 }
 
-export function StageTimeline<F>({ sub, stages, onStage, tickMs = 1000, className }: StageTimelineProps<F>) {
+export function StageTimeline<F>({
+  sub,
+  stages,
+  onStage,
+  tickMs = 1000,
+  className,
+}: StageTimelineProps<F>) {
   const frames = useSyncExternalStore(sub.subscribeFrames, sub.getFrames, sub.getFrames);
 
   // 折叠：目录次序为骨，目录外 key 追加尾
@@ -83,9 +89,7 @@ export function StageTimeline<F>({ sub, stages, onStage, tickMs = 1000, classNam
         note: event.note ?? prev.note,
       });
     }
-    return byKey;
-    // onStage 是纯投影（EventFeed render 同款约定），折叠随帧缓存重算
-    // biome-ignore lint/correctness/useExhaustiveDependencies: onStage 标识变化不应丢折叠——投影纯函数按值闭包
+    return byKey; // onStage 在依赖里：投影标识变化重算折叠是安全语义（纯函数）
   }, [frames, onStage]);
 
   const rows = useMemo(() => {
@@ -143,7 +147,10 @@ export function StageTimeline<F>({ sub, stages, onStage, tickMs = 1000, classNam
               {state?.note ? <p className="truncate text-xs text-muted">{state.note}</p> : null}
             </div>
             {elapsed ? (
-              <span className="shrink-0 text-xs tabular-nums text-muted" data-stage-elapsed={def.key}>
+              <span
+                className="shrink-0 text-xs tabular-nums text-muted"
+                data-stage-elapsed={def.key}
+              >
                 {elapsed}
               </span>
             ) : null}

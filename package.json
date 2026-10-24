@@ -27,6 +27,7 @@
     "lucide-react": "catalog:default",
     "react": "catalog:default",
     "react-dom": "catalog:default",
+    "recharts": "catalog:default",
     "rolldown": "catalog:default",
     "tailwind-merge": "catalog:default",
     "typescript": "catalog:default"

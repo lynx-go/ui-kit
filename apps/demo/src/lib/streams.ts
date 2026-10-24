@@ -140,7 +140,6 @@ export function createStageScript(transport: { emit(frame: StageFrame): void; en
 /** 阶段流 transport：无自动生成，帧完全由脚本注入 */
 export const stagesMockTransport = mockTransport<StageFrame>();
 
-
 // ============ logs：ndjsonTransport over mock fetch（fleetly 日志流方言模拟） ============
 
 export interface LogFrame {

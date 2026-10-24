@@ -8,13 +8,13 @@ import {
   useSubscription,
 } from "@fleetly/fleet-ui-kit";
 import type { ApiError, Cursor, Segment } from "@fleetly/fleet-ui-kit/kernel";
-import type { Widget } from "@/lib/mock-data";
-import { widgetsClient } from "@/lib/resources";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import type { Widget } from "@/lib/mock-data";
+import { widgetsClient } from "@/lib/resources";
 import {
   anchorOf,
   appendLiveEvent,
@@ -147,8 +147,8 @@ function EventsPage() {
         {eventsMockTransport.opens.length}
       </p>
       <p className="text-[11px] text-muted" data-testid="invalidate-counter">
-        invalidateOnFrame: widgets total {widgets.data?.total ?? "…"} · refetched ×
-        {widgetsFetches} (throttle 500ms)
+        invalidateOnFrame: widgets total {widgets.data?.total ?? "…"} · refetched ×{widgetsFetches}{" "}
+        (throttle 500ms)
       </p>
     </Page>
   );

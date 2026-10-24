@@ -20,17 +20,17 @@ export {
   useCommandForm,
 } from "./command";
 export {
-  batchQueryOptions,
-  collectionQueryOptions,
-  type QueryEngineOptions,
-  recordQueryOptions,
-} from "./options";
-export {
   createFrameInvalidator,
   type FrameInvalidator,
   type UseInvalidateOnFrameOptions,
   useInvalidateOnFrame,
 } from "./invalidate";
+export {
+  batchQueryOptions,
+  collectionQueryOptions,
+  type QueryEngineOptions,
+  recordQueryOptions,
+} from "./options";
 export {
   type CanHandle,
   type IdentityLike,

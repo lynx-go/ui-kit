@@ -63,14 +63,11 @@ export function useInvalidateOnFrame<F>(
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: selectors 数组字面量每渲染变化不应重订——经 selectorsKey 锚定
   useEffect(() => {
-    const invalidator = createFrameInvalidator(
-      () => {
-        void queryClient.invalidateQueries({
-          predicate: invalidationPredicate(selectors, optionsRef.current.scope ?? {}),
-        });
-      },
-      optionsRef.current.throttleMs ?? 0,
-    );
+    const invalidator = createFrameInvalidator(() => {
+      void queryClient.invalidateQueries({
+        predicate: invalidationPredicate(selectors, optionsRef.current.scope ?? {}),
+      });
+    }, optionsRef.current.throttleMs ?? 0);
     const unsubscribe = sub.onFrame((frame) => {
       const filter = optionsRef.current.filter;
       if (filter && !filter(frame)) return;

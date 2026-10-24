@@ -7,7 +7,8 @@
  *   schema    允许 kernel + "effect"（公开面零 effect/schema 泄漏由导出审计保证）
  *   adapters  允许 kernel + "effect"
  *   react     允许 kernel + schema + react 系 + @tanstack 系；禁止 "effect"（目录级）
- *   registry  允许 @fleetly/fleet-ui-kit* + @/ + @blocks/ + react 系 + @tanstack 系 + lucide/clsx/cva；禁止 effect
+ *   registry  允许 @fleetly/fleet-ui-kit* + @/ + @blocks/ + react 系 + @tanstack 系 + lucide/clsx/cva
+ *             + recharts（MetricChart 裁决：拷贝制下落消费方，registry.json dependencies 声明）；禁止 effect
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
@@ -57,7 +58,8 @@ const LAYER_RULES = {
       spec === "lucide-react" ||
       spec === "clsx" ||
       spec === "tailwind-merge" ||
-      spec === "class-variance-authority",
+      spec === "class-variance-authority" ||
+      spec === "recharts",
     banned: ["effect"],
     label: "registry blocks（消费绑定 + 基元；禁 effect）",
   },
