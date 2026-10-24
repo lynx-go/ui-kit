@@ -22,3 +22,24 @@ export {
   mockCollection,
   mockFetchAll,
 } from "./mock";
+export {
+  type MockTransport,
+  type MockTransportHandle,
+  type MockTransportOptions,
+  mockSeqTransport,
+  mockTransport,
+} from "./mock-transport";
+export {
+  createSubscriptionEngine,
+  type SubscriptionEngine,
+  type SubscriptionEngineOptions,
+  type SubscriptionHandle,
+  type SubscriptionState,
+} from "./subscription";
+export {
+  type NdjsonTransportOptions,
+  ndjsonTransport,
+  type SseMessage,
+  type SseTransportOptions,
+  sseTransport,
+} from "./transport";
