@@ -26,6 +26,12 @@ export {
   type PreferenceCodec,
   usePreference,
 } from "./preferences";
+export type {
+  SubscriptionEngine,
+  SubscriptionHandle,
+  SubscriptionState,
+} from "../adapters/subscription";
+export { useSubscription, type UseSubscriptionOptions } from "./subscription";
 export {
   batchQueryOptions,
   collectionQueryOptions,

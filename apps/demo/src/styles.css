@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* registry 块在 demo 根之外——Tailwind v4 自动检测扫不到，显式声明源（相对本文件） */
+@source "../../../registry";
+
 @theme {
   --color-bg: oklch(0.145 0 0);
   --color-panel: oklch(0.185 0 0);

@@ -229,9 +229,11 @@ export function collectionQuerySchema(spec: QuerySchemaSpec = {}): QuerySearchSc
     },
     decode(params: unknown): CollectionQuery {
       const flat = normalize(params);
+      // "URL + schema 默认值即真相"：URL 无 sort 时落 defaultOrder（不落会静默丢默认排序）
+      const order = decodeOrders(flat) ?? spec.defaultOrder;
       return {
         ...(decodePredicate(flat) !== undefined ? { predicate: decodePredicate(flat) } : {}),
-        ...(decodeOrders(flat) !== undefined ? { order: decodeOrders(flat) } : {}),
+        ...(order ? { order } : {}),
         window: decodeWindow(flat),
       };
     },

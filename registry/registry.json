@@ -241,6 +241,38 @@
       "registryDependencies": []
     },
     {
+      "name": "subscription-event-feed",
+      "type": "registry:block",
+      "title": "event-feed",
+      "files": [
+        {
+          "path": "registry/subscription/event-feed.tsx",
+          "target": "components/fleet/subscription/event-feed.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
+      "registryDependencies": []
+    },
+    {
+      "name": "subscription-log-viewer",
+      "type": "registry:block",
+      "title": "log-viewer",
+      "files": [
+        {
+          "path": "registry/subscription/log-viewer.tsx",
+          "target": "components/fleet/subscription/log-viewer.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
+      "registryDependencies": []
+    },
+    {
       "name": "shell-app-shell",
       "type": "registry:block",
       "title": "app-shell",
