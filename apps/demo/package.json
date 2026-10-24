@@ -10,7 +10,7 @@
     "e2e": "playwright test"
   },
   "dependencies": {
-    "@fleetly/fleet-ui-kit": "workspace:*",
+    "@fleetly/ui-kit": "workspace:*",
     "@tanstack/react-query": "catalog:default",
     "@tanstack/react-router": "catalog:default",
     "@tanstack/react-table": "catalog:default",

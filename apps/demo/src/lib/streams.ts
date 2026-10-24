@@ -1,7 +1,7 @@
-import { mockCollection, mockTransport, ndjsonTransport } from "@fleetly/fleet-ui-kit/adapters";
-import type { SubscriptionDescriptor } from "@fleetly/fleet-ui-kit/kernel";
-import { defineResource } from "@fleetly/fleet-ui-kit/kernel";
-import { collectionQuerySchema } from "@fleetly/fleet-ui-kit/schema";
+import { mockCollection, mockTransport, ndjsonTransport } from "@fleetly/ui-kit/adapters";
+import type { SubscriptionDescriptor } from "@fleetly/ui-kit/kernel";
+import { defineResource } from "@fleetly/ui-kit/kernel";
+import { collectionQuerySchema } from "@fleetly/ui-kit/schema";
 
 // ============ events：backlog Query 定锚 × Subscription 续订（fleetly events 方言模拟） ============
 

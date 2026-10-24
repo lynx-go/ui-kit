@@ -8,7 +8,7 @@ import { type DiffEntry, DiffView } from "@blocks/values/diff-view";
 import { JsonField } from "@blocks/values/json-field";
 import { RelativeTime } from "@blocks/values/relative-time";
 import { StatusBadge } from "@blocks/values/status-badge";
-import { useCommand, useCommandForm, usePreference, useRecord } from "@fleetly/fleet-ui-kit";
+import { useCommand, useCommandForm, usePreference, useRecord } from "@fleetly/ui-kit";
 import { createFileRoute, Link, useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { Trash2 } from "lucide-react";
 import type { ReactNode } from "react";

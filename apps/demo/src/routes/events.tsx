@@ -6,8 +6,8 @@ import {
   useInvalidateOnFrame,
   usePreference,
   useSubscription,
-} from "@fleetly/fleet-ui-kit";
-import type { ApiError, Cursor, Segment } from "@fleetly/fleet-ui-kit/kernel";
+} from "@fleetly/ui-kit";
+import type { ApiError, Cursor, Segment } from "@fleetly/ui-kit/kernel";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";

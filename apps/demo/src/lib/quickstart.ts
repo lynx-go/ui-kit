@@ -1,6 +1,6 @@
-import { mockCollection, mockTransport } from "@fleetly/fleet-ui-kit/adapters";
-import type { CommandResult } from "@fleetly/fleet-ui-kit/kernel";
-import { defineResource } from "@fleetly/fleet-ui-kit/kernel";
+import { mockCollection, mockTransport } from "@fleetly/ui-kit/adapters";
+import type { CommandResult } from "@fleetly/ui-kit/kernel";
+import { defineResource } from "@fleetly/ui-kit/kernel";
 
 /**
  * quickstart 向导链的 mock 数据源（fleetly 实证语义：ensure 幂等——同名复用不重造；

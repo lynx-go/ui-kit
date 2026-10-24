@@ -1,7 +1,7 @@
-import { clientCollection, mockCollection, mockFetchAll } from "@fleetly/fleet-ui-kit/adapters";
-import type { CommandResult } from "@fleetly/fleet-ui-kit/kernel";
-import { defineResource } from "@fleetly/fleet-ui-kit/kernel";
-import { collectionQuerySchema } from "@fleetly/fleet-ui-kit/schema";
+import { clientCollection, mockCollection, mockFetchAll } from "@fleetly/ui-kit/adapters";
+import type { CommandResult } from "@fleetly/ui-kit/kernel";
+import { defineResource } from "@fleetly/ui-kit/kernel";
+import { collectionQuerySchema } from "@fleetly/ui-kit/schema";
 import type { Owner, Widget } from "./mock-data";
 import { OWNERS, WIDGETS } from "./mock-data";
 
@@ -26,7 +26,7 @@ export const widgetsClient = defineResource({
   record: (id: string) => {
     const widget = widgetsFetchAll.rows().find((w) => w.id === id);
     if (!widget)
-      throw { kind: "not-found" } satisfies import("@fleetly/fleet-ui-kit/kernel").ApiError;
+      throw { kind: "not-found" } satisfies import("@fleetly/ui-kit/kernel").ApiError;
     return Promise.resolve(widget);
   },
   batch: (ids) => Promise.resolve(widgetsFetchAll.rows().filter((w) => ids.includes(w.id))),

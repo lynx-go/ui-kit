@@ -1,4 +1,4 @@
-import type { SubscriptionEngine } from "@fleetly/fleet-ui-kit/react";
+import type { SubscriptionEngine } from "@fleetly/ui-kit/react";
 import { PauseCircle } from "lucide-react";
 import type { ReactNode } from "react";
 import { useSyncExternalStore } from "react";

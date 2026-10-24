@@ -1,4 +1,4 @@
-import type { CollectionHandle } from "@fleetly/fleet-ui-kit/react";
+import type { CollectionHandle } from "@fleetly/ui-kit/react";
 import { flexRender } from "@tanstack/react-table";
 import {
   getCoreRowModel,

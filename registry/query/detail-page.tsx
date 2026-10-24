@@ -1,4 +1,4 @@
-import type { RecordHandle } from "@fleetly/fleet-ui-kit/react";
+import type { RecordHandle } from "@fleetly/ui-kit/react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { ErrorState, LoadingState } from "../values/states";

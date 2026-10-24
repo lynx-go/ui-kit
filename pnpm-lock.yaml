@@ -289,7 +289,7 @@ importers:
       '@biomejs/biome':
         specifier: catalog:default
         version: 2.6.2
-      '@fleetly/fleet-ui-kit':
+      '@fleetly/ui-kit':
         specifier: workspace:*
         version: link:packages/ui-kit
       '@tanstack/react-form':
@@ -340,7 +340,7 @@ importers:
 
   apps/demo:
     dependencies:
-      '@fleetly/fleet-ui-kit':
+      '@fleetly/ui-kit':
         specifier: workspace:*
         version: link:../../packages/ui-kit
       '@tanstack/react-form':
