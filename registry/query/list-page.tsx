@@ -1,4 +1,4 @@
-import type { CollectionHandle } from "@fleetly/ui-kit/react";
+import type { CollectionHandle } from "@lynx-go/ui-kit/react";
 import type { ReactNode } from "react";
 import { Card } from "@/components/ui/card";
 import { EmptyState, ErrorState, LoadingState } from "../values/states";

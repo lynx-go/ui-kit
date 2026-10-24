@@ -1,6 +1,6 @@
 import { Page } from "@blocks/shell/page";
 import { SectionCard } from "@blocks/shell/section-card";
-import { usePreference } from "@fleetly/ui-kit";
+import { usePreference } from "@lynx-go/ui-kit";
 import { createFileRoute } from "@tanstack/react-router";
 
 // 设置页配方（design §6.3）：SectionCard × n × usePreference。此前设置折叠在

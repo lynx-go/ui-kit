@@ -1,6 +1,6 @@
-import { collectionQueryOptions } from "@fleetly/ui-kit";
-import type { ApiError, Resource, Segment } from "@fleetly/ui-kit/kernel";
-import { textPredicate } from "@fleetly/ui-kit/kernel";
+import { collectionQueryOptions } from "@lynx-go/ui-kit";
+import type { ApiError, Resource, Segment } from "@lynx-go/ui-kit/kernel";
+import { textPredicate } from "@lynx-go/ui-kit/kernel";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";

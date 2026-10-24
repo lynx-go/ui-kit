@@ -1,4 +1,4 @@
-import type { SubscriptionEngine } from "@fleetly/ui-kit/react";
+import type { SubscriptionEngine } from "@lynx-go/ui-kit/react";
 import { CheckCircle2, CircleDashed, Loader2, XCircle } from "lucide-react";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { cn } from "@/lib/utils";

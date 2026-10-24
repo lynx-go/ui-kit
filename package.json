@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:default",
-    "@fleetly/ui-kit": "workspace:*",
+    "@lynx-go/ui-kit": "workspace:*",
     "@tanstack/react-form": "catalog:default",
     "@tanstack/react-query": "catalog:default",
     "@tanstack/react-router": "catalog:default",

@@ -1,7 +1,7 @@
 import { Page } from "@blocks/shell/page";
 import { LogViewer } from "@blocks/subscription/log-viewer";
 import { StageTimeline } from "@blocks/subscription/stage-timeline";
-import { usePreference, useSubscription } from "@fleetly/ui-kit";
+import { usePreference, useSubscription } from "@lynx-go/ui-kit";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";

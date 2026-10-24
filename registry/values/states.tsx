@@ -1,4 +1,4 @@
-import type { ApiError } from "@fleetly/ui-kit/kernel";
+import type { ApiError } from "@lynx-go/ui-kit/kernel";
 import { RotateCw, SearchX } from "lucide-react";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";

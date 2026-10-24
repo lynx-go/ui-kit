@@ -1,7 +1,7 @@
-import type { Predicate } from "@fleetly/ui-kit/kernel";
-import { textPredicate } from "@fleetly/ui-kit/kernel";
-import type { CollectionHandle } from "@fleetly/ui-kit/react";
-import type { FilterFieldDef, QuerySearchSchema } from "@fleetly/ui-kit/schema";
+import type { Predicate } from "@lynx-go/ui-kit/kernel";
+import { textPredicate } from "@lynx-go/ui-kit/kernel";
+import type { CollectionHandle } from "@lynx-go/ui-kit/react";
+import type { FilterFieldDef, QuerySearchSchema } from "@lynx-go/ui-kit/schema";
 import { Search, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";

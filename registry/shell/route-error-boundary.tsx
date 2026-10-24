@@ -1,4 +1,4 @@
-import { isApiError } from "@fleetly/ui-kit/kernel";
+import { isApiError } from "@lynx-go/ui-kit/kernel";
 import { RotateCw, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

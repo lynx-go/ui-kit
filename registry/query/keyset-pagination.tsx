@@ -1,4 +1,4 @@
-import type { CollectionHandle } from "@fleetly/ui-kit/react";
+import type { CollectionHandle } from "@lynx-go/ui-kit/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

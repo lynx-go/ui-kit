@@ -1,5 +1,5 @@
-import type { CommandDescriptor, ResourceScope } from "@fleetly/ui-kit/kernel";
-import { useCommand } from "@fleetly/ui-kit/react";
+import type { CommandDescriptor, ResourceScope } from "@lynx-go/ui-kit/kernel";
+import { useCommand } from "@lynx-go/ui-kit/react";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";

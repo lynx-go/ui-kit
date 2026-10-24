@@ -74,7 +74,7 @@ for (const family of families) {
         },
       ],
       // 块依赖 core 的 semver range（Q8 裁决）+ 裸导入扫描出的三方包；UI 基元假定消费方已 vendored shadcn
-      dependencies: ["@fleetly/ui-kit@^0.1", ...blockDependencies(source)].sort(),
+      dependencies: ["@lynx-go/ui-kit@^0.1", ...blockDependencies(source)].sort(),
       registryDependencies: [],
     });
   }
