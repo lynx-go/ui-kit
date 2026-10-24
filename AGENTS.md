@@ -8,7 +8,7 @@
 packages/ui-kit   @fleetly/fleet-ui-kit（npm）
   src/kernel    元概念契约+纯代数（零依赖、零 react）
   src/schema    CollectionQuery URL 编解码（依赖 effect；公开面零 effect/schema 泄漏）
-  src/adapters  http 管线(Effect 内部)/订阅引擎(后续)/evaluate/clientCollection/mock
+  src/adapters  http 管线/订阅引擎（Effect 内部）/ndjson+sse transport/evaluate/clientCollection/mock/mockTransport
   src/react     绑定 hooks + queryOptions（禁 import effect，目录级 layer-check）
 registry/       UI 块五族（values/query/command/subscription/shell），shadcn 拷贝制分发
 apps/demo       活文档：每个配方一个可运行页面，mockResource 驱动
@@ -44,3 +44,5 @@ node scripts/registry-build.mjs
 - pnpm 12.9.1：workspace yaml 需含 `minimumReleaseAgeExclude` 段，否则首次 catalog 解析报误导性错误。
 - DataTable 暂走 `@tanstack/react-table/legacy`（双 console 现行用法）；迁 v9 原生 features 是块内改动。
 - Table v9 / router plugin 1.168 / effect ~4.0（tilde 锁，schema 模块 unstable）。
+- demo 的 registry 块在 Tailwind v4 自动扫描根之外——`apps/demo/src/styles.css` 已声明 `@source "../../../registry"`（相对该文件三层到仓库根）；动 styles.css 位置时注意。
+- effect v4 两个实测陷阱已内化为引擎裁决（design.md §5.3 实现期裁决）：Schedule 无 resettable（退避按帧归零用显式索引）；`Stream.runIntoQueue` 完成即以 Cause.Done 终结队列（连接侧用 `runForEach + Queue.offer`）。

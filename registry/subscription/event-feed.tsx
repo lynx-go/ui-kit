@@ -1,7 +1,7 @@
 import type { SubscriptionEngine } from "@fleetly/fleet-ui-kit/react";
+import { PauseCircle } from "lucide-react";
 import type { ReactNode } from "react";
 import { useSyncExternalStore } from "react";
-import { PauseCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -70,7 +70,10 @@ export function EventFeed<F>({
         </div>
         <div className="flex items-center gap-2">
           {state.status === "paused" ? (
-            <span className="flex items-center gap-1 text-[11px] text-muted" data-testid="paused-indicator">
+            <span
+              className="flex items-center gap-1 text-[11px] text-muted"
+              data-testid="paused-indicator"
+            >
               <PauseCircle className="size-3.5" />
               Paused — frames buffered from cursor on resume
             </span>

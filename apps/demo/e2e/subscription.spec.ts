@@ -25,9 +25,7 @@ test.describe("events composition page (backlog anchor × live follow)", () => {
     // 恢复：从游标续订，行数继续增长
     await page.getByTestId("pause-toggle").click();
     await expect(page.getByTestId("paused-indicator")).toHaveCount(0);
-    await expect
-      .poll(async () => rows.count(), { timeout: 8000 })
-      .toBeGreaterThan(frozen);
+    await expect.poll(async () => rows.count(), { timeout: 8000 }).toBeGreaterThan(frozen);
   });
 
   test("410 gap: yellow bar appears; manual resync re-anchors (resyncs counter)", async ({

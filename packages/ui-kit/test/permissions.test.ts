@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
+import { type IdentityLike, permissionState } from "../src/react/permissions";
 import { decodePreference } from "../src/react/preferences";
-import { permissionState, type IdentityLike } from "../src/react/permissions";
 
 describe("permissionState（useCan 的纯推导）", () => {
   const identity = (

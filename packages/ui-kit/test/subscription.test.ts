@@ -1,10 +1,10 @@
 import { describe, expect, test } from "vitest";
-import type { ApiError, SubscriptionStatus, Transport } from "../src/kernel";
-import { createSubscriptionEngine } from "../src/adapters/subscription";
 import { mockSeqTransport, mockTransport } from "../src/adapters/mock-transport";
+import { createSubscriptionEngine } from "../src/adapters/subscription";
+import type { ApiError, SubscriptionStatus, Transport } from "../src/kernel";
 
 /** 轮询等待引擎进入目标状态（时间断言用短退避，CI 安全）。 */
-async function waitForStatus<F>(
+async function waitForStatus(
   engine: { getState(): { status: SubscriptionStatus } },
   status: SubscriptionStatus,
   timeoutMs = 3000,

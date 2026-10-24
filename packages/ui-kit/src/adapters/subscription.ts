@@ -82,13 +82,6 @@ export interface SubscriptionEngineOptions<F> {
   autoStart?: boolean;
 }
 
-function isAbortError(error: unknown): boolean {  return (
-    typeof error === "object" &&
-    error !== null &&
-    (error as { name?: unknown }).name === "AbortError"
-  );
-}
-
 function sleep(ms: number): Promise<void> {
   return Effect.runPromise(Effect.sleep(ms));
 }
@@ -267,7 +260,8 @@ export function createSubscriptionEngine<F>(
 
   return {
     get frames() {
-      return (framesCache ??= [...frames]);
+      if (framesCache === null) framesCache = [...frames];
+      return framesCache;
     },
     get status() {
       return state.status;
@@ -335,7 +329,8 @@ export function createSubscriptionEngine<F>(
       return () => frameListeners.delete(listener);
     },
     getFrames() {
-      return (framesCache ??= [...frames]);
+      if (framesCache === null) framesCache = [...frames];
+      return framesCache;
     },
   };
 }

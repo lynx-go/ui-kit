@@ -1,3 +1,8 @@
+export type {
+  SubscriptionEngine,
+  SubscriptionHandle,
+  SubscriptionState,
+} from "../adapters/subscription";
 export {
   type BatchHandle,
   type CollectionHandle,
@@ -15,10 +20,16 @@ export {
   useCommandForm,
 } from "./command";
 export {
+  batchQueryOptions,
+  collectionQueryOptions,
+  type QueryEngineOptions,
+  recordQueryOptions,
+} from "./options";
+export {
   type CanHandle,
   type IdentityLike,
-  permissionState,
   type PermissionState,
+  permissionState,
   useCan,
 } from "./permissions";
 export {
@@ -26,15 +37,4 @@ export {
   type PreferenceCodec,
   usePreference,
 } from "./preferences";
-export type {
-  SubscriptionEngine,
-  SubscriptionHandle,
-  SubscriptionState,
-} from "../adapters/subscription";
-export { useSubscription, type UseSubscriptionOptions } from "./subscription";
-export {
-  batchQueryOptions,
-  collectionQueryOptions,
-  type QueryEngineOptions,
-  recordQueryOptions,
-} from "./options";
+export { type UseSubscriptionOptions, useSubscription } from "./subscription";

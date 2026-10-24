@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { ndjsonTransport, sseTransport } from "../src/adapters/transport";
 import { mockTransport } from "../src/adapters/mock-transport";
+import { ndjsonTransport, sseTransport } from "../src/adapters/transport";
 import type { FrameSource } from "../src/kernel";
 
 function ndjsonResponse(chunks: string[], init?: ResponseInit): Response {
@@ -30,8 +30,7 @@ describe("ndjsonTransport", () => {
   test("跨 chunk 的行切分与尾行（无换行结尾）；无 isEnded → body 结束按中断抛错", async () => {
     const transport = ndjsonTransport<{ n: number }>({
       url: "https://x.test/logs",
-      fetchImpl: async () =>
-        ndjsonResponse(['{"n":1}\n{"n"', ':2}\n{"n":3}', "\n", '{"n":4}']),
+      fetchImpl: async () => ndjsonResponse(['{"n":1}\n{"n"', ':2}\n{"n":3}', "\n", '{"n":4}']),
     });
     const iterator = transport.open(null, new AbortController().signal)[Symbol.asyncIterator]();
     expect((await iterator.next()).value).toEqual({ n: 1 });
@@ -118,7 +117,7 @@ describe("sseTransport", () => {
         ndjsonResponse([
           ": heartbeat\n\n",
           'event: created\ndata: {"a":1}\nid: 7\n\n',
-          "event: patched\ndata: {\"b\":", // 事件跨 chunk 边界
+          'event: patched\ndata: {"b":', // 事件跨 chunk 边界
           "2}\n\n",
         ]),
       decode: (message) => ({

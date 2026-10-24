@@ -309,7 +309,7 @@ interface SubscriptionHandle<F> {
   pause(): void;
   resume(): void;
   restart(): void; // 手动重连（fleetly "Reconnect stream" / torchwood 手动重连）
-  resync(): void; // gapped 后重锚：清缓冲 + 从新锚点重开
+  resync(anchor?: Cursor | null): void; // gapped 后重锚：清缓冲 + 从新锚点重开（缺省锚点=活尾 null）；resyncs++ 供黄条渲染
   clear(): void;
 }
 ```
@@ -502,6 +502,16 @@ exec 终端（双向有状态会话，Subscription 单向；受理/观测仍可�
 - **渲染契约**：帧缓冲为外部存储、快照经 useSyncExternalStore；SubscriptionStatus 单独订阅（帧到达不触发全页重渲染）；**StrictMode 双挂载幂等**（AbortSignal 清理 + 退避状态与 transport 实例分离）。
 - **AbortSignal 桥**：Effect scope finalizer → controller.abort；`Effect.callback`/`tryPromise` signal 桥入；引擎主动 abort 的 AbortError 与传输错误严格区分。
 - Schedule v4 形状按新 API 书写（min/max 组合退避；Mailbox 已移除——用 Queue）。
+
+#### 实现期裁决（subscription 批次落地，2026-10-24；偏离原案处已修订）
+
+1. **退避弃用 Stream.retry/Schedule，改显式索引驱动**：v4 Schedule 无 resettable，schedule 状态无法在"连接恢复递送帧"时归零——而 fleetly 语义要求每次断线从 `backoffMs[0]` 重新计数；且 `Stream.retry` 重跑整流，无法保留"已递送帧的游标"语义。实现为驱动环内的 `attempt` 索引 + `Effect.sleep`，帧递送归零（packages/ui-kit/src/adapters/subscription.ts）。
+2. **连接侧弃用 `Stream.runIntoQueue`，改 `runForEach + Queue.offer`**：v4 的 runIntoQueue 会在流完成时以 `Cause.Done` **终结队列**，重连需要复用同一环形缓冲——offer 到 sliding 队列永不挂起且超限丢最旧，队列生命周期归引擎（stop 时 shutdown，泵纤维随 `Stream.fromQueue` 自然退出）。
+3. **状态映射细化（SubscriptionStatus 闭合集不变）**："live" = open 成功而非首帧递送——安静但健康的流（torchwood documents changes 类静流）不该因"暂无新帧"显示 reconnecting；"reconnecting" 覆盖一切连接建立中（含首连与退避等待）；句柄 stop() → "ended"（引擎侧收流，干净终态不区分发起方）。
+4. **终态分诊矩阵成文**：迭代器**正常结束** → closeReason 四值皆终态（ended/gapped 停机待命；auth→error{auth}、transport→error{network}——401 闭环在订阅侧的落点）；迭代器**抛错** → `isApiError` 且不可重试（isRetryable=false）→ error，可重试（network/server）或未知错误 → 传输中断进退避。**抛错=可重试线索，完成=终态判据**——transport 想要重连语义应当抛错而非以 transport 收流。
+5. **`resync(anchor?)` 增加可选锚点参数**（原案签名 `resync(): void` 不充分）：重跑 backlog 得到的新锚必须能传进引擎（缺省 null = 活尾）；resyncs++ 不变。原地进行，不换 cursor prop——`useSubscription` 的 cursor prop 变化语义 = 重建订阅（清缓冲、resyncs 归零）。
+6. **descriptor | transport 运行时判别 = `policy` 字段**：descriptor 必须声明 policy（流属性默认在资源侧声明本就是约定，兼作判别）；裸 Transport 永不带 policy。
+7. **useSubscription 锚点语义**：cursor 传 `undefined` = 待命不开（backlog→follow 等定锚——引擎在 effect 内创建，锚到位才连接）；显式 `null` = 活尾立即开（日志流）。react 层只订阅状态存储；帧存储（subscribeFrames/getFrames）由帧消费块自行接线。
 
 ### 5.4 useCommandForm × TanStack Form 映射（关闭 B-Q6）
 

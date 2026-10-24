@@ -79,6 +79,7 @@ export function useSubscription<Params, F>(
   const policyKey = JSON.stringify(policy ?? null);
   const anchorKey = options.cursor === undefined ? "\u0000waiting" : `\u0000${options.cursor}`;
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: descriptor.open/options.* 由 paramsKey/scopeKey 记忆——params 对象标识每渲染变化不应重开流
   const transport = useMemo<Transport<F>>(() => {
     if (!isDescriptor) return source as Transport<F>;
     return descriptor.open(options.params as Params, options.scope ?? {});
@@ -92,6 +93,7 @@ export function useSubscription<Params, F>(
   const getCursorRef = useRef(options.getCursor);
   getCursorRef.current = options.getCursor;
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: cursor/policy/autoStart 经 anchorKey/policyKey 锚定——引擎重建键 = transport × 锚点 × 策略（创建时值）
   useEffect(() => {
     const created = createSubscriptionEngine<F>({
       transport,

@@ -1,5 +1,3 @@
-import type { RecordHandle } from "./bindings";
-
 /**
  * useCan —— 权限门控（design.md §3 派生表：identity record Query + 纯谓词）。
  *

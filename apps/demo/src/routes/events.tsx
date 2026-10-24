@@ -1,6 +1,11 @@
-import { EventFeed } from "@blocks/subscription/event-feed";
 import { Page } from "@blocks/shell/page";
-import { collectionQueryOptions, useCollection, usePreference, useSubscription } from "@fleetly/fleet-ui-kit";
+import { EventFeed } from "@blocks/subscription/event-feed";
+import {
+  collectionQueryOptions,
+  useCollection,
+  usePreference,
+  useSubscription,
+} from "@fleetly/fleet-ui-kit";
 import type { Cursor, Segment } from "@fleetly/fleet-ui-kit/kernel";
 import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -10,11 +15,11 @@ import { Button } from "@/components/ui/button";
 import {
   anchorOf,
   appendLiveEvent,
+  type EventFrame,
   eventsMockTransport,
   eventsResource,
   eventsSearch,
   eventsStream,
-  type EventFrame,
 } from "@/lib/streams";
 
 export const Route = createFileRoute("/events")({
@@ -105,9 +110,7 @@ function EventsPage() {
         render={(frame) => (
           <>
             <Badge
-              tone={
-                frame.type === "deleted" ? "err" : frame.type === "created" ? "ok" : "accent"
-              }
+              tone={frame.type === "deleted" ? "err" : frame.type === "created" ? "ok" : "accent"}
             >
               {frame.type}
             </Badge>

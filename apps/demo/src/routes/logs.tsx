@@ -1,5 +1,5 @@
-import { LogViewer } from "@blocks/subscription/log-viewer";
 import { Page } from "@blocks/shell/page";
+import { LogViewer } from "@blocks/subscription/log-viewer";
 import { usePreference, useSubscription } from "@fleetly/fleet-ui-kit";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";

@@ -75,7 +75,7 @@ export function mockTransport<F>(options: MockTransportOptions<F> = {}): MockTra
 
   /** 面向句柄控制：只投给活着的当前连接 */
   function send(step: MockStep<F>): void {
-    if (active && active.alive) post(active, step);
+    if (active?.alive) post(active, step);
   }
 
   const handle: MockTransportHandle<F> = {
@@ -167,8 +167,9 @@ export function mockTransport<F>(options: MockTransportOptions<F> = {}): MockTra
 }
 
 /** 数字帧的便捷构造（测试：seq 即帧即游标）。 */
-export function mockSeqTransport(options: { intervalMs?: number; startSeq?: number } = {}):
-  MockTransport<number> {
+export function mockSeqTransport(
+  options: { intervalMs?: number; startSeq?: number } = {},
+): MockTransport<number> {
   return mockTransport<number>({
     cursorOf: (frame) => String(frame),
     auto: options.intervalMs
