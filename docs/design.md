@@ -775,6 +775,15 @@ torchwood console 取证要点（裁决依据）：react-router-dom **v7** 集�
 
 **批 A 不做（挂账后续批）**：表单族/OCC（B 批）、ListenPanel → useSubscription（C 批）、analytics → MetricChart（D 批）、kit http 管线收敛、file-based 路由改造、compat 全退。
 
+**批 A 实现期偏离回写（2026-10-24 落地，两批提交：路由换轨 + keyset 切片；门禁 90/90 绿 + 浏览器对照通过）**：
+
+- **裁决 2 修订——守卫保留组件形态**：auth 是 React context（AuthProvider + useQuery），`beforeLoad` 无 React 上下文可用；RequireAuth/RequireRole 经 `guarded()/roleGuarded()` 工厂挂 `component`，错误兜底用原生 `errorComponent`（RouteErrorBoundary 组件保留、壳换挂法）。beforeLoad 化随 compat 退场批次做。lazy 同理保留 React.lazy + 根级 Suspense（未用 route.lazy()——裁决 1 的实现修订）。
+- **裁决 3 修订——Segment.total 显示而非丢弃**：audit-logs 网关附带 total_count；块侧按"有则显示总数、无则仅本页行数"降级（其余 torchwood 列表端点无 total）。比"一律不显示"更贴近存量页语义（旧页显示 共 N 条）。
+- **裁决 7 修订——Select 保留 radix**：torchwood token 近恒等（text-muted-foreground 等全有），KeysetPagination 的页大小切换直接用本仓 radix Select（未拷 fleetly 原生 select 桥）；ListPage 拷贝去页头（fleetly 先例——页头归 PageHeader）。
+- **keyset 适配落地形态**（src/fleet/auditLogs.ts）：axios 失败在消费方适配器收敛为 ApiError 封闭集（fleet/errors.ts 的 toApiError——拦截器资产保留，kit createHttp 后续收敛批接入）；scope 三态经伪字段 `filter=scope:eq:…` 表达、适配器展开布尔参数；datetime 过滤 URL 存**绝对时刻**（页面边界按管理员时区做墙钟↔绝对换算，跨时区链接同窗）；schema **不设 defaultOrder**——排序三态 none/asc/desc 要能落回服务端默认序，defaultOrder 会把"无排序"钉死在 desc。
+- **TanStack 方言实测**（compat 层与测试已消化）：splat 是 `/$` 不是 `/*`（TestRouter 带 normalizeTestPath 双方言归一）；RouterProvider 首提交异步——jsdom 测试渲染后需 `await act(async () => {})` 冲刷；useOutletContext/useParams 非其导出——前者经 React context 自实现，后者经 useRouterState 合并 matches。
+- **URL 数组方言**：TanStack 默认序列化把数组值 JSON 编码（`filter=%5B%22action%3Aeq%3AX%22%5D`）——与默认解析往返自洽，消费方断言应读解析后的 search 对象而非原始 query 串。
+
 ---
 
 ## 13. 集中反模式清单（进 SKILL.md）

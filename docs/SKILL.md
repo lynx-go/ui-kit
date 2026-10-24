@@ -176,3 +176,5 @@ const sub = useSubscription(eventsStream, { cursor: anchor ?? undefined, getCurs
 ## 适配器作者
 
 见 docs/design.md §2（契约签名）、§5（Effect 缝隙）、§5.2（protojson 配方：int64 双策略/枚举全名/repeated 序列化/零值缺席）、§5.1（401 闭环管线次序）、§5.3 实现期裁决（订阅引擎分诊矩阵）。核心入口：`createHttp({ onUnauthorized })`、`defineResource`、`clientCollection(fetchAll)`、`mockCollection`、`ndjsonTransport`/`sseTransport`（终态判据 isEnded/endEvent 归你的适配器）、`mockTransport`（测试/demo 帧流）、`createSubscriptionEngine`（命令式消费，quickstart 直开 Transport `for await` 亦可）。
+
+keyset（服务端 token）方言的完整实装范本：torchwood 批 A 的 audit-logs 切片（design.md §12.2 实现期回写）——`window.cursor → page_token`、`order.dir → 枚举名`、谓词白名单展开、`Page → Segment`、消费方 axios 失败在适配器收敛 ApiError、URL 存绝对时刻。两个易咬点：schema 不设 defaultOrder（排序三态要能落回服务端默认序）；TanStack 把数组 search 值 JSON 编码，断言读解析后对象不读原始 query 串。
