@@ -10,10 +10,13 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BoomRouteImport } from './routes/boom'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as LogsRouteImport } from './routes/logs'
 import { Route as OwnersRouteImport } from './routes/owners'
 import { Route as QuickstartRouteImport } from './routes/quickstart'
+import { Route as ScopesRouteImport } from './routes/scopes'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as WidgetsIndexRouteImport } from './routes/widgets.index'
 import { Route as WidgetsIdRouteImport } from './routes/widgets.$id'
 import { Route as WidgetsKeysetRouteImport } from './routes/widgets.keyset'
@@ -21,6 +24,11 @@ import { Route as WidgetsKeysetRouteImport } from './routes/widgets.keyset'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoomRoute = BoomRouteImport.update({
+  id: '/boom',
+  path: '/boom',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EventsRoute = EventsRouteImport.update({
@@ -43,6 +51,16 @@ const QuickstartRoute = QuickstartRouteImport.update({
   path: '/quickstart',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ScopesRoute = ScopesRouteImport.update({
+  id: '/scopes',
+  path: '/scopes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WidgetsIndexRoute = WidgetsIndexRouteImport.update({
   id: '/widgets/',
   path: '/widgets/',
@@ -61,20 +79,26 @@ const WidgetsKeysetRoute = WidgetsKeysetRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/boom': typeof BoomRoute
   '/events': typeof EventsRoute
   '/logs': typeof LogsRoute
   '/owners': typeof OwnersRoute
   '/quickstart': typeof QuickstartRoute
+  '/scopes': typeof ScopesRoute
+  '/settings': typeof SettingsRoute
   '/widgets/$id': typeof WidgetsIdRoute
   '/widgets/keyset': typeof WidgetsKeysetRoute
   '/widgets/': typeof WidgetsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/boom': typeof BoomRoute
   '/events': typeof EventsRoute
   '/logs': typeof LogsRoute
   '/owners': typeof OwnersRoute
   '/quickstart': typeof QuickstartRoute
+  '/scopes': typeof ScopesRoute
+  '/settings': typeof SettingsRoute
   '/widgets/$id': typeof WidgetsIdRoute
   '/widgets/keyset': typeof WidgetsKeysetRoute
   '/widgets': typeof WidgetsIndexRoute
@@ -82,10 +106,13 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/boom': typeof BoomRoute
   '/events': typeof EventsRoute
   '/logs': typeof LogsRoute
   '/owners': typeof OwnersRoute
   '/quickstart': typeof QuickstartRoute
+  '/scopes': typeof ScopesRoute
+  '/settings': typeof SettingsRoute
   '/widgets/$id': typeof WidgetsIdRoute
   '/widgets/keyset': typeof WidgetsKeysetRoute
   '/widgets/': typeof WidgetsIndexRoute
@@ -94,30 +121,39 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/boom'
     | '/events'
     | '/logs'
     | '/owners'
     | '/quickstart'
+    | '/scopes'
+    | '/settings'
     | '/widgets/$id'
     | '/widgets/keyset'
     | '/widgets/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/boom'
     | '/events'
     | '/logs'
     | '/owners'
     | '/quickstart'
+    | '/scopes'
+    | '/settings'
     | '/widgets/$id'
     | '/widgets/keyset'
     | '/widgets'
   id:
     | '__root__'
     | '/'
+    | '/boom'
     | '/events'
     | '/logs'
     | '/owners'
     | '/quickstart'
+    | '/scopes'
+    | '/settings'
     | '/widgets/$id'
     | '/widgets/keyset'
     | '/widgets/'
@@ -125,10 +161,13 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BoomRoute: typeof BoomRoute
   EventsRoute: typeof EventsRoute
   LogsRoute: typeof LogsRoute
   OwnersRoute: typeof OwnersRoute
   QuickstartRoute: typeof QuickstartRoute
+  ScopesRoute: typeof ScopesRoute
+  SettingsRoute: typeof SettingsRoute
   WidgetsIdRoute: typeof WidgetsIdRoute
   WidgetsKeysetRoute: typeof WidgetsKeysetRoute
   WidgetsIndexRoute: typeof WidgetsIndexRoute
@@ -141,6 +180,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/boom': {
+      id: '/boom'
+      path: '/boom'
+      fullPath: '/boom'
+      preLoaderRoute: typeof BoomRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/events': {
@@ -171,6 +217,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuickstartRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/scopes': {
+      id: '/scopes'
+      path: '/scopes'
+      fullPath: '/scopes'
+      preLoaderRoute: typeof ScopesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/widgets/': {
       id: '/widgets/'
       path: '/widgets'
@@ -197,10 +257,13 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BoomRoute: BoomRoute,
   EventsRoute: EventsRoute,
   LogsRoute: LogsRoute,
   OwnersRoute: OwnersRoute,
   QuickstartRoute: QuickstartRoute,
+  ScopesRoute: ScopesRoute,
+  SettingsRoute: SettingsRoute,
   WidgetsIdRoute: WidgetsIdRoute,
   WidgetsKeysetRoute: WidgetsKeysetRoute,
   WidgetsIndexRoute: WidgetsIndexRoute,

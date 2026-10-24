@@ -16,4 +16,12 @@ export const nav: NavSection[] = [
       { label: "Quickstart (wizard)", to: "/quickstart" },
     ],
   },
+  {
+    label: "Shell",
+    items: [
+      { label: "Scope sync (URL ↔ storage)", to: "/scopes" },
+      { label: "Settings (SectionCard × n)", to: "/settings" },
+      { label: "Boom (error boundary)", to: "/boom" },
+    ],
+  },
 ];

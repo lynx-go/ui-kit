@@ -28,7 +28,7 @@ export const Route = createFileRoute("/widgets/")({
 
 // 3) 页面：绑定 + 块
 function WidgetsPage() {
-  const list = useCollection(widgetsClient, { from: Route.fullPath, search: widgetsSearch });
+  const list = useCollection(widgetsClient, { from: Route.id, search: widgetsSearch });
   return (
     <ListPage list={list} title="Widgets"
       toolbar={<FilterBar list={list} schema={widgetsSearch} />}
@@ -40,6 +40,8 @@ function WidgetsPage() {
 ```
 
 - URL 键名：`q` / `filter=field:op:value` / `sort=field:dir` / `cursor` / `page` / `size`。
+- **`from` 传 `Route.id`**（不是 fullPath）：pathless 布局（如 `_shell`）下 id 含布局段而 fullPath 不含，
+  `useSearch` 按路由 id 找活跃 match——fleetly 试点实咬（design §12.1 kit 修复 #2）。
 - "URL + schema 默认值"即真相；翻页=push（历史栈即分页栈），过滤/排序=replace+回第一页。
 - 四态（loading/empty/error/success）由 ListPage 切换；你只写 success 态的 children。
 - 预取：`collectionQueryOptions(resource, query)` 进 route loader 的 `ensureQueryData` + `Link preload="intent"`。
@@ -110,7 +112,7 @@ const sub = useSubscription(logsTransport, { cursor: null }); // null = 活尾�
 <LogViewer sub={sub} formatLine={(f) => `${f.ts} ${f.msg}`} />
 
 // backlog 定锚 × 续订（events 组合页）
-const list = useCollection(eventsResource, { from: Route.fullPath, search: eventsSearch });
+const list = useCollection(eventsResource, { from: Route.id, search: eventsSearch });
 const [anchor, setAnchor] = useState<Cursor | null>(null);
 // …backlog 首次成功 → setAnchor(最新一端)…
 const sub = useSubscription(eventsStream, { cursor: anchor ?? undefined, getCursor: (f) => String(f.seq) });
@@ -125,6 +127,19 @@ const sub = useSubscription(eventsStream, { cursor: anchor ?? undefined, getCurs
 - 阶段时间线：`<StageTimeline sub stages onStage>`——页面声明阶段目录（次序+文案），帧经
   `onStage(frame) → {key, status, at?} | undefined` 投影（undefined = 与时间线无关）。
 - 帧失效查询：见"配方速记"的 `useInvalidateOnFrame`。
+
+## Shell 三件（作用域 / 设置页 / 错误边界）
+
+- **作用域切换**：`<ScopeSwitcher label value options onChange staleNote?>`——onChange 带
+  `meta.source: "user" | "correction"`（用户切换 push、陈旧 id 校正 replace）。块内置陈旧 id
+  校正（value 不在 options 时 effect 期回落首个可用）。双通道同步（URL↔localStorage）是页面
+  四件套配方：写方向规则 / storage 事件桥 / synced 守卫（同值不写）/ 防乒乓（setItem 幂等）
+  ——demo `routes/scopes.tsx` 是参照实现。
+- **设置页**：`SectionCard × n × usePreference(key, fallback)`——独立页（`Page width="narrow"`）
+  与详情 settings tab 是同一配方的两种宿主。demo `routes/settings.tsx`。
+- **每路由错误边界**：路由挂 `errorComponent: ({ error, reset }) => <RouteErrorBoundary error reset>`
+  ——页面崩溃兜底（数据面错误走 ListPage 四态，别混）。Retry 恢复语义归页面（如先清失败参数
+  再 reset）。demo `routes/boom.tsx`（`?fail=1` 注入崩溃）。
 
 ## 反模式（必读）
 

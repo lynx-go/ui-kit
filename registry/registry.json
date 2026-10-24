@@ -415,6 +415,39 @@
       "registryDependencies": []
     },
     {
+      "name": "shell-route-error-boundary",
+      "type": "registry:block",
+      "title": "route-error-boundary",
+      "files": [
+        {
+          "path": "registry/shell/route-error-boundary.tsx",
+          "target": "components/fleet/shell/route-error-boundary.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1",
+        "@fleetly/fleet-ui-kit@workspace:*"
+      ],
+      "registryDependencies": []
+    },
+    {
+      "name": "shell-scope-switcher",
+      "type": "registry:block",
+      "title": "scope-switcher",
+      "files": [
+        {
+          "path": "registry/shell/scope-switcher.tsx",
+          "target": "components/fleet/shell/scope-switcher.tsx",
+          "type": "registry:block"
+        }
+      ],
+      "dependencies": [
+        "@fleetly/fleet-ui-kit@^0.1"
+      ],
+      "registryDependencies": []
+    },
+    {
       "name": "shell-section-card",
       "type": "registry:block",
       "title": "section-card",
