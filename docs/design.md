@@ -759,6 +759,8 @@ createHttp({
 
 **§12 路线第 5 步补记：metrics 页对照直迁（2026-10-24 完成）**：MetricChart 块拷入 console（该块零 kit import——recharts + shadcn chart 基元 + cn，token 映射同 §12.1-4 表）；`features/metrics/metric-chart.tsx` 重写为**页面投影 + 同名薄壳**——`toMetricSeries`（key=`s{下标}`、label 经 seriesIdentity 按全集频次判别同名副本）+ `serverCapOf`（truncated/series_total → 块 serverCap props），**seriesIdentity 留 console 侧**（§6.1 裁决兑现：base/replica 是业务词汇）；三个调用点（工作台/app metrics tab/databases metrics）props 零改动——投影薄壳是 v1 形 props 与块 props 之间的诚实边界。旧 console 的 10 条数据语义测试锚（零值缺省/时间轴对齐/脏点/s{index} 唯一/身份判别/活跃排序/截断披露）完整迁移到 `toMetricSeries ∘ buildMetricRows` 真实执行路径——**vendored 块的单测覆盖家在消费方**（registry 块不进 ui-kit 包，fleet-ui 侧只有 e2e 覆盖），此约定成文。行为差异记录：图内重复的 ChartLegend（旧实现渲染了两份图例）随迁移消去，"+N more" 文案由业务句（"stopped replicas…queryable in the workbench"）改为块的通用句——实体文案归页面/消费方的边界在此反向生效（块不认业务词；消费方如需业务句可自持薄壳覆写，本批接受通用句）。浏览器实测（stub 15 序列 fixture）：活跃窗排序/双副本判别尾/全零序列 0% 末值（W-B1 锚）/10 条渲染上限/+N more/服务端截断披露全部呈现。
 
+**分发形态演进（2026-10-24，npm 首发后）**：裁决 1 的 vendored tarball 是未发布期的过渡形态——@lynx-go/ui-kit 0.1.1 公开发布后，console 已切 registry 依赖 `^0.1.1`（vendor/ 目录删除，CI install 不再依赖双仓同步，痛点 #1 随之消解）。发版纪律成文：**必须 `pnpm publish`**——`npm publish` 不解析 pnpm `catalog:` 协议，首发 0.1.0 依赖泄漏 `"effect": "catalog:default"` 不可安装（已 deprecate，净房 install 实证 EUNSUPPORTEDPROTOCOL）；publint + 净房 `npm install` 冒烟是发版门。可见性裁决：组织无付费计划，`publishConfig.access: public`（源码分发模型下 npm 包即源码公开，接受）。
+
 ---
 
 ## 13. 集中反模式清单（进 SKILL.md）
