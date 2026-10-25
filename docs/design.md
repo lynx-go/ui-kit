@@ -899,6 +899,14 @@ torchwood console 取证要点（裁决依据）：react-router-dom **v7** 集�
 - **registry-build 修复实证**：依赖面收敛为 `@lynx-go/ui-kit@^0.1` + `recharts@^3.10.1` 两项（此前 workspace:\* 与 catalog:default 混入）；catalog 解析不到时构建期硬错（协议泄漏不过夜）。
 - 痛点对照收束：②（token 映射表）✓ 工具化；③（基元方言）→ 检测提示（chart 基元/tone=）；④（cn shim）→ profile cnImport 规范化；①（tarball 同步）已被 npm 发版消解；⑤⑥⑦⑧ 维持原处置（上游可修/已修/判断题）。
 
+### 12.8 torchwood 可用性收口——BarChart 根因 + 全站扫查 + 合入 main（2026-10-25）
+
+目标"新 console 尽快可用"的收口批：修已知的用户可见缺陷 → 全站烟雾 → 合 main。
+
+- **BarChart 根因链（D 批挂账的存量缺陷收口）**：维度拆解柱体不渲染 = **recharts 3.10 Bar 入场动画管线在嵌入式 WebView 卡死**——`.recharts-bar-rectangle` 组挂载但 `Rectangle` 因动画未完成永不产出 path（源码定位：Rectangle 的 x/y/w/h 全 NaN/0 防御性返 null；动画态几何未就绪）。多变体二分实证：margin/网格/刻度/radius/Tooltip/容器（ResponsiveContainer 与 shadcn ChartContainer）/数据（真实与静态）逐一排除，**`isAnimationActive={false}` 是唯一决定变量**（关动画后两种数据均正常出柱）。修法与 MetricChart 块自身约定一致（动画/圆点全局关——上游设计"轮询刷新不闪烁"在此意外避坑）。**方法论教训两条**：① HMR 会僵死（编辑不触发更新、lazy chunk 供旧码）——二分实验中途须整页重载/重启 dev server，否则结论被陈旧 bundle 污染（本批一度"修复无效"实为测到旧码）；② vite dev 的 SPA base 下 `/console`（无尾斜杠）落 base 提示页——烟雾扫查的"空白页"先辨工件再定罪。
+- **全站烟雾扫查**：stub 补 13 个列表端点（各区 api 模块的响应键空集）+ 未知 GET 兜底回 `{}`；浏览器逐区导航 17 页（Dashboard/api-keys/databases/storage/functions/webhooks/runtime-vars/analytics/users/groups/orders/assets/subscriptions/leaderboards/projects/admins/audit-logs）——全部渲染无空白无错误边界（Dashboard 首扫 0 是 /console 无斜杠工件 + 冷编译 900ms 不够，加长等待/带斜杠后全过）。
+- **合入**：torchwood PR #2（feat/console-tanstack-migration → main，30 commits = 批 A–D + B2 + 修复），CI 双绿（Frontend lint+build 1m9s / Backend lint+test+build 8m29s），merge commit `117e4dce`。**新 console 自此在 main 可用**（部署走既有 CI 镜像 + 部署机手动 Redeploy 流程）。存量挂账不阻塞：compat 逐页退场、列表骨架 fleet 化、documents 表单换轨、服务端错误体 details 透传。
+
 ---
 
 ## 13. 集中反模式清单（进 SKILL.md）
