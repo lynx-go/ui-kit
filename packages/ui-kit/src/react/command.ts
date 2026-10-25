@@ -63,7 +63,14 @@ export function useCommand<Input, Payload, ID = never>(
   options: UseCommandOptions<Payload> = {},
 ): CommandHandle<Input, Payload> {
   const queryClient = useQueryClient();
-  const scope = options.scope ?? useContextScope() ?? {};
+  // scope 缺省链同查询绑定：显式传入 > （descriptor 声明了 scope 键时——
+  // defineResource 注入 __scopeKeys）Provider context > 空。裸 descriptor
+  // 无声明锚，不采纳 context。
+  const contextScope = useContextScope();
+  const scope =
+    options.scope ??
+    (descriptor.__scopeKeys?.length ? contextScope : undefined) ??
+    {};
 
   const mutation = useMutation<CommandResult<Payload>, ApiError, Input>({
     mutationFn: (input) => runCommand(descriptor, input, scope),

@@ -1,6 +1,6 @@
 {
   "name": "@lynx-go/ui-kit",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Headless core for data-dense console UIs — Query / Command / Subscription over TanStack engines",
   "type": "module",
   "license": "MIT",

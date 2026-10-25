@@ -146,3 +146,22 @@ describe("defineResource commands 类型收窄（§12.10-⑥）", () => {
     expect(streams.commands).toBeUndefined();
   });
 });
+
+describe("scope 声明注入（§12.10-③：声明 = 参与 scope 线程）", () => {
+  it("defineResource 注入 __scopeKeys（命令/订阅）；未声明为 undefined", () => {
+    const apps = defineResource({
+      name: "apps",
+      scope: ["projectId"],
+      commands: { save: { run: async () => ok(1) } },
+      subscriptions: {
+        listen: {
+          open: () => ({ async *[Symbol.asyncIterator]() {} }) as never,
+          policy: { buffer: 10, retry: { backoffMs: [] } },
+        },
+      },
+    });
+    expect(apps.commands.save.__scopeKeys).toEqual(["projectId"]);
+    const bare = defineResource({ name: "streams", commands: { go: { run: async () => ok(1) } } });
+    expect(bare.commands.go.__scopeKeys).toBeUndefined();
+  });
+});

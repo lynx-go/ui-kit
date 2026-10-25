@@ -89,9 +89,11 @@ export function useCollection<T, ID, C extends CommandsRecord<ID>, S extends Sub
     replace?: boolean;
   }) => Promise<void>;
 
-  // scope 缺省链：显式传入 > ResourceScopeProvider context > 无 scope。
+  // scope 缺省链：显式传入 > （资源声明了 scope 键时）ResourceScopeProvider
+  // context > 无 scope。声明 = 参与 scope 线程：未声明 scope 键的资源不采纳
+  // context 值——平台级资源不被项目 scope 意外污染（queryKey/失效相交均不受影响）。
   const contextScope = useContextScope();
-  const scope = options.scope ?? contextScope;
+  const scope = options.scope ?? (resource.scope?.length ? contextScope : undefined);
   const target = scope ? scoped(resource, scope) : resource;
   const query = options.search.decode(rawSearch);
   const keepPrevious = options.query?.keepPrevious !== false;
@@ -195,7 +197,8 @@ export function useRecord<T, ID, C extends CommandsRecord<ID>, S extends SubsRec
   resource: Resource<T, ID, C, S>,
   options: { id: ID | undefined; scope?: ResourceScope; query?: { staleTime?: number } },
 ): RecordHandle<T> {
-  const scope = options.scope ?? useContextScope();
+  const contextScope = useContextScope();
+  const scope = options.scope ?? (resource.scope?.length ? contextScope : undefined);
   const target = scope ? scoped(resource, scope) : resource;
   const result = useQuery<T, ApiError>({
     ...recordQueryOptions(target, options.id, {
@@ -222,7 +225,8 @@ export function useBatch<T, ID, C extends CommandsRecord<ID>, S extends SubsReco
   ids: ReadonlyArray<ID>,
   options: { scope?: ResourceScope; query?: { staleTime?: number } } = {},
 ): BatchHandle<T, ID> {
-  const scope = options.scope ?? useContextScope();
+  const contextScope = useContextScope();
+  const scope = options.scope ?? (resource.scope?.length ? contextScope : undefined);
   const target = scope ? scoped(resource, scope) : resource;
   const result = useQuery<ReadonlyArray<T>, ApiError>({
     ...batchQueryOptions(target, ids, {

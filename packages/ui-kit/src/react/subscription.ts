@@ -74,8 +74,15 @@ export function useSubscription<Params, F>(
   const isDescriptor =
     typeof (source as { policy?: unknown }).policy === "object" &&
     typeof source.open === "function";
-  // scope 缺省链同查询/命令绑定：显式传入 > ResourceScopeProvider context > 空
-  const scope = options.scope ?? useContextScope() ?? {};
+  // scope 缺省链同查询/命令绑定：显式传入 > （descriptor 声明了 scope 键时
+  // ——defineResource 注入 __scopeKeys）ResourceScopeProvider context > 空
+  const contextScope = useContextScope();
+  const scope =
+    options.scope ??
+    ((descriptor as { __scopeKeys?: ReadonlyArray<string> }).__scopeKeys?.length
+      ? contextScope
+      : undefined) ??
+    {};
   const paramsKey = options.params === undefined ? "" : JSON.stringify(options.params);
   const scopeKey = JSON.stringify(scope);
   const policy = options.policy ?? descriptor.policy;

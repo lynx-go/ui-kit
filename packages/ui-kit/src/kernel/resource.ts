@@ -37,6 +37,12 @@ export interface CommandDescriptor<Input, Payload, ID = never> {
    * （内置动词同资源失效，跨资源声明走 invalidates）。
    */
   __resource?: ResourceName;
+  /**
+   * @internal 资源的 scope 键声明——defineResource 注入。命令绑定据此决定是否
+   * 采纳 ResourceScopeProvider 的 context 值（声明 = 参与 scope 线程，与查询
+   * 绑定同契约）；裸 descriptor 无此锚，context 采纳不生效。
+   */
+  __scopeKeys?: ReadonlyArray<string>;
 }
 
 export interface SubscriptionDescriptor<Params, Frame> {
@@ -47,12 +53,14 @@ export interface SubscriptionDescriptor<Params, Frame> {
 
 export type CommandsRecord<ID> = Record<string, CommandDescriptor<any, any, ID>>;
 
-/** defineResource 注入 __resource/legacyKeys 后的命令映射（逐键保留具体 Input/Payload 类型） */
+/** defineResource 注入 __resource/legacyKeys/__scopeKeys 后的命令映射（逐键保留具体 Input/Payload 类型） */
 export type AttachedCommands<C> = {
   [K in keyof C]: C[K] & {
     __resource?: ResourceName;
     /** defineResource 从 spec.legacyKeys 注入（descriptor 自带优先）；类型面恒可选 */
     legacyKeys?: (scope: ResourceScope) => ReadonlyArray<readonly unknown[]>;
+    /** 资源的 scope 键声明（context 采纳锚）；未声明为 undefined */
+    __scopeKeys?: ReadonlyArray<string>;
   };
 };
 export type SubsRecord = Record<string, SubscriptionDescriptor<any, any>>;
@@ -160,11 +168,20 @@ export function defineResource<
             __resource: spec.name as ResourceName,
             // 存量键桥缺省注入：资源级声明对全部命令生效，descriptor 自带优先
             legacyKeys: descriptor.legacyKeys ?? spec.legacyKeys,
+            __scopeKeys: spec.scope,
           },
         ]),
       ) as AttachedCommands<C>)
     : undefined;
-  return { ...spec, commands, name: spec.name as ResourceName };
+  const subscriptions = spec.subscriptions
+    ? (Object.fromEntries(
+        Object.entries(spec.subscriptions).map(([verb, descriptor]) => [
+          verb,
+          { ...descriptor, __scopeKeys: spec.scope },
+        ]),
+      ) as unknown as S)
+    : undefined;
+  return { ...spec, commands, subscriptions, name: spec.name as ResourceName };
 }
 
 /**
