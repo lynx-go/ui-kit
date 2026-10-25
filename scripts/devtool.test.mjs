@@ -79,7 +79,7 @@ test("头生成：源路径/版本/profile/适配清单/手工区", () => {
     unmapped: [{ token: "text-warn", count: 2 }],
     manualHints: ["Badge tone= ×1——…"],
   });
-  assert.match(header, /vendored from fleet-ui registry\/values\/states\.tsx @0\.1\.1（2026-10-25 测试批次）/);
+  assert.match(header, /vendored from @lynx-go\/ui registry\/values\/states\.tsx @0\.1\.1（2026-10-25 测试批次）/);
   assert.match(header, /--profile torchwood/);
   assert.match(header, /text-muted→text-muted-foreground/);
   assert.match(header, /手工步骤/);
@@ -132,7 +132,7 @@ test("registry.json 依赖收敛：无 workspace:/catalog: 协议泄漏，core �
     assert.doesNotMatch(dep, /workspace:/, `协议泄漏：${dep}`);
     assert.doesNotMatch(dep, /catalog:/, `协议泄漏：${dep}`);
   }
-  assert.ok(deps.has("@lynx-go/ui-kit@^0.1"));
+  assert.ok(deps.has("@lynx-go/ui-kit@^0.2"));
   const kitCount = items.filter((it) =>
     it.dependencies.filter((d) => d.startsWith("@lynx-go/ui-kit")).length > 1,
   );
@@ -150,10 +150,10 @@ test("CLI 端到端：copy 真块到临时目录（映射+头+警告面+不覆�
     );
     assert.match(out, /⚠ 未映射/);
     assert.match(out, /tone=/);
-    const target = join(tmp, "components", "fleet", "subscription", "event-feed.tsx");
+    const target = join(tmp, "components", "lynx", "subscription", "event-feed.tsx");
     assert.ok(existsSync(target));
     const vendored = readFileSync(target, "utf8");
-    assert.match(vendored, /^\/\/ vendored from fleet-ui registry\/subscription\/event-feed\.tsx @\d+\.\d+\.\d+/);
+    assert.match(vendored, /^\/\/ vendored from @lynx-go\/ui registry\/subscription\/event-feed\.tsx @\d+\.\d+\.\d+/);
     assert.match(vendored, /text-muted-foreground/);
     // 代码体（头注释之后的 import 起）不得残留源方言 token——头注释里的
     // "text-muted→text-muted-foreground" 是映射文档，属合法出现。
@@ -179,7 +179,7 @@ test("CLI 端到端：copy 真块到临时目录（映射+头+警告面+不覆�
       ["scripts/devtool.mjs", "copy", "values/states", "--to", tmp, "--profile", "fleetly", "--force"],
       { cwd: root, encoding: "utf8" },
     );
-    const states = readFileSync(join(tmp, "components", "fleet", "values", "states.tsx"), "utf8");
+    const states = readFileSync(join(tmp, "components", "lynx", "values", "states.tsx"), "utf8");
     const statesBody = states.slice(states.indexOf("\nimport"));
     assert.match(statesBody, /text-\[var\(--status-danger\)\]/);
     assert.doesNotMatch(statesBody, /(?<![\w-])text-err(?![\w-])/);

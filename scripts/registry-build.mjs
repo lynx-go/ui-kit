@@ -22,7 +22,7 @@ const families = ["values", "query", "command", "subscription", "shell"];
 
 // core 依赖单源：kit 自身的 semver range（root devDeps 里是 workspace:*，不可外发）
 const CORE_PACKAGE = "@lynx-go/ui-kit";
-const CORE_RANGE = "^0.1";
+const CORE_RANGE = "^0.2";
 
 // 生态基线包：vendored shadcn 模型下假定消费方已有，不进 dependencies
 const ECOSYSTEM = [

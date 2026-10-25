@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * devtool —— 拷贝制适配的机械化（design.md §12.7）：registry 块 → 消费方
- * components/fleet/<family>/ 的 token 方言重写 + vendored 头生成 + 判断题警告。
+ * components/lynx/<family>/ 的 token 方言重写 + vendored 头生成 + 判断题警告。
  *
  * 机械面（工具吃掉）：token 类名映射（词边界，连字符是 token 内部字符）、
  * cn import 规范化、vendored 头、依赖提示（registry.json 单源）。
@@ -81,7 +81,7 @@ export function detectManualHints(source) {
 /** vendored 头生成（既有批次的实证格式自动化）。 */
 export function buildVendoredHeader({ sourcePath, kitVersion, date, note, profile, applied, unmapped, manualHints }) {
   const lines = [];
-  lines.push(`// vendored from fleet-ui ${sourcePath} @${kitVersion}（${date}${note ? ` ${note}` : ""}）`);
+  lines.push(`// vendored from @lynx-go/ui ${sourcePath} @${kitVersion}（${date}${note ? ` ${note}` : ""}）`);
   lines.push(`// 拷贝适配（scripts/devtool.mjs --profile ${profile.name}）：`);
   const mapNote = applied.length > 0
     ? applied.map((a) => `${a.from}→${a.to}`).join("、")
@@ -113,12 +113,11 @@ function kitVersion() {
   return JSON.parse(readFileSync(join(root, "packages", "ui-kit", "package.json"), "utf8")).version;
 }
 
-function registryDeps(sourcePath) {
+function registryItem(sourcePath) {
   const registryJson = join(root, "registry", "registry.json");
   if (!existsSync(registryJson)) return null;
   const { items } = JSON.parse(readFileSync(registryJson, "utf8"));
-  const item = items.find((it) => it.files.some((f) => f.path === sourcePath));
-  return item ? item.dependencies : null;
+  return items.find((it) => it.files.some((f) => f.path === sourcePath)) ?? null;
 }
 
 function cmdList() {
@@ -145,7 +144,7 @@ function cmdProfiles() {
 }
 
 function cmdCopy(blockRef, options) {
-  const { to, profileName, note, force } = options;
+  const { to, profileName, note, force, dir } = options;
   const match = /^([\w-]+)\/([\w-]+)$/.exec(blockRef);
   if (!match) die(`块引用形如 <family>/<name>，如 values/metric-chart（收到 "${blockRef}"）`);
   const [, family, name] = match;
@@ -161,9 +160,19 @@ function cmdCopy(blockRef, options) {
   if (!profile) die(`profile 不存在：${profileName}（可用：${Object.keys(profiles).join(", ")}）`);
   if (!to) die(`--to <consumer-root> 必填（拷贝目标仓根，如 ~/workspace/qiulin/torchwood/console）`);
 
-  const target = join(resolve(to), "components", "fleet", family, `${name}.tsx`);
-  if (existsSync(target) && !force) {
-    die(`目标已存在：${target}（拷贝制的手工适配不可自动叠加——确认覆盖用 --force，或手工对照升级）`);
+  // 多文件块（registry files[]，含 .ts 伴生）：主文件 + 伴生全部拷贝；
+  // 目标基目录缺省 registry 约定 components/lynx（torchwood --dir src/components/fleet）。
+  const item = registryItem(sourcePath);
+  const fileList = item ? item.files.map((f) => f.path) : [sourcePath];
+  const baseDir = dir ?? join("components", "lynx");
+
+  const targets = fileList.map((rel) => {
+    const relFromFamily = rel.split("/").slice(-2).join("/");
+    return join(resolve(to), baseDir, relFromFamily);
+  });
+  const existing = targets.filter((t) => existsSync(t));
+  if (existing.length > 0 && !force) {
+    die(`目标已存在：${existing.join(", ")}（拷贝制的手工适配不可自动叠加——确认覆盖用 --force，或手工对照升级）`);
   }
 
   const { output, applied, unmapped } = applyTokenMap(source, profile.tokenMap);
@@ -179,14 +188,21 @@ function cmdCopy(blockRef, options) {
     manualHints,
   });
 
-  mkdirSync(dirname(target), { recursive: true });
-  writeFileSync(target, `${header}\n${output}`);
+  mkdirSync(dirname(targets[0]), { recursive: true });
+  writeFileSync(targets[0], `${header}\n${output}`);
 
-  console.log(`✓ ${sourcePath} → ${target}（profile ${profile.name}）`);
+  console.log(`✓ ${sourcePath} → ${targets[0]}（profile ${profile.name}）`);
+  // 伴生文件（.ts 纯函数旁置等）：同头 + 同 token 映射，无手工提示面
+  for (let i = 1; i < fileList.length; i += 1) {
+    const sidecarSource = readFileSync(join(root, fileList[i]), "utf8");
+    const mapped = applyTokenMap(sidecarSource, profile.tokenMap);
+    writeFileSync(targets[i], `${header}\n${mapped.output}`);
+    console.log(`✓ ${fileList[i]} → ${targets[i]}`);
+  }
   for (const a of applied) console.log(`  token ${a.from}→${a.to} ×${a.count}`);
   for (const u of unmapped) console.log(`  ⚠ 未映射 ${u.token} ×${u.count}（手工判断）`);
   for (const hint of manualHints) console.log(`  ⚠ ${hint}`);
-  const deps = registryDeps(sourcePath);
+  const deps = item ? item.dependencies : null;
   if (deps && deps.length > 0) console.log(`  deps（registry.json）：${deps.join(" ")}`);
 }
 
@@ -200,7 +216,7 @@ function main(argv) {
   if (command === "list") return cmdList();
   if (command === "profiles") return cmdProfiles();
   if (command === "copy") {
-    const options = { to: null, profileName: "torchwood", note: "", force: false };
+    const options = { to: null, profileName: "torchwood", note: "", force: false, dir: null };
     const positional = [];
     for (let i = 0; i < rest.length; i += 1) {
       const arg = rest[i];
@@ -208,6 +224,7 @@ function main(argv) {
       else if (arg === "--profile") options.profileName = rest[++i];
       else if (arg === "--note") options.note = rest[++i];
       else if (arg === "--force") options.force = true;
+      else if (arg === "--dir") options.dir = rest[++i];
       else positional.push(arg);
     }
     if (positional.length !== 1) die("copy 需要 exactly 一个块引用：<family>/<name>");
