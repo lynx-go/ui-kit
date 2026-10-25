@@ -1,6 +1,6 @@
-import type { Predicate } from "@lynx-go/ui-kit/kernel";
-import { textPredicate } from "@lynx-go/ui-kit/kernel";
+import { textPredicate, type Predicate } from "@lynx-go/ui-kit/kernel";
 import type { CollectionHandle } from "@lynx-go/ui-kit/react";
+import { filterValues, predicateOf } from "@lynx-go/ui-kit/schema";
 import type { FilterFieldDef, QuerySearchSchema } from "@lynx-go/ui-kit/schema";
 import { Search, X } from "lucide-react";
 import { useState } from "react";
@@ -12,6 +12,8 @@ import { Select } from "@/components/ui/select";
  * FilterBar（query 块）—— 文本搜索（q）+ 下拉过滤（filter=field:op:value）。
  * 提交走 list.setPredicate（replace + 清游标回第一页）；清空恢复默认。
  * 过滤字段清单来自与路由共用的 schema 工厂（同一实例，单一事实源）。
+ * 谓词读写经 schema 纯函数层（filterValues/predicateOf）——本块只是薄壳，
+ * 消费方自绘过滤条时复用同一对纯函数（§12.10-④）。
  */
 export interface FilterBarProps<T> {
   list: CollectionHandle<T>;
@@ -19,29 +21,18 @@ export interface FilterBarProps<T> {
   textPlaceholder?: string;
 }
 
-function currentFilters(
-  list: CollectionHandle<never> | CollectionHandle<unknown>,
-): Record<string, string | undefined> {
-  const predicate = (list as CollectionHandle<unknown>).query.predicate;
-  const out: Record<string, string | undefined> = {};
-  const leaves =
-    predicate && "all" in predicate
-      ? predicate.all
-      : predicate && "field" in predicate
-        ? [predicate]
-        : [];
-  for (const leaf of leaves) {
-    if ("field" in leaf && typeof leaf.value === "string") out[leaf.field as string] = leaf.value;
-  }
-  return out;
-}
-
 export function FilterBar<T>({ list, schema, textPlaceholder }: FilterBarProps<T>) {
   const spec: ReadonlyArray<FilterFieldDef> = schema.spec.filters ?? [];
   const [text, setText] = useState(() =>
     typeof schema.encode(list.query).q === "string" ? (schema.encode(list.query).q as string) : "",
   );
-  const selects = currentFilters(list);
+  // 读路径：单值投影收窄到 spec 字段（过滤下拉即单值）
+  const values = filterValues(list.query.predicate);
+  const selects: Record<string, string | undefined> = {};
+  for (const def of spec) {
+    const v = values[def.field];
+    if (typeof v === "string") selects[def.field] = v;
+  }
 
   const apply = (nextText: string, nextSelects: Record<string, string | undefined>) => {
     const parts: Predicate[] = [];
@@ -53,7 +44,7 @@ export function FilterBar<T>({ list, schema, textPlaceholder }: FilterBarProps<T
         parts.push({ field: def.field, op: def.op ?? "eq", value });
       }
     }
-    list.setPredicate(parts.length > 0 ? (parts.length === 1 ? parts[0]! : { all: parts }) : null);
+    list.setPredicate(predicateOf(parts));
   };
 
   return (

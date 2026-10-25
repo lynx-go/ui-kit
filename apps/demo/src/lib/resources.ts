@@ -96,6 +96,45 @@ export const widgetsKeyset = defineResource({
   collection: widgetsKeysetMock.collection,
 });
 
+// ============ scope 单源配方（ResourceScopeProvider + 未就绪停用，§12.10-③） ============
+
+export interface ScopedWidget {
+  id: string;
+  name: string;
+  project: string;
+}
+
+const SCOPED_ROWS: ScopedWidget[] = [
+  ...Array.from({ length: 3 }, (_, i) => ({
+    id: `alpha-${i + 1}`,
+    name: `Alpha widget ${i + 1}`,
+    project: "proj-alpha",
+  })),
+  ...Array.from({ length: 2 }, (_, i) => ({
+    id: `beta-${i + 1}`,
+    name: `Beta widget ${i + 1}`,
+    project: "proj-beta",
+  })),
+];
+
+/**
+ * 声明 scope 键的资源：绑定在 Provider 值缺键时自动停用（enabled: false）
+ * ——未就绪查询不启用，页面不再逐处写 enabled 守卫；适配器的空段守卫退居防御。
+ */
+export const scopedWidgets = defineResource({
+  name: "scoped-widgets",
+  getId: (row: ScopedWidget) => row.id,
+  scope: ["projectId"],
+  collection: async (q, ctx) => {
+    if (ctx.projectId == null) return { rows: [] }; // 防御：未就绪停用外的兜底
+    await new Promise((r) => setTimeout(r, 120));
+    const rows = SCOPED_ROWS.filter((row) => row.project === ctx.projectId);
+    return { rows, total: rows.length };
+  },
+});
+
+export const scopedWidgetsSearch = collectionQuerySchema({ defaultSize: 8 });
+
 // ============ identity（useCan 门控演示：record Query + 纯谓词，fail-closed） ============
 
 export interface Identity {

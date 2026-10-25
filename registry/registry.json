@@ -7,7 +7,7 @@
       "files": [
         {
           "path": "registry/values/copy-button.tsx",
-          "target": "components/fleet/values/copy-button.tsx",
+          "target": "components/lynx/values/copy-button.tsx",
           "type": "registry:block"
         }
       ],
@@ -23,7 +23,7 @@
       "files": [
         {
           "path": "registry/values/diff-view.tsx",
-          "target": "components/fleet/values/diff-view.tsx",
+          "target": "components/lynx/values/diff-view.tsx",
           "type": "registry:block"
         }
       ],
@@ -39,7 +39,7 @@
       "files": [
         {
           "path": "registry/values/json-field.tsx",
-          "target": "components/fleet/values/json-field.tsx",
+          "target": "components/lynx/values/json-field.tsx",
           "type": "registry:block"
         }
       ],
@@ -55,7 +55,12 @@
       "files": [
         {
           "path": "registry/values/metric-chart.tsx",
-          "target": "components/fleet/values/metric-chart.tsx",
+          "target": "components/lynx/values/metric-chart.tsx",
+          "type": "registry:block"
+        },
+        {
+          "path": "registry/values/metric-rows.ts",
+          "target": "components/lynx/values/metric-rows.ts",
           "type": "registry:block"
         }
       ],
@@ -72,7 +77,7 @@
       "files": [
         {
           "path": "registry/values/relative-time.tsx",
-          "target": "components/fleet/values/relative-time.tsx",
+          "target": "components/lynx/values/relative-time.tsx",
           "type": "registry:block"
         }
       ],
@@ -88,7 +93,7 @@
       "files": [
         {
           "path": "registry/values/secret-reveal.tsx",
-          "target": "components/fleet/values/secret-reveal.tsx",
+          "target": "components/lynx/values/secret-reveal.tsx",
           "type": "registry:block"
         }
       ],
@@ -104,7 +109,7 @@
       "files": [
         {
           "path": "registry/values/stat-card.tsx",
-          "target": "components/fleet/values/stat-card.tsx",
+          "target": "components/lynx/values/stat-card.tsx",
           "type": "registry:block"
         }
       ],
@@ -120,7 +125,7 @@
       "files": [
         {
           "path": "registry/values/states.tsx",
-          "target": "components/fleet/values/states.tsx",
+          "target": "components/lynx/values/states.tsx",
           "type": "registry:block"
         }
       ],
@@ -136,7 +141,7 @@
       "files": [
         {
           "path": "registry/values/status-badge.tsx",
-          "target": "components/fleet/values/status-badge.tsx",
+          "target": "components/lynx/values/status-badge.tsx",
           "type": "registry:block"
         }
       ],
@@ -152,7 +157,7 @@
       "files": [
         {
           "path": "registry/query/data-table.tsx",
-          "target": "components/fleet/query/data-table.tsx",
+          "target": "components/lynx/query/data-table.tsx",
           "type": "registry:block"
         }
       ],
@@ -168,7 +173,7 @@
       "files": [
         {
           "path": "registry/query/detail-page.tsx",
-          "target": "components/fleet/query/detail-page.tsx",
+          "target": "components/lynx/query/detail-page.tsx",
           "type": "registry:block"
         }
       ],
@@ -184,7 +189,7 @@
       "files": [
         {
           "path": "registry/query/filter-bar.tsx",
-          "target": "components/fleet/query/filter-bar.tsx",
+          "target": "components/lynx/query/filter-bar.tsx",
           "type": "registry:block"
         }
       ],
@@ -200,7 +205,7 @@
       "files": [
         {
           "path": "registry/query/keyset-pagination.tsx",
-          "target": "components/fleet/query/keyset-pagination.tsx",
+          "target": "components/lynx/query/keyset-pagination.tsx",
           "type": "registry:block"
         }
       ],
@@ -216,7 +221,7 @@
       "files": [
         {
           "path": "registry/query/list-page.tsx",
-          "target": "components/fleet/query/list-page.tsx",
+          "target": "components/lynx/query/list-page.tsx",
           "type": "registry:block"
         }
       ],
@@ -232,7 +237,7 @@
       "files": [
         {
           "path": "registry/query/pagination.tsx",
-          "target": "components/fleet/query/pagination.tsx",
+          "target": "components/lynx/query/pagination.tsx",
           "type": "registry:block"
         }
       ],
@@ -248,7 +253,7 @@
       "files": [
         {
           "path": "registry/query/reference-select.tsx",
-          "target": "components/fleet/query/reference-select.tsx",
+          "target": "components/lynx/query/reference-select.tsx",
           "type": "registry:block"
         }
       ],
@@ -264,7 +269,7 @@
       "files": [
         {
           "path": "registry/command/confirm-dialog.tsx",
-          "target": "components/fleet/command/confirm-dialog.tsx",
+          "target": "components/lynx/command/confirm-dialog.tsx",
           "type": "registry:block"
         }
       ],
@@ -280,7 +285,7 @@
       "files": [
         {
           "path": "registry/command/delete-button.tsx",
-          "target": "components/fleet/command/delete-button.tsx",
+          "target": "components/lynx/command/delete-button.tsx",
           "type": "registry:block"
         }
       ],
@@ -296,7 +301,7 @@
       "files": [
         {
           "path": "registry/command/fields.tsx",
-          "target": "components/fleet/command/fields.tsx",
+          "target": "components/lynx/command/fields.tsx",
           "type": "registry:block"
         }
       ],
@@ -312,7 +317,7 @@
       "files": [
         {
           "path": "registry/command/form.tsx",
-          "target": "components/fleet/command/form.tsx",
+          "target": "components/lynx/command/form.tsx",
           "type": "registry:block"
         }
       ],
@@ -328,7 +333,7 @@
       "files": [
         {
           "path": "registry/subscription/event-feed.tsx",
-          "target": "components/fleet/subscription/event-feed.tsx",
+          "target": "components/lynx/subscription/event-feed.tsx",
           "type": "registry:block"
         }
       ],
@@ -344,7 +349,7 @@
       "files": [
         {
           "path": "registry/subscription/log-viewer.tsx",
-          "target": "components/fleet/subscription/log-viewer.tsx",
+          "target": "components/lynx/subscription/log-viewer.tsx",
           "type": "registry:block"
         }
       ],
@@ -360,7 +365,7 @@
       "files": [
         {
           "path": "registry/subscription/stage-timeline.tsx",
-          "target": "components/fleet/subscription/stage-timeline.tsx",
+          "target": "components/lynx/subscription/stage-timeline.tsx",
           "type": "registry:block"
         }
       ],
@@ -376,7 +381,7 @@
       "files": [
         {
           "path": "registry/shell/app-shell.tsx",
-          "target": "components/fleet/shell/app-shell.tsx",
+          "target": "components/lynx/shell/app-shell.tsx",
           "type": "registry:block"
         }
       ],
@@ -392,7 +397,7 @@
       "files": [
         {
           "path": "registry/shell/page.tsx",
-          "target": "components/fleet/shell/page.tsx",
+          "target": "components/lynx/shell/page.tsx",
           "type": "registry:block"
         }
       ],
@@ -408,7 +413,7 @@
       "files": [
         {
           "path": "registry/shell/route-error-boundary.tsx",
-          "target": "components/fleet/shell/route-error-boundary.tsx",
+          "target": "components/lynx/shell/route-error-boundary.tsx",
           "type": "registry:block"
         }
       ],
@@ -424,7 +429,7 @@
       "files": [
         {
           "path": "registry/shell/scope-switcher.tsx",
-          "target": "components/fleet/shell/scope-switcher.tsx",
+          "target": "components/lynx/shell/scope-switcher.tsx",
           "type": "registry:block"
         }
       ],
@@ -440,7 +445,7 @@
       "files": [
         {
           "path": "registry/shell/section-card.tsx",
-          "target": "components/fleet/shell/section-card.tsx",
+          "target": "components/lynx/shell/section-card.tsx",
           "type": "registry:block"
         }
       ],
@@ -456,7 +461,7 @@
       "files": [
         {
           "path": "registry/shell/stepper.tsx",
-          "target": "components/fleet/shell/stepper.tsx",
+          "target": "components/lynx/shell/stepper.tsx",
           "type": "registry:block"
         }
       ],

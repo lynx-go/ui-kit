@@ -7,6 +7,7 @@ import type {
   SubscriptionPolicy,
   Transport,
 } from "../kernel";
+import { useContextScope } from "./scope";
 
 /**
  * useSubscription —— Subscription 原语的绑定（问/令/听的"听"）。
@@ -73,8 +74,10 @@ export function useSubscription<Params, F>(
   const isDescriptor =
     typeof (source as { policy?: unknown }).policy === "object" &&
     typeof source.open === "function";
+  // scope 缺省链同查询/命令绑定：显式传入 > ResourceScopeProvider context > 空
+  const scope = options.scope ?? useContextScope() ?? {};
   const paramsKey = options.params === undefined ? "" : JSON.stringify(options.params);
-  const scopeKey = JSON.stringify(options.scope ?? {});
+  const scopeKey = JSON.stringify(scope);
   const policy = options.policy ?? descriptor.policy;
   const policyKey = JSON.stringify(policy ?? null);
   const anchorKey = options.cursor === undefined ? "\u0000waiting" : `\u0000${options.cursor}`;
@@ -82,7 +85,7 @@ export function useSubscription<Params, F>(
   // biome-ignore lint/correctness/useExhaustiveDependencies: descriptor.open/options.* 由 paramsKey/scopeKey 记忆——params 对象标识每渲染变化不应重开流
   const transport = useMemo<Transport<F>>(() => {
     if (!isDescriptor) return source as Transport<F>;
-    return descriptor.open(options.params as Params, options.scope ?? {});
+    return descriptor.open(options.params as Params, scope);
   }, [source, isDescriptor, paramsKey, scopeKey]);
 
   const [engine, setEngine] = useState<SubscriptionEngine<F> | null>(null);

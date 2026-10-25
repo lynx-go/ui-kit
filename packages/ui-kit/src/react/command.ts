@@ -1,5 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { QueryClient } from "@tanstack/react-query";
 import {
   type ApiError,
   type CommandDescriptor,
@@ -9,6 +10,7 @@ import {
   type ResourceScope,
   runCommand,
 } from "../kernel";
+import { useContextScope } from "./scope";
 
 /**
  * useCommand —— Command 原语的绑定（问/令/听的"令"）。
@@ -16,7 +18,9 @@ import {
  * - rejected/conflict 是**结果**（mutation.data），只有失败（网络/401/解码）走 mutation.error；
  * - ok 后执行失效：descriptor.invalidates 声明优先，缺省 = 同资源全部查询（内置动词默认失效）；
  *   selector 默认与命令 ctx scope 相交（project A 的命令不清 project B 的缓存）；
+ *   legacyKeys 桥在此并行执行（存量 react-query 前缀键，迁移期声明面）；
  * - treatAs 裁决在 kernel runCommand 单源完成；
+ * - scope 省略时取 ResourceScopeProvider 的 context 值；
  * - 库不内置 toast：onSettled 回调交消费方（sonner 等）。
  */
 export interface UseCommandOptions<Payload> {
@@ -35,25 +39,37 @@ export interface CommandHandle<Input, Payload> {
   reset(): void;
 }
 
+/** ok 后的失效编排（kit selector 匹配 + legacyKeys 前缀桥）；导出供测试与命令式编排复用。 */
+export function invalidateAfterCommand(
+  queryClient: Pick<QueryClient, "invalidateQueries">,
+  descriptor: CommandDescriptor<any, any, any>,
+  scope: ResourceScope,
+): void {
+  const selectors: ReadonlyArray<QuerySelector> =
+    descriptor.invalidates ??
+    (descriptor.__resource !== undefined ? [{ resource: descriptor.__resource }] : []);
+  if (selectors.length > 0) {
+    void queryClient.invalidateQueries({
+      predicate: invalidationPredicate(selectors, scope),
+    });
+  }
+  for (const key of descriptor.legacyKeys?.(scope) ?? []) {
+    void queryClient.invalidateQueries({ queryKey: key });
+  }
+}
+
 export function useCommand<Input, Payload, ID = never>(
   descriptor: CommandDescriptor<Input, Payload, ID>,
   options: UseCommandOptions<Payload> = {},
 ): CommandHandle<Input, Payload> {
   const queryClient = useQueryClient();
-  const scope = options.scope ?? {};
+  const scope = options.scope ?? useContextScope() ?? {};
 
   const mutation = useMutation<CommandResult<Payload>, ApiError, Input>({
     mutationFn: (input) => runCommand(descriptor, input, scope),
     onSuccess: (result) => {
       if (result.status === "ok") {
-        const selectors: ReadonlyArray<QuerySelector> =
-          descriptor.invalidates ??
-          (descriptor.__resource !== undefined ? [{ resource: descriptor.__resource }] : []);
-        if (selectors.length > 0) {
-          void queryClient.invalidateQueries({
-            predicate: invalidationPredicate(selectors, scope),
-          });
-        }
+        invalidateAfterCommand(queryClient, descriptor, scope);
       }
       options.onSettled?.(result, null);
     },

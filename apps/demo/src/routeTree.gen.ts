@@ -15,6 +15,7 @@ import { Route as EventsRouteImport } from './routes/events'
 import { Route as LogsRouteImport } from './routes/logs'
 import { Route as OwnersRouteImport } from './routes/owners'
 import { Route as QuickstartRouteImport } from './routes/quickstart'
+import { Route as ScopeProviderRouteImport } from './routes/scope-provider'
 import { Route as ScopesRouteImport } from './routes/scopes'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as WidgetsIndexRouteImport } from './routes/widgets.index'
@@ -51,6 +52,11 @@ const QuickstartRoute = QuickstartRouteImport.update({
   path: '/quickstart',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ScopeProviderRoute = ScopeProviderRouteImport.update({
+  id: '/scope-provider',
+  path: '/scope-provider',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ScopesRoute = ScopesRouteImport.update({
   id: '/scopes',
   path: '/scopes',
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/logs': typeof LogsRoute
   '/owners': typeof OwnersRoute
   '/quickstart': typeof QuickstartRoute
+  '/scope-provider': typeof ScopeProviderRoute
   '/scopes': typeof ScopesRoute
   '/settings': typeof SettingsRoute
   '/widgets/$id': typeof WidgetsIdRoute
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/logs': typeof LogsRoute
   '/owners': typeof OwnersRoute
   '/quickstart': typeof QuickstartRoute
+  '/scope-provider': typeof ScopeProviderRoute
   '/scopes': typeof ScopesRoute
   '/settings': typeof SettingsRoute
   '/widgets/$id': typeof WidgetsIdRoute
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/logs': typeof LogsRoute
   '/owners': typeof OwnersRoute
   '/quickstart': typeof QuickstartRoute
+  '/scope-provider': typeof ScopeProviderRoute
   '/scopes': typeof ScopesRoute
   '/settings': typeof SettingsRoute
   '/widgets/$id': typeof WidgetsIdRoute
@@ -126,6 +135,7 @@ export interface FileRouteTypes {
     | '/logs'
     | '/owners'
     | '/quickstart'
+    | '/scope-provider'
     | '/scopes'
     | '/settings'
     | '/widgets/$id'
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/logs'
     | '/owners'
     | '/quickstart'
+    | '/scope-provider'
     | '/scopes'
     | '/settings'
     | '/widgets/$id'
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/logs'
     | '/owners'
     | '/quickstart'
+    | '/scope-provider'
     | '/scopes'
     | '/settings'
     | '/widgets/$id'
@@ -166,6 +178,7 @@ export interface RootRouteChildren {
   LogsRoute: typeof LogsRoute
   OwnersRoute: typeof OwnersRoute
   QuickstartRoute: typeof QuickstartRoute
+  ScopeProviderRoute: typeof ScopeProviderRoute
   ScopesRoute: typeof ScopesRoute
   SettingsRoute: typeof SettingsRoute
   WidgetsIdRoute: typeof WidgetsIdRoute
@@ -217,6 +230,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuickstartRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/scope-provider': {
+      id: '/scope-provider'
+      path: '/scope-provider'
+      fullPath: '/scope-provider'
+      preLoaderRoute: typeof ScopeProviderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/scopes': {
       id: '/scopes'
       path: '/scopes'
@@ -262,6 +282,7 @@ const rootRouteChildren: RootRouteChildren = {
   LogsRoute: LogsRoute,
   OwnersRoute: OwnersRoute,
   QuickstartRoute: QuickstartRoute,
+  ScopeProviderRoute: ScopeProviderRoute,
   ScopesRoute: ScopesRoute,
   SettingsRoute: SettingsRoute,
   WidgetsIdRoute: WidgetsIdRoute,

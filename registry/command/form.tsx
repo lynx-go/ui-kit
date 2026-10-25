@@ -16,7 +16,12 @@ export interface FormProps<Payload> {
   form: { handleSubmit: (submitMeta?: unknown) => void | Promise<void> };
   submitting?: boolean;
   result?: CommandResult<Payload> | null;
+  /** 结果盒内的动作槽（conflict 的"刷新重载"等页面编排；§12.10-⑤ 回流） */
+  resultAction?: ReactNode;
   submitLabel?: string;
+  /** 提交中标签；缺省 "Saving…" */
+  submittingLabel?: string;
+  cancelLabel?: string;
   onCancel?: () => void;
   children: ReactNode;
 }
@@ -25,7 +30,10 @@ export function Form<Payload>({
   form,
   submitting = false,
   result = null,
+  resultAction,
   submitLabel = "Save",
+  submittingLabel = "Saving…",
+  cancelLabel = "Cancel",
   onCancel,
   children,
 }: FormProps<Payload>) {
@@ -42,22 +50,25 @@ export function Form<Payload>({
       {result !== null && result.status !== "ok" ? (
         <div
           role="alert"
-          className="rounded-md border border-err/40 bg-err/10 px-3 py-2 text-xs text-err"
+          className="flex items-center justify-between gap-3 rounded-md border border-err/40 bg-err/10 px-3 py-2 text-xs text-err"
         >
-          {result.status === "rejected" && result.code ? (
-            <span className="font-mono">[{result.code}] </span>
-          ) : null}
-          {result.message}
+          <span>
+            {result.status === "rejected" && result.code ? (
+              <span className="font-mono">[{result.code}] </span>
+            ) : null}
+            {result.message}
+          </span>
+          {resultAction}
         </div>
       ) : null}
       <div className="flex justify-end gap-2 pt-1">
         {onCancel ? (
           <Button type="button" variant="ghost" onClick={onCancel}>
-            Cancel
+            {cancelLabel}
           </Button>
         ) : null}
         <Button type="submit" disabled={submitting}>
-          {submitting ? "Saving…" : submitLabel}
+          {submitting ? submittingLabel : submitLabel}
         </Button>
       </div>
     </form>

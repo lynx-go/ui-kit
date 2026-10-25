@@ -14,6 +14,7 @@ export const nav: NavSection[] = [
       { label: "Events (backlog × follow)", to: "/events" },
       { label: "Logs (ndjson stream)", to: "/logs" },
       { label: "Quickstart (wizard)", to: "/quickstart" },
+      { label: "Scope provider (context)", to: "/scope-provider" },
     ],
   },
   {

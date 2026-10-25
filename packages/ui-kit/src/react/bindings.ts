@@ -16,6 +16,7 @@ import {
 } from "../kernel";
 import type { FlatPatch, QuerySearchSchema } from "../schema";
 import { batchQueryOptions, collectionQueryOptions, recordQueryOptions } from "./options";
+import { scopeReady, useContextScope } from "./scope";
 
 /**
  * useCollection —— collection Query ↔ URL ↔ Table 的绑定。
@@ -88,9 +89,15 @@ export function useCollection<T, ID, C extends CommandsRecord<ID>, S extends Sub
     replace?: boolean;
   }) => Promise<void>;
 
-  const target = options.scope ? scoped(resource, options.scope) : resource;
+  // scope 缺省链：显式传入 > ResourceScopeProvider context > 无 scope。
+  const contextScope = useContextScope();
+  const scope = options.scope ?? contextScope;
+  const target = scope ? scoped(resource, scope) : resource;
   const query = options.search.decode(rawSearch);
   const keepPrevious = options.query?.keepPrevious !== false;
+  // 未就绪自动停用（fail-safe）：资源声明的 scope 键缺值时不启用——
+  // 消费方不再需要逐页 enabled 守卫，也堵住"未就绪空段"污染无 scope 键。
+  const enabled = scopeReady(resource, scope) ? options.query?.enabled : false;
 
   const result = useQuery<Segment<T>, ApiError>({
     ...collectionQueryOptions(target, query, {
@@ -98,7 +105,7 @@ export function useCollection<T, ID, C extends CommandsRecord<ID>, S extends Sub
       ...(options.query?.refetchInterval !== undefined
         ? { refetchInterval: options.query.refetchInterval }
         : {}),
-      ...(options.query?.enabled !== undefined ? { enabled: options.query.enabled } : {}),
+      ...(enabled !== undefined ? { enabled } : {}),
     }),
     ...(keepPrevious ? { placeholderData: keepPreviousData } : {}),
   });
@@ -188,11 +195,13 @@ export function useRecord<T, ID, C extends CommandsRecord<ID>, S extends SubsRec
   resource: Resource<T, ID, C, S>,
   options: { id: ID | undefined; scope?: ResourceScope; query?: { staleTime?: number } },
 ): RecordHandle<T> {
-  const target = options.scope ? scoped(resource, options.scope) : resource;
+  const scope = options.scope ?? useContextScope();
+  const target = scope ? scoped(resource, scope) : resource;
   const result = useQuery<T, ApiError>({
     ...recordQueryOptions(target, options.id, {
       ...(options.query?.staleTime !== undefined ? { staleTime: options.query.staleTime } : {}),
     }),
+    ...(scopeReady(resource, scope) ? {} : { enabled: false }),
   });
   return {
     data: result.data,
@@ -213,11 +222,13 @@ export function useBatch<T, ID, C extends CommandsRecord<ID>, S extends SubsReco
   ids: ReadonlyArray<ID>,
   options: { scope?: ResourceScope; query?: { staleTime?: number } } = {},
 ): BatchHandle<T, ID> {
-  const target = options.scope ? scoped(resource, options.scope) : resource;
+  const scope = options.scope ?? useContextScope();
+  const target = scope ? scoped(resource, scope) : resource;
   const result = useQuery<ReadonlyArray<T>, ApiError>({
     ...batchQueryOptions(target, ids, {
       ...(options.query?.staleTime !== undefined ? { staleTime: options.query.staleTime } : {}),
     }),
+    ...(scopeReady(resource, scope) ? {} : { enabled: false }),
   });
   const rows = result.data ?? EMPTY_ROWS;
   const byId = new Map(

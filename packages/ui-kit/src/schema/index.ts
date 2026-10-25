@@ -7,3 +7,10 @@ export {
   type QuerySearchSchema,
   type StandardSchemaV1,
 } from "./codec";
+export {
+  eqFilter,
+  type FilterLeaf,
+  filterLeaves,
+  filterValues,
+  predicateOf,
+} from "./filters";

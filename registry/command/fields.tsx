@@ -4,19 +4,25 @@ import { Input } from "@/components/ui/input";
 
 /**
  * TextField / SelectField（command 块）—— TanStack Form 的字段接线。
- * 字段级错误（含 onSubmit 返回的 fieldErrors 映射）经 meta.errors 渲染。
+ * 字段级错误（含 onSubmit 返回的 fieldErrors 映射）经 meta.errors 渲染
+ * （双注册校验器的重复条目去重——onChange+onSubmit 同挂时 TanStack 会
+ * 产生双份，§12.10-⑤ 回流）。
  */
 
 function FieldErrors({ errors }: { errors: ReadonlyArray<unknown> }) {
-  const messages = errors
-    .map((error) =>
-      typeof error === "string"
-        ? error
-        : error && typeof error === "object" && "message" in error
-          ? String((error as { message: unknown }).message)
-          : null,
-    )
-    .filter((message): message is string => message !== null);
+  const messages = [
+    ...new Set(
+      errors
+        .map((error) =>
+          typeof error === "string"
+            ? error
+            : error && typeof error === "object" && "message" in error
+              ? String((error as { message: unknown }).message)
+              : null,
+        )
+        .filter((message): message is string => message !== null),
+    ),
+  ];
   if (messages.length === 0) return null;
   return (
     <div className="space-y-0.5" role="alert">
@@ -65,6 +71,13 @@ export interface TextFieldProps<T extends object> {
   label: string;
   placeholder?: string;
   type?: "text" | "password" | "email";
+  /** 必填客户端校验（空串/纯空白拒绝）；字符串 = 自定义文案（§12.10-⑤ 回流） */
+  required?: boolean | string;
+}
+
+function requiredMessage(message: string) {
+  return ({ value }: { value: unknown }): string | undefined =>
+    value === undefined || value === null || String(value).trim() === "" ? message : undefined;
 }
 
 export function TextField<T extends object>({
@@ -73,10 +86,22 @@ export function TextField<T extends object>({
   label,
   placeholder,
   type = "text",
+  required = false,
 }: TextFieldProps<T>) {
   return (
     <FieldShell label={label}>
-      <form.Field name={name}>
+      <form.Field
+        name={name}
+        validators={
+          required
+            ? {
+                // onChange 即时反馈 + onSubmit 兜住"从未输入直接提交"
+                onChange: requiredMessage(required === true ? "Required" : required),
+                onSubmit: requiredMessage(required === true ? "Required" : required),
+              }
+            : undefined
+        }
+      >
         {(field: {
           state: { value: unknown; meta: { errors: ReadonlyArray<unknown> } };
           handleChange(value: unknown): void;
@@ -101,12 +126,30 @@ export interface SelectFieldProps<T extends object> {
   name: string & keyof T;
   label: string;
   options: ReadonlyArray<{ value: string; label: string }>;
+  /** 必填客户端校验（空串拒绝）；字符串 = 自定义文案 */
+  required?: boolean | string;
 }
 
-export function SelectField<T extends object>({ form, name, label, options }: SelectFieldProps<T>) {
+export function SelectField<T extends object>({
+  form,
+  name,
+  label,
+  options,
+  required = false,
+}: SelectFieldProps<T>) {
   return (
     <FieldShell label={label}>
-      <form.Field name={name}>
+      <form.Field
+        name={name}
+        validators={
+          required
+            ? {
+                onChange: requiredMessage(required === true ? "Required" : required),
+                onSubmit: requiredMessage(required === true ? "Required" : required),
+              }
+            : undefined
+        }
+      >
         {(field: {
           state: { value: unknown; meta: { errors: ReadonlyArray<unknown> } };
           handleChange(value: unknown): void;

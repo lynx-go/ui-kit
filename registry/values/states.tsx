@@ -40,6 +40,10 @@ export interface ErrorStateProps {
   error: ApiError;
   /** 重试动作（refetch）；不传则只展示 */
   onRetry?: () => void;
+  /** 失败文案注入（消费方 describeApiError 单源；缺省块内英文六分支） */
+  describeError?: (error: ApiError) => string;
+  title?: string;
+  retryLabel?: string;
 }
 
 function describe(error: ApiError): string {
@@ -59,14 +63,20 @@ function describe(error: ApiError): string {
   }
 }
 
-export function ErrorState({ error, onRetry }: ErrorStateProps) {
+export function ErrorState({
+  error,
+  onRetry,
+  describeError,
+  title = "Something went wrong",
+  retryLabel = "Retry",
+}: ErrorStateProps) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 p-12 text-center" role="alert">
-      <div className="text-sm font-medium text-err">Something went wrong</div>
-      <div className="max-w-md text-xs text-muted">{describe(error)}</div>
+      <div className="text-sm font-medium text-err">{title}</div>
+      <div className="max-w-md text-xs text-muted">{describeError?.(error) ?? describe(error)}</div>
       {onRetry ? (
         <Button variant="outline" size="sm" onClick={onRetry}>
-          <RotateCw className="size-3.5" /> Retry
+          <RotateCw className="size-3.5" /> {retryLabel}
         </Button>
       ) : null}
     </div>

@@ -127,3 +127,22 @@ test.describe("overview dashboard (StatCard × n + MetricChart × n)", () => {
     await expect(page.getByTestId("metric-chart-empty")).toHaveCount(0);
   });
 });
+
+test.describe("scope provider (context single-source, §12.10-③)", () => {
+  test("bindings resolve scope from provider; not-ready suspends the query", async ({ page }) => {
+    await page.goto("/scope-provider");
+    // 就绪：proj-alpha 行到达（绑定未传 scope 字面量——Provider 单源）
+    await expect(page.getByRole("row", { name: /Alpha widget 1/ })).toBeVisible();
+
+    // 切项目 = 换 scope 键重取（proj-beta 行集）
+    await page.getByLabel("Project scope").selectOption("proj-beta");
+    await expect(page.getByRole("row", { name: /Beta widget 1/ })).toBeVisible();
+    await expect(page.getByRole("row", { name: /Alpha widget 1/ })).toHaveCount(0);
+
+    // 未就绪：查询停用（enabled: false，无新请求）；keepPrevious（绑定缺省）
+    // 保留上一帧数据——停用不是清屏，是"冻结"。徽章转黄佐证状态。
+    await page.getByLabel("Project scope").selectOption("");
+    await expect(page.getByTestId("scope-state")).toHaveText(/not ready/);
+    await expect(page.getByRole("row", { name: /Beta widget 1/ })).toBeVisible();
+  });
+});

@@ -1,6 +1,6 @@
 {
   "name": "@lynx-go/ui-kit",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Headless core for data-dense console UIs — Query / Command / Subscription over TanStack engines",
   "type": "module",
   "license": "MIT",
@@ -28,6 +28,10 @@
     "./react": {
       "types": "./src/react/index.ts",
       "default": "./src/react/index.ts"
+    },
+    "./testing": {
+      "types": "./src/testing/index.ts",
+      "default": "./src/testing/index.ts"
     }
   },
   "files": [
@@ -63,6 +67,10 @@
     "react": "catalog:default",
     "typescript": "catalog:default",
     "vitest": "catalog:default",
-    "@tanstack/react-form": "catalog:default"
+    "@tanstack/react-form": "catalog:default",
+    "jsdom": "^28.0.0",
+    "@testing-library/react": "^16.3.0",
+    "react-dom": "catalog:default",
+    "@types/react-dom": "catalog:default"
   }
 }

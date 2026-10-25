@@ -25,6 +25,12 @@ export interface EventFeedProps<F> {
   render?: (frame: F) => ReactNode;
   /** gapped/stalled 黄条上的动作槽（页面的 resync 编排按钮） */
   resyncAction?: ReactNode;
+  /** 头部标题；缺省 "Events" */
+  title?: string;
+  /** 空态文案槽（业务句归页面；缺省通用句） */
+  emptyText?: string;
+  /** 状态徽章文案注入（消费方语言）；缺省原样 status */
+  statusLabels?: Partial<Record<string, string>>;
   className?: string;
 }
 
@@ -34,6 +40,9 @@ export function EventFeed<F>({
   getKey,
   render,
   resyncAction,
+  title = "Events",
+  emptyText = "No events yet",
+  statusLabels,
   className,
 }: EventFeedProps<F>) {
   const frames = useSyncExternalStore(sub.subscribeFrames, sub.getFrames, sub.getFrames);
@@ -47,17 +56,18 @@ export function EventFeed<F>({
 
   const showGapBar = state.status === "gapped" || state.status === "stalled";
   const rowRender = render ?? ((frame: F) => String(frame));
+  const statusLabel = statusLabels?.[state.status] ?? state.status;
 
   return (
     <div className={cn("overflow-hidden rounded-md border border-line", className)}>
       <div className="flex items-center justify-between gap-2 border-b border-line bg-panel px-3 py-1.5">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-muted">Events</span>
+          <span className="text-xs font-medium text-muted">{title}</span>
           <Badge
             tone={state.status === "live" ? "ok" : state.status === "error" ? "err" : "warn"}
             data-testid="sub-status"
           >
-            {state.status}
+            {statusLabel}
           </Badge>
           {state.resyncs > 0 && state.status !== "gapped" ? (
             <span
@@ -97,7 +107,7 @@ export function EventFeed<F>({
       ) : null}
       <ul className="max-h-96 divide-y divide-line overflow-y-auto">
         {rows.length === 0 ? (
-          <li className="px-3 py-6 text-center text-xs text-muted">No events yet</li>
+          <li className="px-3 py-6 text-center text-xs text-muted">{emptyText}</li>
         ) : (
           rows.map((frame) => (
             <li

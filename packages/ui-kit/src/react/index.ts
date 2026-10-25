@@ -14,6 +14,7 @@ export {
 } from "./bindings";
 export {
   type CommandHandle,
+  invalidateAfterCommand,
   type UseCommandFormOptions,
   type UseCommandOptions,
   useCommand,
@@ -43,4 +44,9 @@ export {
   type PreferenceCodec,
   usePreference,
 } from "./preferences";
+export {
+  ResourceScopeProvider,
+  scopeReady,
+  useContextScope,
+} from "./scope";
 export { type UseSubscriptionOptions, useSubscription } from "./subscription";
