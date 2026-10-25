@@ -34,6 +34,18 @@ export { buildMetricRows } from "./metric-rows";
  * ——key 里出现点/空格等字符不会落进 CSS 变量名。
  */
 
+export interface MetricChartLabels {
+  empty: string;
+  more: (hidden: number) => string;
+  serverCap: (shown: number, total: number) => string;
+}
+
+const DEFAULT_LABELS: MetricChartLabels = {
+  empty: "No samples in window",
+  more: (hidden) => `+${hidden} more series not shown — ranking keeps active series first`,
+  serverCap: (shown, total) => `server cap reached — ${shown} of ${total} series shown`,
+};
+
 export interface MetricChartProps {
   series: ReadonlyArray<MetricSeries>;
   /** y 轴/tooltip/图例末值的量纲格式化（bytes/percent 等单位词表由页面注入） */
@@ -47,6 +59,8 @@ export interface MetricChartProps {
   serverCap?: { shown: number; total: number };
   /** 图高 px（缺省 224） */
   height?: number;
+  /** 披露文案注入（消费方语言） */
+  labels?: Partial<MetricChartLabels>;
   className?: string;
 }
 
@@ -59,8 +73,10 @@ export function MetricChart({
   missingValue,
   serverCap,
   height = 224,
+  labels,
   className,
 }: MetricChartProps) {
+  const t = { ...DEFAULT_LABELS, ...labels };
   const built = useMemo(
     () => buildMetricRows(series, { maxSeries, activeWindowMs, missingValue }),
     [series, maxSeries, activeWindowMs, missingValue],
@@ -83,7 +99,7 @@ export function MetricChart({
 
   const capNote =
     serverCap && serverCap.total > serverCap.shown
-      ? `server cap reached — ${serverCap.shown} of ${serverCap.total} series shown`
+      ? t.serverCap(serverCap.shown, serverCap.total)
       : null;
 
   return (
@@ -94,7 +110,7 @@ export function MetricChart({
           style={{ height }}
           data-testid="metric-chart-empty"
         >
-          No samples in window
+          {t.empty}
         </div>
       ) : (
         <ChartContainer config={config} className="w-full" style={{ height }}>
@@ -153,7 +169,7 @@ export function MetricChart({
       </div>
       {built.hidden > 0 ? (
         <p className="px-1 pb-1 text-[11px] text-muted" data-testid="metric-chart-more">
-          +{built.hidden} more series not shown — ranking keeps active series first
+          {t.more(built.hidden)}
         </p>
       ) : null}
       {capNote ? (

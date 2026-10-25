@@ -10,6 +10,8 @@
     "border-line": "border-border",
     "divide-line": "divide-border",
     "text-fg": "text-foreground",
-    "text-err": "text-[var(--status-danger)]"
+    "text-err": "text-[var(--status-danger)]",
+    "bg-err": "bg-[var(--status-danger)]",
+    "border-err": "border-[var(--status-danger)]"
   }
 }

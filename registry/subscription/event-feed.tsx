@@ -31,8 +31,24 @@ export interface EventFeedProps<F> {
   emptyText?: string;
   /** 状态徽章文案注入（消费方语言）；缺省原样 status */
   statusLabels?: Partial<Record<string, string>>;
+  /** 瞬态提示文案注入（gapped/stalled 黄条、暂停指示、计数） */
+  labels?: Partial<EventFeedLabels>;
   className?: string;
 }
+
+export interface EventFeedLabels {
+  gapGapped: string;
+  gapStalled: string;
+  paused: string;
+  count: (n: number) => string;
+}
+
+const DEFAULT_LABELS: EventFeedLabels = {
+  gapGapped: "Retention gap — re-anchor the backlog to continue.",
+  gapStalled: "Backoff budget exhausted — reconnect or switch to polling fallback.",
+  paused: "Paused — frames buffered from cursor on resume",
+  count: (n) => `${n} events`,
+};
 
 export function EventFeed<F>({
   sub,
@@ -43,8 +59,10 @@ export function EventFeed<F>({
   title = "Events",
   emptyText = "No events yet",
   statusLabels,
+  labels,
   className,
 }: EventFeedProps<F>) {
+  const t = { ...DEFAULT_LABELS, ...labels };
   const frames = useSyncExternalStore(sub.subscribeFrames, sub.getFrames, sub.getFrames);
   const state = useSyncExternalStore(sub.subscribeStatus, sub.getState, sub.getState);
 
@@ -85,10 +103,10 @@ export function EventFeed<F>({
               data-testid="paused-indicator"
             >
               <PauseCircle className="size-3.5" />
-              Paused — frames buffered from cursor on resume
+              {t.paused}
             </span>
           ) : null}
-          <span className="text-[11px] text-muted">{rows.length} events</span>
+          <span className="text-[11px] text-muted">{t.count(rows.length)}</span>
         </div>
       </div>
       {showGapBar ? (
@@ -97,11 +115,7 @@ export function EventFeed<F>({
           data-testid="gap-bar"
           role="status"
         >
-          <span>
-            {state.status === "gapped"
-              ? "Retention gap — re-anchor the backlog to continue."
-              : "Backoff budget exhausted — reconnect or switch to polling fallback."}
-          </span>
+          <span>{state.status === "gapped" ? t.gapGapped : t.gapStalled}</span>
           {resyncAction}
         </div>
       ) : null}

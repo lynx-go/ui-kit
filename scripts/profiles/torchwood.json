@@ -10,6 +10,8 @@
     "border-line": "border-border",
     "divide-line": "divide-border",
     "text-fg": "text-foreground",
-    "text-err": "text-destructive"
+    "text-err": "text-destructive",
+    "bg-err": "bg-destructive",
+    "border-err": "border-destructive"
   }
 }
