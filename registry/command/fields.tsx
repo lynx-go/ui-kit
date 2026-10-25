@@ -76,9 +76,18 @@ export interface TextFieldProps<T extends object> {
 }
 
 function requiredMessage(message: string) {
-  return ({ value }: { value: unknown }): string | undefined =>
-    value === undefined || value === null || String(value).trim() === "" ? message : undefined;
+  let validator = REQUIRED_VALIDATORS.get(message);
+  if (validator === undefined) {
+    validator = ({ value }: { value: unknown }): string | undefined =>
+      value === undefined || value === null || String(value).trim() === "" ? message : undefined;
+    // 缓存校验器标识：每次渲染新建函数会让 TanStack Field 判定 validators
+    // 变化而重置字段状态——提交错误刚写入就被下一次渲染清掉（torchwood 实咬）。
+    REQUIRED_VALIDATORS.set(message, validator);
+  }
+  return validator;
 }
+
+const REQUIRED_VALIDATORS = new Map<string, (meta: { value: unknown }) => string | undefined>();
 
 export function TextField<T extends object>({
   form,
