@@ -784,6 +784,29 @@ torchwood console 取证要点（裁决依据）：react-router-dom **v7** 集�
 - **TanStack 方言实测**（compat 层与测试已消化）：splat 是 `/$` 不是 `/*`（TestRouter 带 normalizeTestPath 双方言归一）；RouterProvider 首提交异步——jsdom 测试渲染后需 `await act(async () => {})` 冲刷；useOutletContext/useParams 非其导出——前者经 React context 自实现，后者经 useRouterState 合并 matches。
 - **URL 数组方言**：TanStack 默认序列化把数组值 JSON 编码（`filter=%5B%22action%3Aeq%3AX%22%5D`）——与默认解析往返自洽，消费方断言应读解析后的 search 对象而非原始 query 串。
 
+### 12.3 torchwood 批 B：命令族/表单族——api-keys 切片裁决（2026-10-25，取证先行）
+
+取证要点：torchwood console **无表单库**（全手写 useState 受控表单）；命令流 = useMutation + queryClient.invalidateQueries(["api-keys", …]) + sonner toast（axios 拦截器全局错误 toast，`__skipToast` 可豁免）；api-keys 三页 = 列表（行删/批量删/enabled 过滤）+ 新建（name + scope 词表勾选/通配/手输 + **secret 一次性显示**）+ 详情（编辑对话框 diff 提交 + 轮换双 Key 引导）；**无 version 面**。OCC 真实面在 databases documents（version 必填）与 runtime-vars（etag）。
+
+1. **表单栈 = 引入 TanStack Form**（torchwood 首个表单库，kit peer ≥1.30）：新表单走 useCommandForm/裸 TanStack Form + Form/Fields 块；存量 useState 表单并存，逐页换轨（与批 A compat 层同节奏——有始有终）。
+2. **命令资源化**（api-keys 首个 commands 资源）：`create/update/remove` 三命令挂 defineResource；结果两分映射 = HTTP 400→`rejected{code,message}`（gateway 错误体 {error:{code,message}}；**fieldErrors 形状未实证，先不映射**——挂账 B2）、409→`conflict`、其余经批 A 的 toApiError 收敛缝 throw ApiError；delete 已删→幂等 ok（treatAs not-found）。
+3. **toast 单源 = onSettled**：命令调用一律 `__skipToast: true`（拦截器全局 toast 让位）——ok → toast.success（消费方文案）；结果分支（rejected/conflict）→ Form 块结果盒（message-first，不 toast）；失败（ApiError）→ toast.error(describeApiError)。双 toast 是接入反模式，裁决在先。
+4. **失效桥接（过渡期双轨）**：kit invalidationPredicate 有 isFleetKey 守卫（只失效 "collection/record/batch" 前缀键）——存量 `["api-keys", …]` 键在 onSettled 手动 invalidate（页面知道两个世界，桥在页面）。api-keys **列表骨架不动**（ResourceListPage + useServerPaging + 页内搜索/批量选择）：kit DataTable 行选择尚无（v9 atoms 挂账），列表换轨等选择支持。
+5. **reveal 概念正名**：create 的 secret 一次性显示 = useCommandForm.reveal（ok payload、卸载即弃、不进 Query 缓存）——API key secret 是 reveal 的原生案例（kit §5.4 预言兑现）。
+6. **proto3 optional diff 语义归 descriptor**：update 表单值 = 展示形（含 datetime-local），descriptor 工厂闭包原实体快照（`editApiKeyDescriptor(key)`），run 内做字段 diff 只传变更；tz 换算在**字段边界**（字段值存 ISO，input 渲染/写入时按管理员时区墙钟↔绝对换算）——descriptor 无时区依赖，URL/表单值可分享。
+7. **块拷贝范围 = Form/TextField/SelectField**（token 映射同批 A 表）；**ConfirmDialog/DeleteButton 不拷**：torchwood 有 radix confirm 既有约定（RowDeleteButton/DeleteButton/BulkDeleteButton），命令接线在 onConfirm，确认壳留存量——块的 minimal overlay 形态是 demo 方言。
+8. **批量删除与轮换保持直调**：批量 = N 命令聚合（Promise.allSettled 汇总文案），非 useCommand 面；轮换 = useCommand×2（create + expireOld），双 Key 引导 UI 不变。
+9. **OCC 挂账 B2**：本切片无 version 面；databases documents（version 必填）或 runtime-vars（etag）做 B2 切片时一并裁决 fieldErrors 形状与 conflict 分支的真实路径。
+
+**批 B 不做（挂账）**：列表骨架 fleet 化（等行选择）、ListenPanel → useSubscription（C 批）、analytics → MetricChart（D 批）、kit http 管线收敛、compat 逐页退场、OCC（B2）。
+
+**批 B 实现期回写（2026-10-25 落地，门禁 105/105 + 浏览器对照通过）**：
+
+- **Resource.commands 可选类型面**：消费方按 demo 先例 `commands!` + 模块级提升句柄（createApiKeyCommand/removeApiKeyCommand）；treatAs 字面量需 `as const`（status: "ok" 否则推断 string）。
+- **TanStack Form 方言三则**：① required 校验器需同时挂 onChange（即时反馈）+ onSubmit（兜住"从未输入直接提交"），双注册会在 meta.errors 产生重复条目——FieldErrors 渲染去重；② 跨字段联动（wildcard 禁用词表勾选）必须 form.Subscribe——目标字段子树独立订阅，直读 form.state.values 在对方翻转时不重渲染；③ FormPageWrapper 类"onSubmit 形外壳 + 自渲染 footer"与 Form 内芯互斥（内芯持有 submit），整页表单换壳不换芯。
+- **radix Dialog 退出动画残留**：关闭后 data-state=closed 的 Presence 可长期滞留 DOM（等 exit animationend）——既有壳行为非切片引入，elementFromPoint 证不挡交互；jsdom 断言用 queryByRole 即可（radix 在 jsdom 立即卸载）。
+- **浏览器实证**：新建 reveal 一次性 secret、编辑 diff（仅传 name）+ 桥接失效刷新、删除后存量列表实时更新（手动桥生效）。
+
 ---
 
 ## 13. 集中反模式清单（进 SKILL.md）
