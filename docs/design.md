@@ -832,6 +832,29 @@ torchwood console 取证要点（裁决依据）：react-router-dom **v7** 集�
 - **浏览器对照（stub 手写 RFC6455 最小服务端**：握手 sha1+掩码帧解析+close 帧状态码；控制端点 /stub/ws/{state,emit,expire}；vite 代理 `/v1` 需对象形态 + `ws: true` 才代理 WebSocket）：① hello 绑 proj-1 + 订阅 databases.app.collections.posts（服务端 state 佐证）；② 两条事件到达——最新在上、到达时刻按管理员时区（Asia/Shanghai）渲染、payload 120 字摘要；③ /stub/ws/expire（1008 token_expired）→ conn-2 重订 + 徽章回「已连接」+ 旧缓冲保留（不补历史）+ 新事件续达（3 条）；④ 视觉：浅色主题下徽章 default/行三段式/无溢出，amber 系未触发路径由 stalled 单测覆盖。StrictMode 双挂载幂等由服务端单连接佐证（首引擎 stop 干净）。
 - **EventFeed 本地扩展 emptyText**：空态业务句（「对该集合执行写操作后…」）归页面——块加 emptyText 槽而非把业务词写进块（边界正向改进，上游候选）。
 
+### 12.5 torchwood 批 B2：OCC——documents 切片裁决（2026-10-25，取证先行）
+
+取证要点：**OCC 真身 = documents version**（update/delete 必填 CAS，缺省→FailedPrecondition/DOCUMENT.VERSION_REQUIRED、显式 0→InvalidArgument/DOCUMENT.VERSION_INVALID、不匹配→FailedPrecondition/DOCUMENT.VERSION_CONFLICT；冲突时服务端在 gRPC status 的 ErrorInfo metadata 附 current_version 供免读回合并重试）。**runtime-vars 无 OCC 面**（UpdateRuntimeVarRequest 无版本前件——LWW 设计；etag 是 client SDK 读路径轮询 token "{epoch}:{revision}"（D2/D4/D10），console 仅展示）——§12.3 挂账"runtime-vars etag"以此取证关闭。**通道方言**：grpc-gateway 把 FailedPrecondition 映射 **HTTP 400**（非 409——409 是 AlreadyExists（自选 document_id 撞重复键）/Aborted（幂等键进行中））；HTTP 错误体 = `{error:{type, code: gRPC code 字符串, message, error_id, error_code: 枚举}}`——**ErrorInfo/BadRequest details（域码 reason、current_version、field_violations）在 HTTP 面被 errorBodyBuilder 丢弃**（Build 只透传 code/message/errorID，sharedv1.Error 无 details 字段）；message 格式恒为 `"DOMAIN.CODE: 文案[; field: description]"`——**域码判别的唯一可靠面 = message 前缀**。kit 侧：useCommand 结果两分（result/failure 通道）；useCommandForm.onSubmit 把 rejected.fieldErrors 回填 TanStack Form fields（v1 文档化路径）。
+
+1. **切片 = documents 单页族**（detail 编辑/删除 + new 创建 + 列表行删除的命令化）；runtime-vars 不动。列表骨架/批量操作留存量（批 B 裁决 4/8 同款——批量=N 命令聚合直调，不在本批）。
+2. **结果两分映射（documents 版）**：`400 + message 前缀 DOCUMENT.VERSION_CONFLICT → conflict`——**OCC 冲突才是 kit conflict 分支的 torchwood 真身（HTTP 409 反而不是：那是重复键/幂等进行中）**，conflict 文案 = 域码中文映射（"文档已被其他修改抢先提交（版本不匹配）……"）；400 其他 → rejected{code=域码前缀（机器判别面）, message=域码中文或网关原文}；409 → conflict（重复键中文）；其余 throw toApiError。域码中文映射表落 fleet/documents.ts（消费方文案权，批 B describeApiError 同层）。
+3. **version 前置守卫 = 客户端 rejected 而非 throw**：version 缺失/≤0 → rejected{code: "DOCUMENT.VERSION_REQUIRED", message: 中文}——已知分支不占失败通道（现状 mutationFn throw Error 的换轨形态）。
+4. **current_version 对 console 不可达 → conflict UX = 提示 +「刷新重载」**（invalidate 详情存量键 → refetch → 草稿按服务端态重建）。服务端 HTTP 面不透传 status details 是上游缺口（torchwood 仓 errorBodyBuilder），本批不改服务端——挂账上游（console 侧已按 message 前缀工作，details 透传后可升级为"取 current_version 一键合并重试"）。
+5. **fieldErrors 形状实证关闭（§12.3 挂账）**：服务端 HTTP 面无字段级机器载荷（violations 只在 message 文本内嵌 `; field: description`，不作解析面）——**服务端 fieldErrors 无数据源，不映射**；**首个真实 fieldErrors 来源 = 客户端提交收敛**（buildDocumentData 的 required 缺失/JSON 无效、increment 非整数——批 B"表单值=展示形，run 内收敛为提交形"同款落 descriptor.run）→ rejected{message, fieldErrors: {attrKey: 文案}}。
+6. **表单栈不换**：documents 表单是集合 schema 动态驱动（attributes 元数据 + JsonEditor string 值 + increments 增量区），TanStack Form 换轨是独立批（挂账）；本批 = useCommand + 既有 useState 壳，结果盒为页面局部组件（message-first + fieldErrors 经 DocumentFormFields 的 errors 槽渲染字段级红字）。api-keys 的静态字段表单（批 B）与 documents 的动态 schema 表单自此成为两种形态的对照样例。
+7. **treatAs 面**：delete 404 → treatAs not-found → ok 幂等（批 B 先例）；update 404 → throw（失败通道——update 404 语义 = 文档已被删，幂等 ok 不诚实）。
+8. **无表单容器命令的 toast 细化**：批 B"结果分支不 toast"裁决的适用面 = 表单结果盒场景；删除（页头按钮/列表行）无结果盒容器——rejected/conflict 不 toast 即丢失，裁决为 toast.error(域码中文)；failure 仍 toast.error(describeApiError)；ok 仍 toast.success。失效桥：存量 `["documents", dbId, collId]` 前缀 onSettled 手动 invalidate（批 B 同款）；不建 Resource（无 kit 查询面——裸 descriptor 工厂闭包路径参数，批 B editApiKeyDescriptor 先例）。
+9. **api/databases.ts 写函数加 config 透传**（ApiRequestConfig.__skipToast 通道——命令调用一律豁免全局错误 toast，批 B apiKeys 同款）。
+
+**批 B2 实现期回写（2026-10-25 落地，门禁 121/121 + 浏览器对照通过）**：
+
+- **remove 命令结果透传 bug（映射矩阵单测首跑抓获）**：run 内 `await runDocumentCommand(...)` 把返回值丢弃——OCC 冲突被吞成 ok。修法：`outcome.status === "ok" ? ok : outcome` 透传。void 载荷命令的 ok 映射习惯 = `CommandResult<null>` + `payload: null`（批 B 同款）。
+- **treatAs 分工实证**：映射层 404 一律 `throw toApiError(err)`（not-found ApiError）——幂等与否归 descriptor.treatAs（kernel runCommand 只拦截 ApiError；抛原始 axios 错误会绕过 treatAs 直达失败通道）。这正式坐实 treatAs 是"命令作者裁决"层而非"适配器裁决"层。
+- **vitest 方言一条：mockResolvedValue 不清调用计数**——页面测试 beforeEach 必须 `mockReset()` 后再设实现（否则 toHaveBeenCalledWith/次数断言跨测试累计漂移，本批三个测试同时"离奇"失败皆此）。
+- **浏览器实证**（stub documents 端点 version-CAS + /stub/doc-bump 模拟外部写者）：① 保存 ok → 只读重建 + 时间戳刷新；② 外部 bump 后以陈旧 version 保存 → 冲突盒（域码中文）+「刷新重载」→ fetchQuery fresh-read 草稿按服务端态重建、结果盒清空、保持编辑态；③ 重载基底上合并改名重存 → 成功回只读。**IAB 新坑：空值输入不可达**——`fill("")` 与 Backspace 均不改变受控输入值（非空 fill 正常）——required 空值路径以 jsdom 断言为准（fireEvent.change 真实事件语义覆盖且绿）。
+- **stub 方言**：中文 query 参数必须 `--data-urlencode`（裸 UTF-8 query 使 stub 的 `new URL()` 抛错 → node http 400 空响应，初判"端点失灵"实为编码问题）。
+- **Form 块第二处本地扩展 resultAction**：结果盒动作槽（冲突「刷新重载」）——与 emptyText 同模式记 vendored 头（上游候选）。页面侧 buildDocumentData/parseFieldValue 随提交收敛迁入 fleet/documents.ts（页面不再持协议知识）。
+
 ---
 
 ## 13. 集中反模式清单（进 SKILL.md）
