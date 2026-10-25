@@ -907,6 +907,24 @@ torchwood console 取证要点（裁决依据）：react-router-dom **v7** 集�
 - **全站烟雾扫查**：stub 补 13 个列表端点（各区 api 模块的响应键空集）+ 未知 GET 兜底回 `{}`；浏览器逐区导航 17 页（Dashboard/api-keys/databases/storage/functions/webhooks/runtime-vars/analytics/users/groups/orders/assets/subscriptions/leaderboards/projects/admins/audit-logs）——全部渲染无空白无错误边界（Dashboard 首扫 0 是 /console 无斜杠工件 + 冷编译 900ms 不够，加长等待/带斜杠后全过）。
 - **合入**：torchwood PR #2（feat/console-tanstack-migration → main，30 commits = 批 A–D + B2 + 修复），CI 双绿（Frontend lint+build 1m9s / Backend lint+test+build 8m29s），merge commit `117e4dce`。**新 console 自此在 main 可用**（部署走既有 CI 镜像 + 部署机手动 Redeploy 流程）。存量挂账不阻塞：compat 逐页退场、列表骨架 fleet 化、documents 表单换轨、服务端错误体 details 透传。
 
+### 12.9 torchwood 全量 ui-kit 收尾——总体裁决（2026-10-25，"全部完成"批）
+
+目标：剩余 16 域全部上 kit 绑定，compat 退役，console 全程可用。分支 feat/console-uikit-completion（自 main 117e4dce 拉）。取证定量：legacy 列表栈（ResourceListPage + useServerPaging）16 页，数据面统一 Page<T>{rows, nextPageToken} 方言（与批 A audit-logs 同构）；compat 导入面 31 文件（Link 17/useParams 16/useNavigate 12/useLocation 5/Outlet 4/NavLink 4/useSearchParams 3/Navigate 2/useOutletContext 1 + TestRouter）；手写表单域 runtime-vars/webhooks/projects settings/databases collections/subscriptions/admins。
+
+1. **阶段顺序 = 风险从低到高**：① 列表族 fleet 化（16 域，行为等价 + URL 分页增量）→ ② 写路径命令化 + 表单族 → ③ Dashboard/杂项 → ④ compat 残余清空 → ⑤ kit http 收敛。每阶段门禁全绿再进。
+2. **列表族范式（批 A playbook 复用，行为等价基线）**：每域 fleet/<domain>.ts = collectionQuerySchema（defaultSize 沿用现页大小）+ defineResource（collection 适配器：Page<T>→Segment，谓词白名单 = 该域真实服务端过滤参数）+ 路由 validateSearch + 页面 useCollection{from: Route 路径, scope:{projectId}} + ListPage/DataTable/KeysetPagination。**页内当前页搜索保持本地态**（legacy 即此语义，不假装服务端化）；既有服务端过滤（如 api-keys enabled）进 URL 谓词。游标/页大小进 URL = 行为增量（批 A 同款）。
+3. **DataTable 行选择 = 受控扩展**（vendored 副本本地扩展，上游候选）：`selection?: { selectedIds: ReadonlySet<string>; onToggle(id); onToggleAll(visibleIds); isRowSelectable? }`——选择态归页面（批量动作是业务编排），块只渲染复选列并上报。api-keys 列表先行样板（行删/批量删/enabled 过滤全接线），随后并行铺开。
+4. **写路径与表单**：一切写经 useCommand（结果两分 + __skipToast + 失效桥接——B2 映射层复用/复制）；静态字段表单上 useCommandForm（TanStack Form），动态 schema 表单（documents 已决）保留 useState 壳 + useCommand。fieldErrors 依 B2 范式按域收敛进 descriptor。
+5. **compat 退场 = 随页自然退役 + 末班清残**：页面 fleet 化时该页 compat import 自然消亡（useCollection 页不再用 useSearchParams/useNavigate 形态）；阶段 ④ 处理残余共享件（Layout NavLink/PageHeader 等换 TanStack 原生 import + router 类型注册），TestRouter 迁独立测试件，compat.tsx 删除。
+6. **http 收敛（阶段 ⑤）**：kit createHttp 的 onUnauthorized 闭环与 torchwood axios 拦截器资产合并评估——若收益不抵风险（拦截器栈是稳定资产），裁决"保留 axios 管线为 torchwood 方言、kit http 收敛关闭"亦是合法终态，以实证定。
+7. **验收**：每域门禁（tsc/vitest/eslint/build）+ 抽页浏览器对照；终验收 = 全站扫查 + PR 合 main。测试锚：每域列表换轨保底 2 条（URL 游标往返 + 空态/错误态），写路径按 B2 矩阵。
+
+**§12.9 阶段回写（进行中，2026-10-25）**：
+
+- **阶段 1 落地**（820db9e6，143/143 绿 + 浏览器 9 页抽页）：16 域 + analytics 事件字典全部 useCollection 化。四组并行子代理 + router.tsx 集中接线（16 条 validateSearch）的协作形态成立——关键在 router 接线归主会话单点、代理按变量名报路由定位（行号在并行下必漂）。**DataTable 行选择受控面**（选择态归页面）+ **行点击挡交互元素冒泡**（操作按钮误触行导航——样板期实测抓获，块级语义修正）。**useInfiniteQuery 加载更多 → keyset 分页**（analytics 事件字典）：事件字典量级小，行为等价（百条内单页即全量）。**account 偏好用例 15s 定向去抖**：radix Select 重交互在满载并行下贴 5s 默认线（三组独立取证：单跑恒绿、干净 HEAD 满载复现）——并行度上升是既成事实，定向放宽优于全局加时。
+- **阶段 2 落地**（66287264，157/157 绿）：三组并行（E storage/functions/webhooks/leaderboards、F admins/groups/users/account、G runtime-vars/subscriptions/databases 建删）+ 主会话（projects settings 七写路径 + Dashboard collectionQueryOptions 资源化）。**范式收敛点**：runCommandMapped 逐文件复制（不共享——各域错误体微差留给域内，避免共享工具的虚假抽象）；提交形收敛一律进 run（五类型 oneof/ID 派生/grace_days/maxUses/scopes 多行文本——apiKeys mergeScopes 先例的批量复制）；子资源/动作类不挂集合（裸 descriptor + invalidates 声明）。**runtime-vars 取证兑现**：UpdateVarSet 无写前件（LWW）——无 OCC 守卫，§12.5 结论在写路径落地时直接适用。
+- **阶段 5 裁决（http 收敛关闭）**：取证 torchwood axios client.ts（132 行）四件资产 = X-Torchwood-Project 头注入（localStorage 单源）/401 单飞刷新+重试+expired=1 重定向/全局错误 toast（__skipToast 豁免）/cookie 会话；kit createHttp 的可收敛面（401 闭环语义 + ApiError 映射）已在全部 fleet 适配器经 toApiError 边界收敛达成，而四件资产全是消费方政策（kit 无对应面）。**裁决：管线本体不统一——axios 是 torchwood 的稳定方言资产，"收敛"的真实含义（类型化 ApiError 边界）已完成**。挂账关闭。
+
 ---
 
 ## 13. 集中反模式清单（进 SKILL.md）
