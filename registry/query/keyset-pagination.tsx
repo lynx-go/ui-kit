@@ -1,8 +1,6 @@
 import type { CollectionHandle } from "@lynx-go/ui-kit/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
 
 /**
  * KeysetPagination（query 块）—— keyset 方言：有 total（Segment.total）则显示
@@ -63,8 +61,9 @@ export function KeysetPagination<T>({
       <div>{t.describe({ rows, total, hasMore })}</div>
       <div className="flex items-center gap-2">
         {pageSizeOptions && pageSizeOptions.length > 0 ? (
-          <Select
-            className={cn("h-8 w-24")}
+          /* 原生 select（fields 块先例）：页大小微控件不耦合消费方 Select 基元方言 */
+          <select
+            className="h-8 w-24 rounded-md border border-line bg-panel px-2 text-fg focus-visible:outline-2 focus-visible:outline-accent"
             aria-label={t.pageSizeAria}
             value={String(size)}
             onChange={(e) => {
@@ -77,7 +76,7 @@ export function KeysetPagination<T>({
                 {t.pageSizeOption(option)}
               </option>
             ))}
-          </Select>
+          </select>
         ) : null}
         <Button
           variant="outline"
