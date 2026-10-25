@@ -1,0 +1,15 @@
+{
+  "name": "torchwood",
+  "note": "torchwood console（~/workspace/qiulin/torchwood/console）——shadcn classic token（Tailwind v3，token 近恒等）",
+  "cnImport": "@/lib/utils",
+  "cnNote": "原生同路径，无需 shim",
+  "tokenMap": {
+    "text-muted": "text-muted-foreground",
+    "bg-panel": "bg-card",
+    "bg-panel-2": "bg-muted",
+    "border-line": "border-border",
+    "divide-line": "divide-border",
+    "text-fg": "text-foreground",
+    "text-err": "text-destructive"
+  }
+}

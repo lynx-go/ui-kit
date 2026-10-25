@@ -876,6 +876,29 @@ torchwood console 取证要点（裁决依据）：react-router-dom **v7** 集�
 - **存量缺陷观察（非本批引入，挂账）**：维度拆解 BarChart 的柱体序列在浏览器不渲染（SVG 有轴/网格无 recharts-bar 组）——二分验证与色改动无关（hex 色同样 0 path，换轨前后一致；拆解表格数据正常呈现，UX 可用）。挂账排查 recharts 3.10 + React 19 的 vertical Bar，或后续批统一换 shadcn chart 容器承载。
 - **环境坑**：后台 `pnpm dev` 的 wrapper 进程会被会话收割（SIGTERM 143，vite 子进程连带死）——dev server 须以 harness 后台任务形态跑；stub（纯 node）不受影响。
 
+### 12.7 devtool 实现——拷贝制适配的机械化（2026-10-25，裁决先行）
+
+§12.1 痛点清单实施终版。取证要点：registry 源 token 词表 18 形（text-muted ×45、border-line ×17、text-fg/text-err ×9、bg-panel ×9、bg-panel-2 ×7、warn/ok/accent 系 ×18、bg-line ×1…）；双 console 实证映射表已散落在各 vendored 头（fleetly §12.1-4 与 torchwood 批 A–D 头注释）——**devtool 第一步是把散落的实证映射表收拢为仓内单源**。registry-build 三态瑕疵：`@lynx-go/ui-kit@workspace:*`（root devDeps 解析值）与模板 `@^0.1` 混入同列表 + `recharts@catalog:default`（pnpm catalog 协议泄漏——npm publish 0.1.0 事故同类）。
+
+1. **形态 = 仓内 CLI `scripts/devtool.mjs`**（零依赖 node 脚本，与 layer-check/registry-build/size-check 同文化）；**不做独立 npm 包**——消费方是本地双 console，open-code 源码可见即文档，包分发的版本管理成本 > 收益（tarball 痛点 #1 的教训反向适用：工具本身不分发，跟着 checkout 走）。
+2. **命令面 v1 = `list` / `profiles` / `copy`**；`diff`（上游块变更 vs 消费方副本的升级同步提示）挂账 v2——拷贝制核心循环是"拷贝 → 手工适配"，自动 diff 需先证明手工适配可稳定叠加。
+3. **profile = `scripts/profiles/<name>.json`**：`tokenMap`（类名→类名）+ `cnImport`（规范化目标）+ 可选 note。fleetly/torchwood 两条从两 console 实证 vendored 头提取落仓（差异实证：text-err 与 bg-panel-2 双 console 不同目标；warn/ok/accent 系**不设默认映射**——那是每块语境判断（torchwood amber/emerald、fleetly status vars），工具以警告面呈现而非假装可机械）。
+4. **token 引擎 = 词边界类名重写**：`(?<![\w-])token(?![\w-])`——`text-muted` 不得误伤 `text-muted-foreground`（连字符是 token 内部字符，边界须含它）。替换后面源再扫一遍源词表：仍出现的 = 未映射警告（列 token + 出现处）。registry 源不含 `-foreground` 形（demo 方言独占词表），无反向污染。
+5. **cn import 规范化 = `@/lib/utils`**：块源恒 `@/lib/utils`，fleetly 走已建 shim（src/lib/utils.ts 转发 cn npm——两世界单源）；torchwood 原生同路径。存量 fleetly 3 文件直 `import { cn } from "cn"` 是 shim 前形态，不回改（copy 默认不覆盖已存在文件）。
+6. **vendored 头生成**：既有格式自动化——`// vendored from fleet-ui registry/<family>/<file> @<kitVersion>（<日期> <note>）` + 适配清单（tokenMap 已应用/cn 规范化）+ 手工步骤提示区（未映射 token、检测到的 `tone=`（Badge 方言面）、`@/components/ui/chart`（需随批拷基元））。kitVersion 从 packages/ui-kit/package.json 读。
+7. **判断题不自动化**：Badge tone→variant、文案中文化、结构剥离（页壳）、Select 桥——工具把机械面吃掉、把判断题显式列出来（警告即交接单）。痛点 ⑤（tsr generate）⑥（table-core 主入口——上游可直接修，另行处理）⑦（shell-agnostic 化）⑧（严格度穿透——已修）不在本工具面。
+8. **registry-build 瑕疵修复（三态）**：`blockDependencies` 排除 `@lynx-go/ui-kit`（core 依赖单源 = 硬编码 semver）；`catalog:` 协议解析——读 pnpm-workspace.yaml catalogs 还原真 semver（recharts ^3.10.1）；解析不到硬错（协议泄漏必须在构建期爆，不能流到 registry.json）。
+9. **测试 = `node --test scripts/devtool.test.mjs`**（scripts 层非 workspace 包，无 vitest 面；node 24 内建 runner 零配置）：token 引擎矩阵（边界/误伤/未映射警告）、头生成、依赖提示、profile 完备性（两 profile 对源词表的覆盖面 = 警告面断言）、registry-build 依赖收敛。`pnpm check` 链入 `test:devtool`。
+
+**devtool 实现期回写（2026-10-25 落地，`pnpm check` 全绿 + 真实块干跑对照通过）**：
+
+- **生成头与手工版逐条对应**（干跑 event-feed 对照明证）：工具产出的头 = 机械区（token 映射清单 + cn 规范化）自动化 + 手工区（未映射 warn 系 ×N、Badge tone= 检测）逐条列出——正是批 A–D 各 vendored 头里人写的那两段。工具没有发明新格式，它把既有实践单源化。
+- **词边界方言两处坑（测试矩阵锁住）**：① 连字符是 token 内部字符——`(?<![\w-])…(?![\w-])` 否则 `text-muted` 误伤 `text-muted-foreground`（词边界 `\b` 因 `-` 属非词字符而失效）；② 映射目标（如 torchwood 的 `bg-muted`）不得误报未映射——**未映射扫描用源词表枚举正则而非生成式模式**（`(text|bg|…)-(muted|…)` 生成式会把合法目标 `bg-muted` 当方言）。
+- **头注释是映射文档不是代码**：端到端断言"输出不含源 token"须切代码体（首个 import 起）——头里 `text-muted→text-muted-foreground` 是合法的文档性出现。
+- **copy 默认拒绝覆盖**（--force 例外）：拷贝制的核心循环是"拷贝→手工适配"，重拷会静默抹掉手工层——升级同步走 diff（v2 挂账）而非盲覆盖。
+- **registry-build 修复实证**：依赖面收敛为 `@lynx-go/ui-kit@^0.1` + `recharts@^3.10.1` 两项（此前 workspace:\* 与 catalog:default 混入）；catalog 解析不到时构建期硬错（协议泄漏不过夜）。
+- 痛点对照收束：②（token 映射表）✓ 工具化；③（基元方言）→ 检测提示（chart 基元/tone=）；④（cn shim）→ profile cnImport 规范化；①（tarball 同步）已被 npm 发版消解；⑤⑥⑦⑧ 维持原处置（上游可修/已修/判断题）。
+
 ---
 
 ## 13. 集中反模式清单（进 SKILL.md）

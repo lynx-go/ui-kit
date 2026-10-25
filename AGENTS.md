@@ -25,10 +25,11 @@ docs/           design.md / SKILL.md / llms.txt
 ## 常用命令
 
 ```
-pnpm check          # layer-check + typecheck + test（提交前必绿）
+pnpm check          # layer-check + typecheck + test + devtool 测试（提交前必绿）
 pnpm --filter demo dev   # demo 起 5173
 pnpm --filter demo e2e   # Playwright（URL 即真相的行为验收）
 node scripts/registry-build.mjs
+node scripts/devtool.mjs copy <family>/<name> --to <consumer-root> [--profile torchwood|fleetly] [--note "批次"]   # 拷贝制适配（§12.7）
 ```
 
 ## 关键约定（速查，完整版见 design.md §2/§13/§14）

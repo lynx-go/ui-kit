@@ -9,9 +9,10 @@
     "lint": "biome check .",
     "layer-check": "node scripts/layer-check.mjs",
     "size-check": "node scripts/size-check.mjs",
-    "check": "pnpm layer-check && pnpm typecheck && pnpm size-check && pnpm test",
+    "check": "pnpm layer-check && pnpm typecheck && pnpm size-check && pnpm test && pnpm test:devtool",
     "demo": "pnpm --filter demo dev",
-    "e2e": "pnpm --filter demo e2e"
+    "e2e": "pnpm --filter demo e2e",
+    "test:devtool": "node --test scripts/devtool.test.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:default",

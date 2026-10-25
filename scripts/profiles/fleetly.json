@@ -1,0 +1,15 @@
+{
+  "name": "fleetly",
+  "note": "fleetly console（~/workspace/qiulin/fleetly/console）——shadcn 全量 token（Tailwind v4）",
+  "cnImport": "@/lib/utils",
+  "cnNote": "消费方 cn 实现是 npm 包 cn；src/lib/utils.ts 已建 shim 转发（两世界单源），块统一 @/lib/utils",
+  "tokenMap": {
+    "text-muted": "text-muted-foreground",
+    "bg-panel": "bg-card",
+    "bg-panel-2": "bg-muted/50",
+    "border-line": "border-border",
+    "divide-line": "divide-border",
+    "text-fg": "text-foreground",
+    "text-err": "text-[var(--status-danger)]"
+  }
+}

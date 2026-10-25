@@ -61,7 +61,7 @@
       ],
       "dependencies": [
         "@lynx-go/ui-kit@^0.1",
-        "recharts@catalog:default"
+        "recharts@^3.10.1"
       ],
       "registryDependencies": []
     },
@@ -125,8 +125,7 @@
         }
       ],
       "dependencies": [
-        "@lynx-go/ui-kit@^0.1",
-        "@lynx-go/ui-kit@workspace:*"
+        "@lynx-go/ui-kit@^0.1"
       ],
       "registryDependencies": []
     },
@@ -158,8 +157,7 @@
         }
       ],
       "dependencies": [
-        "@lynx-go/ui-kit@^0.1",
-        "@lynx-go/ui-kit@workspace:*"
+        "@lynx-go/ui-kit@^0.1"
       ],
       "registryDependencies": []
     },
@@ -175,8 +173,7 @@
         }
       ],
       "dependencies": [
-        "@lynx-go/ui-kit@^0.1",
-        "@lynx-go/ui-kit@workspace:*"
+        "@lynx-go/ui-kit@^0.1"
       ],
       "registryDependencies": []
     },
@@ -192,8 +189,7 @@
         }
       ],
       "dependencies": [
-        "@lynx-go/ui-kit@^0.1",
-        "@lynx-go/ui-kit@workspace:*"
+        "@lynx-go/ui-kit@^0.1"
       ],
       "registryDependencies": []
     },
@@ -209,8 +205,7 @@
         }
       ],
       "dependencies": [
-        "@lynx-go/ui-kit@^0.1",
-        "@lynx-go/ui-kit@workspace:*"
+        "@lynx-go/ui-kit@^0.1"
       ],
       "registryDependencies": []
     },
@@ -226,8 +221,7 @@
         }
       ],
       "dependencies": [
-        "@lynx-go/ui-kit@^0.1",
-        "@lynx-go/ui-kit@workspace:*"
+        "@lynx-go/ui-kit@^0.1"
       ],
       "registryDependencies": []
     },
@@ -243,8 +237,7 @@
         }
       ],
       "dependencies": [
-        "@lynx-go/ui-kit@^0.1",
-        "@lynx-go/ui-kit@workspace:*"
+        "@lynx-go/ui-kit@^0.1"
       ],
       "registryDependencies": []
     },
@@ -260,8 +253,7 @@
         }
       ],
       "dependencies": [
-        "@lynx-go/ui-kit@^0.1",
-        "@lynx-go/ui-kit@workspace:*"
+        "@lynx-go/ui-kit@^0.1"
       ],
       "registryDependencies": []
     },
@@ -293,8 +285,7 @@
         }
       ],
       "dependencies": [
-        "@lynx-go/ui-kit@^0.1",
-        "@lynx-go/ui-kit@workspace:*"
+        "@lynx-go/ui-kit@^0.1"
       ],
       "registryDependencies": []
     },
@@ -326,8 +317,7 @@
         }
       ],
       "dependencies": [
-        "@lynx-go/ui-kit@^0.1",
-        "@lynx-go/ui-kit@workspace:*"
+        "@lynx-go/ui-kit@^0.1"
       ],
       "registryDependencies": []
     },
@@ -343,8 +333,7 @@
         }
       ],
       "dependencies": [
-        "@lynx-go/ui-kit@^0.1",
-        "@lynx-go/ui-kit@workspace:*"
+        "@lynx-go/ui-kit@^0.1"
       ],
       "registryDependencies": []
     },
@@ -360,8 +349,7 @@
         }
       ],
       "dependencies": [
-        "@lynx-go/ui-kit@^0.1",
-        "@lynx-go/ui-kit@workspace:*"
+        "@lynx-go/ui-kit@^0.1"
       ],
       "registryDependencies": []
     },
@@ -377,8 +365,7 @@
         }
       ],
       "dependencies": [
-        "@lynx-go/ui-kit@^0.1",
-        "@lynx-go/ui-kit@workspace:*"
+        "@lynx-go/ui-kit@^0.1"
       ],
       "registryDependencies": []
     },
@@ -426,8 +413,7 @@
         }
       ],
       "dependencies": [
-        "@lynx-go/ui-kit@^0.1",
-        "@lynx-go/ui-kit@workspace:*"
+        "@lynx-go/ui-kit@^0.1"
       ],
       "registryDependencies": []
     },
