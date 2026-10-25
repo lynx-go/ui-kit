@@ -855,6 +855,27 @@ torchwood console 取证要点（裁决依据）：react-router-dom **v7** 集�
 - **stub 方言**：中文 query 参数必须 `--data-urlencode`（裸 UTF-8 query 使 stub 的 `new URL()` 抛错 → node http 400 空响应，初判"端点失灵"实为编码问题）。
 - **Form 块第二处本地扩展 resultAction**：结果盒动作槽（冲突「刷新重载」）——与 emptyText 同模式记 vendored 头（上游候选）。页面侧 buildDocumentData/parseFieldValue 随提交收敛迁入 fleet/documents.ts（页面不再持协议知识）。
 
+### 12.6 torchwood 批 D：analytics → MetricChart 配方裁决（2026-10-25，取证先行）
+
+取证要点：torchwood analytics 三处图表全是手拼 recharts + **硬编码 hex 色**（#2563eb 蓝/#16a34a 绿/#e5e7eb 网格——浅色专属，无主题变量）；两处趋势折线（概览页 + 事件详情页）同构：2 序列（total 事件数/uv 活跃用户）、UTC 桶预格式化字符串做 x 轴、h-64；事件详情另有维度拆解 **BarChart（分类柱状，非时序）**；UserActivityPage 无图。依赖缺口：无 shadcn chart 基元（components/ui/chart.tsx）、无 `--chart-1..5` CSS 变量（index.css 无 .dark 段——暗色主题本身缺位）；recharts 3.10.1 已在。fleetly 直迁范式（§12.1 补记）：MetricChart 块（零 kit import）+ 页面投影薄壳 toMetricSeries + serverCapOf。
+
+1. **切片 = 两处趋势折线换 MetricChart**（概览页 + 事件详情页）；**维度拆解 BarChart 留存**——MetricChart 是时序多序列折线，分类柱状不在其面（块不越面），但其硬编码色顺带换 `var(--chart-1)`/主题网格色（暗色可用性一次性修正，结构不动）；**KpiCard → StatCard 挂账**（tone 的 ok/warn 色无 token + KPI 不是图表族——等列表骨架批或第二消费者再裁）；UserActivityPage 不涉及。
+2. **依赖缺口补齐**：shadcn chart 基元拷入 `components/ui/chart.tsx`（fleetly 同款 372 行，`cn` import 改 `@/lib/utils`——基元层非 fleet 块）；index.css `:root` 补 `--chart-1..5`（shadcn 默认色板；torchwood 无 .dark 段，暗色主题挂账不在本批）。
+3. **投影层 = `routes/analytics/metricChart.tsx` 页面侧薄壳**（fleetly features/metrics/metric-chart.tsx 同位法——analytics 是页面域，不进 fleet/）：`toTrendSeries(points): MetricSeries[]`——固定 2 序列、key 用语义名 total/uv（跨刷新稳定，非 fleetly 的 s{index}——那是动态序列列表的方言，固定序列直接语义名）、`t = Date.parse(bucket)`（UTC 毫秒，数值时间轴）、`v = num()`（int64 string 收敛）；`formatTick` = UTC 桶方言（复用 formatBucket——HOUR `mm-dd hh:00`/DAY `mm-dd`，页面吸收）；`formatValue` = toLocaleString。**timeseriesRows 退役**（预格式化 label 轴是旧方言；其测试锚随删，formatBucket 锚保留）。
+4. **全零窗口的业务空态保留页面级**：现页面"全零 → 业务空态文案（没人上报）"是业务口径判断，保留在页面外层 if；块哲学"全零=合法序列照画"不冲突——页面判"有上报"，块判"有样本"，两层各司其职。
+5. **块拷贝 = metric-chart.tsx**（vendored @0.1.1）：token 映射同批 A 表（border-line→border-border、text-muted→text-muted-foreground、text-fg→text-foreground）；文案中文化（窗口内无样本 / +N 条序列未显示 / 服务端截断披露句）；serverCap 面保留（本页无截断面不传——analytics timeseries 无该方言）。
+6. **测试锚**（vendored 块单测覆盖家在消费方，§12.1 约定）：toTrendSeries 投影锚新增（bucket→t 解析、total/unique_users 的 string→num 收敛、两序列 key/label、空 points→空序列）；shared.test.ts 的 timeseriesRows 锚随退役删除；buildMetricRows 的序列治理锚（排序/上限/零值缺省）由块源拷贝自带语义，消费方不重复锁（fleetly 先例锁的是投影层）。
+7. **stub 扩 analytics 端点**（浏览器对照）：/v1/server/analytics/overview + /timeseries（多桶 fixture，HOUR 桶 UTC 对齐）。
+
+**批 D 实现期回写（2026-10-25 落地，门禁 123/123 + 浏览器对照通过）**：
+
+- **react-refresh 约束拆出两份纯函数文件**：torchwood eslint 只许组件文件导出组件——`buildMetricRows` 从块拆至 `components/fleet/values/metric-rows.ts`（vendored 头注明拆分，语义与上游一致）；投影 `toTrendSeries` 并入 `routes/analytics/shared.ts`（与 formatBucket 同居——投影与刻度方言本是一对，react-refresh 约束反促成更诚实的归属）。投影锚落 shared.test.ts（替补 timeseriesRows 退役锚的原位）。
+- **chart 色变量方言**：torchwood token 体系是 HSL 三元组（tailwind.config 包 hsl()），但块经 `var(--chart-N)` 直用 presentation attribute——**三元组形态无效，须落完整色值**（`--chart-1: hsl(221 83% 53%)`）。chart-1/2 沿用旧图 hex（#2563eb/#16a34a）保视觉连续（蓝=事件数、绿=活跃用户）；presentation attribute 上的 var() 在现代 Chromium 走得通（SVG2 presentation attribute 按 CSS 声明解析）——线图实渲染佐证。
+- **`AnalyticsTimeseriesPoint.unique_users` 改可选**：protojson 零值省略方言——全零 UV 桶运行时缺席该键（服务端 proto3 标量零值不序列化），类型面如实化（投影层 num 收敛 0，stub fixture 专门造了一个缺席桶做对照锚）。
+- **浏览器实证**：DAY 视图双线渲染 + UTC 日刻度（10-19…10-25）+ y 轴整数千分位；HOUR 视图小时刻度（10-24 04:00…）+ raw 口径徽标 + uv 缺席桶收敛；事件详情趋势同构；视觉核验（蓝线峰值=字符串桶 "480" 收敛、主题协调、无重叠）。**stub 方言两条**：granularity 参数是枚举全名 `ANALYTICS_GRANULARITY_{HOUR,DAY}`（裸 "HOUR" 比对踩坑——初判"页面没重取"实为 stub 分支错）；**react-query 缓存会让错误响应粘住同 key**——修 stub 后须整页重载而非点选重试。
+- **存量缺陷观察（非本批引入，挂账）**：维度拆解 BarChart 的柱体序列在浏览器不渲染（SVG 有轴/网格无 recharts-bar 组）——二分验证与色改动无关（hex 色同样 0 path，换轨前后一致；拆解表格数据正常呈现，UX 可用）。挂账排查 recharts 3.10 + React 19 的 vertical Bar，或后续批统一换 shadcn chart 容器承载。
+- **环境坑**：后台 `pnpm dev` 的 wrapper 进程会被会话收割（SIGTERM 143，vite 子进程连带死）——dev server 须以 harness 后台任务形态跑；stub（纯 node）不受影响。
+
 ---
 
 ## 13. 集中反模式清单（进 SKILL.md）
