@@ -925,6 +925,14 @@ torchwood console 取证要点（裁决依据）：react-router-dom **v7** 集�
 - **阶段 2 落地**（66287264，157/157 绿）：三组并行（E storage/functions/webhooks/leaderboards、F admins/groups/users/account、G runtime-vars/subscriptions/databases 建删）+ 主会话（projects settings 七写路径 + Dashboard collectionQueryOptions 资源化）。**范式收敛点**：runCommandMapped 逐文件复制（不共享——各域错误体微差留给域内，避免共享工具的虚假抽象）；提交形收敛一律进 run（五类型 oneof/ID 派生/grace_days/maxUses/scopes 多行文本——apiKeys mergeScopes 先例的批量复制）；子资源/动作类不挂集合（裸 descriptor + invalidates 声明）。**runtime-vars 取证兑现**：UpdateVarSet 无写前件（LWW）——无 OCC 守卫，§12.5 结论在写路径落地时直接适用。
 - **阶段 5 裁决（http 收敛关闭）**：取证 torchwood axios client.ts（132 行）四件资产 = X-Torchwood-Project 头注入（localStorage 单源）/401 单飞刷新+重试+expired=1 重定向/全局错误 toast（__skipToast 豁免）/cookie 会话；kit createHttp 的可收敛面（401 闭环语义 + ApiError 映射）已在全部 fleet 适配器经 toApiError 边界收敛达成，而四件资产全是消费方政策（kit 无对应面）。**裁决：管线本体不统一——axios 是 torchwood 的稳定方言资产，"收敛"的真实含义（类型化 ApiError 边界）已完成**。挂账关闭。
 
+**§12.9 终回写（2026-10-25 全量完成，PR torchwood#3）**：
+
+- **阶段 2 收尾（48e6b670）**：残留 17 处 useMutation 清零（webhooks redeliver/functions 触发器+客户端策略/资产建改删/订单退款履约/集合 schema 编辑器六动词/建项目）。归属判断先例固化：**实体 PATCH 挂 resource commands（client_policy 是 function 实体字段、refund/fulfill 是订单状态机）；子资源/动作类裸 descriptor（触发器三动词/轮换/redeliver）**。终态 useMutation 仅剩 leaderboards 条目 lookup（GET 读检索伪装 mutation——刻意保留并成文）。
+- **阶段 4 compat 退役（ab3b59ef，51 文件）**：模板串 Link/navigate → `to="$param" params={{…}}` 参数形（路由参数表映射脚本；带 query 的模板 → `search={{…}}` 形）；`useParams({strict:false})` 替合并面；**TanStack v1 无 NavLink/useSearchParams**——前者落 app 级 `router/nav-link.tsx`（激活态链接是 UI 模式非兼容层），后者三消费面分别原生化（Login 旗标读注意 **TanStack 默认解析把 "1" 变数字——String() 归一**；assets owner 读写 useSearch+navigate 函数式；useListParams 整体重写为 search 对象投影）。Outlet context 形态落 `router/outlet-context.{ts,tsx}`（context+hook 居 .ts 过 react-refresh 约束）；TestRouter 迁 `test-utils/`。**测试方言**：LocationProbe 类探针 `pathname + search` 会因 search 对象炸整树（Cannot convert object to primitive）——探针须回拼查询串。
+- **协作形态总结**：本批 8 个子代理（列表四组 + 写路径三组 + 收尾一组）+ 主会话（样板/接线/集成/阶段 3/阶段 4）。**样板先行 + router 集中单点 + 按变量名报路由定位**是并行不冲突的三支柱；每代理域内门禁全绿 + 主会话集成门禁复核，全套测试 124→164（+41 锚）。
+- **验收**：门禁全绿（tsc 0/vitest 164/eslint 0 error/build 过）+ 浏览器全站 22 页扫查全渲染 + 导航抽检（行点击 $id 详情/typed Link/带 query 跳转）全通。**冷启动时序假阴性两次教训**：dev server 刚起时首访页冷编译 >1.1s 窗口——扫查判定前须加长等待或复测。
+- **torchwood ui-kit 改造至此全量完成**：读（useCollection 16 域 + collectionQueryOptions）/写（useCommand 全量 + useCommandForm api-keys/documents）/听（useSubscription）/块（List/DataTable/KeysetPagination/Form/Fields/EventFeed/MetricChart/StatCard/states）四族绑定全覆盖，compat 零残留。遗留存量（非 kit 面）：ResourceListPage 子视图族（assets 用户资产/storage 文件列表/groups 成员——useListParams 原生重写后仍可用，等第二个消费者再裁去留）。
+
 ---
 
 ## 13. 集中反模式清单（进 SKILL.md）
