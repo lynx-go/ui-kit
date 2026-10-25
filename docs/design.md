@@ -808,6 +808,30 @@ torchwood console 取证要点（裁决依据）：react-router-dom **v7** 集�
 - **TanStack 测试方言补一条（切片复核时发现）**：命令 onSettled 内 `navigate` 的目标路由未注册进 TestRouter harness 时，not-found rejection 的落点随并行时序漂移——单文件稳定、全套 4 轮 1 次失败，每轮均有 notFoundError stderr 佐证；harness 须注册导航目标路由（torchwood bf34dc99 修复，修后 stderr 归零、全套 2 轮 + 单文件 3 轮 105/105）。
 - **浏览器实证**：新建 reveal 一次性 secret、编辑 diff（仅传 name）+ 桥接失效刷新、删除后存量列表实时更新（手动桥生效）。
 
+### 12.4 torchwood 批 C：订阅族——ListenPanel 切片裁决（2026-10-25，取证先行）
+
+取证要点：torchwood `/v1/realtime` 是**握手式 WebSocket**（非 fetch 流）——cookie 鉴权（HttpOnly TORCHWOOD_session_console，无 access_token 面），open 后 `hello{project_id}` → `hello_ok{connection_id}` → `subscribe{id:"c1", channel}`，服务端 30s ping/客户端 pong，事件帧 `event{channel, payload}`；断线（15m 到期 close 1008 token_expired 或任意 onclose）→ 先 `/v1/console/auth` refresh 续 cookie → 重开重订（**不补历史**），refresh 失败 → disconnected + 「已断开，点击重连」手动重连；现状**无退避重试、无游标/续订语义、无服务端终态**（流永续）。ListenPanel = CollectionLayout 的 listen tab，Outlet context 给 dbId/collId，事件表 100 条封顶。kit 侧对照：`Transport.beforeReconnect` 与 `SubscriptionHandle.restart` 的注释**明写 torchwood realtime 是预定落点**（kernel types.ts「先 refresh 再重订」/ 引擎「torchwood 手动重连」）——映射是契约设计时预对的。
+
+1. **transport = 消费方自建薄 wsTransport**（非 ndjson/sse 复用）：握手协议与双向 ping/pong 无法落 fetch 流族，正中 kernel「帧方言归消费方适配器」的分工。分层对齐批 A：`api/realtime.ts` 收敛为纯协议件（URL、ListenWebSocket 注入口、帧构造/解析），kit 面 `Transport<EventFrame>` + descriptor 落 `src/fleet/realtime.ts`；现 `startCollectionListener`（自带重连环）被引擎整体取代——删除，重连/退避/refresh 编排一律归引擎，消费方不再手写监听状态机。
+2. **重连语义映射**：一切非用户 onclose → 迭代器抛 `{kind:"network"}`（可重试中断）→ 引擎退避 → `beforeReconnect = refreshSession` → 重开重订；退避预算耗尽 → stalled。close 1008 token_expired **不映射 auth 终态**——首遇即终态会杀死 15m 正常续期路径（refresh 只活在 beforeReconnect，终态分诊先于它）。refresh 失败不阻断重订（引擎既定语义）：死会话多跑 ≤N 轮退避后 stalled，UX 等价（同落「已断开+手动重连」），多付出有界探测；顺带换来瞬时 refresh 抖动不杀监听。手动重连 = `sub.restart()`（先开后刷，会话已死时多一拍退避）——kit 注释预定语义，接受。
+3. **退避与缓冲**：`backoffMs = [500,1000,2000,4000]`（试听面板量级，~7.5s 到 stalled）；`buffer = 100`（= 现 MAX_EVENTS，环形缓冲丢最旧即现状 slice 语义）。
+4. **descriptor = 裸 SubscriptionDescriptor**（demo eventsStream 同款先例，不挂 Resource——collections 资源化不在本批）：`params={dbId, collId}`、`scope={projectId}`（hello 的 project 绑定就是作用域概念本体）、policy 声明在 descriptor（运行时判别）；`cursor: null`（活尾即开）、无 getCursor（无续订语义，重连即活尾重订）。projectId 未就绪（null）→ open 返回待命迭代器（首 next() 挂起至 abort），状态停留「连接中」——对齐现状 `if (!projectId) return` 的守卫。
+5. **帧方言**：`ListenEvent → EventFrame{channel, payload, at, seq}`——`at`=到达时刻（transport 内 new Date()，同现状）；`seq`=transport 闭包内**跨重连单调递增**的到达序（transport 实例跨引擎重试复用），作 EventFeed 的 getKey——无 backlog 不补历史，去重即到达恒等。
+6. **块拷贝 = EventFeed 单块**（LogViewer 不拷——日志族是 fleetly 面，torchwood 试听是事件面）：token 映射同批 A 表 + **warn→amber 系**（torchwood 无 warn token，`border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-400` 是仓库既有 warn 惯例）；demo Badge `tone` → shadcn `variant`+className（ok→default、err→destructive、warn→secondary+amber 字色）；**文案中文化**（批 B form.tsx 先例，vendored 头注明差异）。页面投影：render 槽 = 时间（formatTimeOnly+管理员时区）+ 事件名（payload.event）+ payload 摘要（120 字截断）；stalled 黄条的 resyncAction 槽 = 「已断开，点击重连」按钮（onClick=sub.restart）。
+7. **UI 形变接受**（批 A audit-logs 整页换 DataTable 同款先例）：Table 三列 → EventFeed 列表行；页级小页头（Radio 图标+「实时事件」+状态徽章）让位块自带页头（状态徽章+计数）；状态文案映射 live=已连接 / reconnecting=连接中… / stalled=已断开。**live 语义偏差知情接受**：引擎 live = open() 返回即置（ndjson 同款——迭代已启动≠握手完成），WS 握手窗口徽章短暂超前、黑洞网络下 live 持续到 TCP 超时——连接失败随即回 reconnecting/退避。暂停能力（块自带 paused 指示灯）本批不接页面按钮——现状无此交互，保持等价。
+8. **测试换轨**：MockWebSocket harness（stubGlobal）+ vi.mock api/auth 保留；行为锚三条不丢：① hello 绑 project_id（无 access_token）→ hello_ok 后订阅频道 → 事件呈现 → ping/pong；② close 1008 → refreshSession 调用 → 新 WS 重 hello+重订；③ refresh 持续失败 → 多轮退避后 stalled「已断开」→ 点击重连 → restart → 恢复。**真实计时器**（Effect sleep 与 vitest fake timers 不友好），首档 500ms 在 waitFor 预算内。stub 扩手写 RFC6455 最小 ws 服务端（`/v1/realtime` 握手+事件推送+1008 关闭控制端点）供浏览器对照。
+
+**批 C 不做（挂账）**：fleetly 订阅族（events/logs/wait 票据方言是另一套取证）、暂停/恢复交互接入（块能力已在）、analytics → MetricChart（D 批）、列表骨架 fleet 化、kit http 管线收敛、compat 逐页退场、OCC（B2）。
+
+**批 C 实现期回写（2026-10-25 落地，门禁 105/105 + 浏览器对照通过）**：
+
+- **closeReason 恒 "transport" 落成常量属性**：本方言无服务端终态（流永续，一切收流皆中断）——transport 的 closeReason 不再需要 let+getter 形态（ndjson/sse 因 isEnded/endEvent 会改写才用 getter），eslint prefer-const 顺水推舟。消费方 transport 的两种写法（恒值/可变）自此有对照样例。
+- **待命迭代器的 TS 方言**：projectId null 的"待命至 abort"分支 await 一个只 reject 的 Promise——TS 不因此收窄 null，需在 await 后补不可达 `return` 满足控制流分析（运行时死码）。
+- **vitest 计时方言**：stalled 全路径要走完 4 档真实退避（250+500+1000+2000=3.75s，Effect sleep 与 fake timers 不友好只能真实计时）——`it(name, { timeout: 20000 }, fn)` 选项形态（describe 第三参超时在 vitest 4 不可用）；测试驱动"死会话"循环 = 每个新 MockWebSocket 实例到达后手动 serverClose（mock 不会自行关闭，真实服务端才会）。
+- **引擎 refresh 语义实证**：refresh 按重试次数调用（每档退避后一次，beforeReconnect 落点），非按 close 次数——4 档退避 = 4 次 refresh + 5 个连接后 stalled；restart 立即重开不先 refresh（会话已死时多一拍退避再进 refresh 路径）。
+- **浏览器对照（stub 手写 RFC6455 最小服务端**：握手 sha1+掩码帧解析+close 帧状态码；控制端点 /stub/ws/{state,emit,expire}；vite 代理 `/v1` 需对象形态 + `ws: true` 才代理 WebSocket）：① hello 绑 proj-1 + 订阅 databases.app.collections.posts（服务端 state 佐证）；② 两条事件到达——最新在上、到达时刻按管理员时区（Asia/Shanghai）渲染、payload 120 字摘要；③ /stub/ws/expire（1008 token_expired）→ conn-2 重订 + 徽章回「已连接」+ 旧缓冲保留（不补历史）+ 新事件续达（3 条）；④ 视觉：浅色主题下徽章 default/行三段式/无溢出，amber 系未触发路径由 stalled 单测覆盖。StrictMode 双挂载幂等由服务端单连接佐证（首引擎 stop 干净）。
+- **EventFeed 本地扩展 emptyText**：空态业务句（「对该集合执行写操作后…」）归页面——块加 emptyText 槽而非把业务词写进块（边界正向改进，上游候选）。
+
 ---
 
 ## 13. 集中反模式清单（进 SKILL.md）
