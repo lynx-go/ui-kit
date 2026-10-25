@@ -805,6 +805,7 @@ torchwood console 取证要点（裁决依据）：react-router-dom **v7** 集�
 - **Resource.commands 可选类型面**：消费方按 demo 先例 `commands!` + 模块级提升句柄（createApiKeyCommand/removeApiKeyCommand）；treatAs 字面量需 `as const`（status: "ok" 否则推断 string）。
 - **TanStack Form 方言三则**：① required 校验器需同时挂 onChange（即时反馈）+ onSubmit（兜住"从未输入直接提交"），双注册会在 meta.errors 产生重复条目——FieldErrors 渲染去重；② 跨字段联动（wildcard 禁用词表勾选）必须 form.Subscribe——目标字段子树独立订阅，直读 form.state.values 在对方翻转时不重渲染；③ FormPageWrapper 类"onSubmit 形外壳 + 自渲染 footer"与 Form 内芯互斥（内芯持有 submit），整页表单换壳不换芯。
 - **radix Dialog 退出动画残留**：关闭后 data-state=closed 的 Presence 可长期滞留 DOM（等 exit animationend）——既有壳行为非切片引入，elementFromPoint 证不挡交互；jsdom 断言用 queryByRole 即可（radix 在 jsdom 立即卸载）。
+- **TanStack 测试方言补一条（切片复核时发现）**：命令 onSettled 内 `navigate` 的目标路由未注册进 TestRouter harness 时，not-found rejection 的落点随并行时序漂移——单文件稳定、全套 4 轮 1 次失败，每轮均有 notFoundError stderr 佐证；harness 须注册导航目标路由（torchwood bf34dc99 修复，修后 stderr 归零、全套 2 轮 + 单文件 3 轮 105/105）。
 - **浏览器实证**：新建 reveal 一次性 secret、编辑 diff（仅传 name）+ 桥接失效刷新、删除后存量列表实时更新（手动桥生效）。
 
 ---
