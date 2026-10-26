@@ -1,7 +1,7 @@
-import { textPredicate, type Predicate } from "@lynx-go/ui-kit/kernel";
-import type { CollectionHandle } from "@lynx-go/ui-kit/react";
-import { filterValues, predicateOf } from "@lynx-go/ui-kit/schema";
-import type { FilterFieldDef, QuerySearchSchema } from "@lynx-go/ui-kit/schema";
+import { textPredicate, type Predicate } from "@lynx-go/uikit-core/kernel";
+import type { CollectionHandle } from "@lynx-go/uikit-core/react";
+import { filterValues, predicateOf } from "@lynx-go/uikit-core/schema";
+import type { FilterFieldDef, QuerySearchSchema } from "@lynx-go/uikit-core/schema";
 import { Search, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";

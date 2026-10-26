@@ -26,7 +26,7 @@ export interface CommandDescriptor<Input, Payload, ID = never> {
   /**
    * 存量键失效桥（迁移期）：ok 后按返回的前缀键失效（TanStack 前缀语义）。
    * 与 invalidates（kit 键声明）互补——存量 react-query 键（如 ["groups",
-   * projectId]）无 fleet 键形，selector 匹配结构性不覆盖，声明面在此。
+   * projectId]）无 kit 键形，selector 匹配结构性不覆盖，声明面在此。
    * defineResource 把 spec.legacyKeys 注入为各命令缺省；descriptor 自带优先。
    */
   legacyKeys?: (scope: ResourceScope) => ReadonlyArray<readonly unknown[]>;
@@ -156,7 +156,7 @@ export function defineResource<
 >(spec: ResourceSpec<T, ID, C, S>): Resource<T, ID, C, S> {
   if (!/^[a-z][a-z0-9-]*$/.test(spec.name)) {
     throw new Error(
-      `@lynx-go/ui-kit: resource name "${spec.name}" must be kebab-case (it lives in query keys and URL diagnostics)`,
+      `@lynx-go/uikit-core: resource name "${spec.name}" must be kebab-case (it lives in query keys and URL diagnostics)`,
     );
   }
   const commands = spec.commands

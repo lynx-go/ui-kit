@@ -7,7 +7,7 @@
  *   schema    允许 kernel + "effect"（公开面零 effect/schema 泄漏由导出审计保证）
  *   adapters  允许 kernel + "effect"
  *   react     允许 kernel + schema + react 系 + @tanstack 系；禁止 "effect"（目录级）
- *   registry  允许 @lynx-go/ui-kit* + @/ + @blocks/ + react 系 + @tanstack 系 + lucide/clsx/cva
+ *   registry  允许 @lynx-go/uikit-core* + @/ + @blocks/ + react 系 + @tanstack 系 + lucide/clsx/cva
  *             + recharts（MetricChart 裁决：拷贝制下落消费方，registry.json dependencies 声明）；禁止 effect
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
@@ -20,22 +20,22 @@ const IMPORT_RE = /(?:from\s+|import\s*\(\s*)["']([^"']+)["']/g;
 
 const LAYER_RULES = {
   kernel: {
-    base: "packages/ui-kit/src/kernel",
+    base: "packages/core/src/kernel",
     allowed: (spec, isRelative) => isRelative, // 只允许相对导入
     label: "kernel（零依赖）",
   },
   schema: {
-    base: "packages/ui-kit/src/schema",
+    base: "packages/core/src/schema",
     allowed: (spec, isRelative) => isRelative || spec === "effect" || spec.startsWith("effect/"),
     label: "schema（kernel + effect）",
   },
   adapters: {
-    base: "packages/ui-kit/src/adapters",
+    base: "packages/core/src/adapters",
     allowed: (spec, isRelative) => isRelative || spec === "effect" || spec.startsWith("effect/"),
     label: "adapters（kernel + effect）",
   },
   react: {
-    base: "packages/ui-kit/src/react",
+    base: "packages/core/src/react",
     allowed: (spec, isRelative) =>
       isRelative ||
       spec === "react" ||
@@ -49,7 +49,7 @@ const LAYER_RULES = {
     base: "registry",
     allowed: (spec, isRelative) =>
       isRelative ||
-      spec.startsWith("@lynx-go/ui-kit") ||
+      spec.startsWith("@lynx-go/uikit-core") ||
       spec.startsWith("@/") ||
       spec.startsWith("@blocks/") ||
       spec === "react" ||

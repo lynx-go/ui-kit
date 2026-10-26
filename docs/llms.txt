@@ -1,4 +1,4 @@
-# @lynx-go/ui
+# @lynx-go/uikit
 
 > Data-dense console UI library: three interaction primitives (Query / Command / Subscription) + one interaction surface (Resource), Effect in the seams, five families of UI blocks, on TanStack engines.
 > Built agent-first, for agents guided by humans.

@@ -8,7 +8,7 @@ import { Pagination } from "@blocks/query/pagination";
 import { CopyButton } from "@blocks/values/copy-button";
 import { RelativeTime } from "@blocks/values/relative-time";
 import { StatusBadge } from "@blocks/values/status-badge";
-import { useCollection, useCommandForm } from "@lynx-go/ui-kit";
+import { useCollection, useCommandForm } from "@lynx-go/uikit-core";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { legacyCreateColumnHelper } from "@tanstack/react-table/legacy";
 import { Download, Plus } from "lucide-react";

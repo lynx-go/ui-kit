@@ -1,5 +1,5 @@
-import { mockCollection } from "@lynx-go/ui-kit/adapters";
-import { defineResource } from "@lynx-go/ui-kit/kernel";
+import { mockCollection } from "@lynx-go/uikit-core/adapters";
+import { defineResource } from "@lynx-go/uikit-core/kernel";
 
 /**
  * 时序 = collection（时间窗谓词）——design §7.1 推导的 demo 落地。

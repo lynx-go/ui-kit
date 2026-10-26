@@ -2,7 +2,7 @@ import { DataTable } from "@blocks/query/data-table";
 import { KeysetPagination } from "@blocks/query/keyset-pagination";
 import { ListPage } from "@blocks/query/list-page";
 import { Page } from "@blocks/shell/page";
-import { ResourceScopeProvider, useCollection } from "@lynx-go/ui-kit";
+import { ResourceScopeProvider, useCollection } from "@lynx-go/uikit-core";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { scopedWidgets, scopedWidgetsSearch } from "@/lib/resources";

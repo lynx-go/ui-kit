@@ -9,7 +9,7 @@
  * （如 recharts）按 root devDependencies 的 range 追加——registry 拷贝制下落消费方。
  *
  * §12.7 修复的两类协议泄漏（构建期爆，不流进 registry.json）：
- * ① @lynx-go/ui-kit 的 workspace:* 解析值混入——core 依赖单源（CORE_RANGE 硬编码
+ * ① @lynx-go/uikit-core 的 workspace:* 解析值混入——core 依赖单源（CORE_RANGE 硬编码
  *   semver），块内 import kit 不再重复产出；
  * ② pnpm catalog: 协议（root devDeps 的 "catalog:default"）——读 pnpm-workspace.yaml
  *   catalogs 还原真 semver，解析不到即硬错（npm publish 0.1.0 事故同类教训）。
@@ -21,8 +21,8 @@ const root = new URL("..", import.meta.url).pathname;
 const families = ["values", "query", "command", "subscription", "shell"];
 
 // core 依赖单源：kit 自身的 semver range（root devDeps 里是 workspace:*，不可外发）
-const CORE_PACKAGE = "@lynx-go/ui-kit";
-const CORE_RANGE = "^0.2";
+const CORE_PACKAGE = "@lynx-go/uikit-core";
+const CORE_RANGE = "^0.3";
 
 // 生态基线包：vendored shadcn 模型下假定消费方已有，不进 dependencies
 const ECOSYSTEM = [

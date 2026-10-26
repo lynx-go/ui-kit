@@ -1,6 +1,6 @@
 import { Page } from "@blocks/shell/page";
 import { ScopeSwitcher } from "@blocks/shell/scope-switcher";
-import { decodePreference, usePreference } from "@lynx-go/ui-kit";
+import { decodePreference, usePreference } from "@lynx-go/uikit-core";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 

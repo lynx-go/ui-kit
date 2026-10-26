@@ -1,10 +1,15 @@
 {
-  "name": "@lynx-go/ui-kit",
-  "version": "0.2.1",
+  "name": "@lynx-go/uikit-core",
+  "version": "0.3.0",
   "description": "Headless core for data-dense console UIs — Query / Command / Subscription over TanStack engines",
   "type": "module",
   "license": "MIT",
   "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lynx-go/uikit.git",
+    "directory": "packages/core"
+  },
   "publishConfig": {
     "access": "public"
   },

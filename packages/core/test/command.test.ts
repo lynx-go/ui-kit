@@ -96,7 +96,7 @@ describe("legacyKeys 存量键失效桥（§12.10-②）", () => {
       ],
       commands: { save: { run: async () => ok(null) } },
     });
-    // fleet 键（同资源、同 scope）+ 存量键 + 他 scope 存量键
+    // kit 键（同资源、同 scope）+ 存量键 + 他 scope 存量键
     client.setQueryData(["collection", "groups", { projectId: "p1" }, null, null, { size: 20 }], []);
     client.setQueryData(["groups", "p1"], []);
     client.setQueryData(["memberships", "g-1"], []);

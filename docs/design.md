@@ -1,4 +1,4 @@
-# @lynx-go/ui 设计文档
+# @lynx-go/uikit 设计文档
 
 - **版本**：draft-2（六视角审查 + 交叉审核修订版）
 - **日期**：2026-10-23
@@ -10,23 +10,23 @@
 
 ## 0. 定位与非目标
 
-**@lynx-go/ui** 是一个数据密集 console UI 库：由人指导 AI Agent 构建，同样服务于人指导 AI Agent 的使用。
+**@lynx-go/uikit** 是一个数据密集 console UI 库：由人指导 AI Agent 构建，同样服务于人指导 AI Agent 的使用。
 
 **定位**：
 1. **内部优先、开源友好**——首要消费者是 fleetly console 与 torchwood console 的重写；但无业务残留：英文命名、文案全走 messages 覆盖通道、不含任何业务名词。
-2. **TanStack 原生**——Router（typed file routes + `validateSearch`）、Query、Table、Form 是引擎层，**借用不重建**。@lynx-go/ui 不在引擎上再包一层抽象（refine 的 routerProvider 两次重写是前车之鉴）。
-3. **分发双通道**——无头核心 `@lynx-go/ui-kit` 发 npm（semver + changesets）；UI 块走 shadcn registry 拷贝制（open code，归消费方所有）。
+2. **TanStack 原生**——Router（typed file routes + `validateSearch`）、Query、Table、Form 是引擎层，**借用不重建**。@lynx-go/uikit 不在引擎上再包一层抽象（refine 的 routerProvider 两次重写是前车之鉴）。
+3. **分发双通道**——无头核心 `@lynx-go/uikit-core` 发 npm（semver + changesets）；UI 块走 shadcn registry 拷贝制（open code，归消费方所有）。
 4. **Agent-first**——SKILL.md（TanStack Intent 格式）、llms.txt、AGENTS.md 随包分发；集中反模式清单（§13）与幻觉诱饵对照表（§14）直接进 SKILL.md。
 
 **非目标（持证拒签，理由与重启条件见 §8）**：
 - 不造路由抽象层（不支持多路由器/SSR 元框架绑定）
 - 不做页面原型 / 词表 / 登记制本体论（旧项目死因）
-- 不做 undo / 乐观更新（双 console 零使用证伪；**明码标价**：react-admin 与 shadcn-admin-kit 的编辑/删除默认即 undoable，@lynx-go/ui 默认同步等待——这是有意的体验取舍）
+- 不做 undo / 乐观更新（双 console 零使用证伪；**明码标价**：react-admin 与 shadcn-admin-kit 的编辑/删除默认即 undoable，@lynx-go/uikit 默认同步等待——这是有意的体验取舍）
 - 不做后端适配器生态（自持后端，适配缝即插件点）
 - 不做完整 i18n 语言包（messages 通道 + 消费方词条）
 - 不内置 toast/通知系统（`useCommandForm` 暴露 `onSettled` 回调，消费方接 sonner 等——shadcn 生态惯例）
 
-**一句话**：@lynx-go/ui = 三个交互原语（Query / Command / Subscription）+ 一个交互面（Resource）+ Effect 缝隙 + 五族 UI 块，架在 TanStack 引擎上。
+**一句话**：@lynx-go/uikit = 三个交互原语（Query / Command / Subscription）+ 一个交互面（Resource）+ Effect 缝隙 + 五族 UI 块，架在 TanStack 引擎上。
 
 ---
 
@@ -40,13 +40,13 @@
 | ---------------- | ---- | ------------------------------ | ----------------------------------------------- |
 | **Query**        | 问   | 参数化缓存读，无副作用         | TanStack Query                                  |
 | **Command**      | 令   | 有副作用的意图，可被结构化拒绝 | TanStack Query mutation + 失效                  |
-| **Subscription** | 听   | 按游标定位的帧递送             | @lynx-go/ui 自建（Effect 引擎在 /adapters，见 §5） |
+| **Subscription** | 听   | 按游标定位的帧递送             | @lynx-go/uikit 自建（Effect 引擎在 /adapters，见 §5） |
 
 三者同属一个语域（交互消息类型学，CQRS + 订阅的标准词汇），彼此正交（§2 各节论证）。
 
 ### 1.2 引擎借用
 
-缓存/去重/失效（Query）、URL/类型化路由/历史栈（Router）、表格状态机（Table）、表单状态机（Form）已经由 TanStack 提供。@lynx-go/ui 的价值不在重建引擎，而在：
+缓存/去重/失效（Query）、URL/类型化路由/历史栈（Router）、表格状态机（Table）、表单状态机（Form）已经由 TanStack 提供。@lynx-go/uikit 的价值不在重建引擎，而在：
 1. 定义**用户实现的契约**（后端交互的统一形状）；
 2. 提供**绑定**（把契约接到引擎与 URL 的 headless hooks + queryOptions 预取工厂）；
 3. 提供**块**（消费绑定输出的 shadcn 风格组件）。
@@ -505,7 +505,7 @@ exec 终端（双向有状态会话，Subscription 单向；受理/观测仍可�
 
 #### 实现期裁决（subscription 批次落地，2026-10-24；偏离原案处已修订）
 
-1. **退避弃用 Stream.retry/Schedule，改显式索引驱动**：v4 Schedule 无 resettable，schedule 状态无法在"连接恢复递送帧"时归零——而 fleetly 语义要求每次断线从 `backoffMs[0]` 重新计数；且 `Stream.retry` 重跑整流，无法保留"已递送帧的游标"语义。实现为驱动环内的 `attempt` 索引 + `Effect.sleep`，帧递送归零（packages/ui-kit/src/adapters/subscription.ts）。
+1. **退避弃用 Stream.retry/Schedule，改显式索引驱动**：v4 Schedule 无 resettable，schedule 状态无法在"连接恢复递送帧"时归零——而 fleetly 语义要求每次断线从 `backoffMs[0]` 重新计数；且 `Stream.retry` 重跑整流，无法保留"已递送帧的游标"语义。实现为驱动环内的 `attempt` 索引 + `Effect.sleep`，帧递送归零（packages/core/src/adapters/subscription.ts）。
 2. **连接侧弃用 `Stream.runIntoQueue`，改 `runForEach + Queue.offer`**：v4 的 runIntoQueue 会在流完成时以 `Cause.Done` **终结队列**，重连需要复用同一环形缓冲——offer 到 sliding 队列永不挂起且超限丢最旧，队列生命周期归引擎（stop 时 shutdown，泵纤维随 `Stream.fromQueue` 自然退出）。
 3. **状态映射细化（SubscriptionStatus 闭合集不变）**："live" = open 成功而非首帧递送——安静但健康的流（torchwood documents changes 类静流）不该因"暂无新帧"显示 reconnecting；"reconnecting" 覆盖一切连接建立中（含首连与退避等待）；句柄 stop() → "ended"（引擎侧收流，干净终态不区分发起方）。
 4. **终态分诊矩阵成文**：迭代器**正常结束** → closeReason 四值皆终态（ended/gapped 停机待命；auth→error{auth}、transport→error{network}——401 闭环在订阅侧的落点）；迭代器**抛错** → `isApiError` 且不可重试（isRetryable=false）→ error，可重试（network/server）或未知错误 → 传输中断进退避。**抛错=可重试线索，完成=终态判据**——transport 想要重连语义应当抛错而非以 transport 收流。
@@ -546,7 +546,7 @@ exec 终端（双向有状态会话，Subscription 单向；受理/观测仍可�
 
 #### MetricChart 实现期裁决（2026-10-24，双 console 取证后；批内第一性裁决）
 
-**选型 = recharts（vendored shadcn chart.tsx 基元 + 块直用 recharts 原语）**。取证：两 console 现行同库 recharts ^3.10.1（fleetly shadcn 封装 + torchwood 裸用）；密度上限 240 点/序列 × ≤10 序列/图（fleetly 窗宽定死 240 桶）——uPlot 的百万点性能溢价无落点，且 canvas 渲染丢 CSS 变量主题化、tooltip/图例全要自建；自绘 SVG 需重建时间轴 scale/跟随 tooltip/图例，为省一个消费者已有的依赖重造轮子。**分发影响**：registry 拷贝制下 recharts 落消费方——registry.json item `dependencies` 声明（registry-build 扫描块裸导入自动追加）+ root devDeps 供 demo；不进 @lynx-go/ui-kit core，/adapters 预算门不受影响。
+**选型 = recharts（vendored shadcn chart.tsx 基元 + 块直用 recharts 原语）**。取证：两 console 现行同库 recharts ^3.10.1（fleetly shadcn 封装 + torchwood 裸用）；密度上限 240 点/序列 × ≤10 序列/图（fleetly 窗宽定死 240 桶）——uPlot 的百万点性能溢价无落点，且 canvas 渲染丢 CSS 变量主题化、tooltip/图例全要自建；自绘 SVG 需重建时间轴 scale/跟随 tooltip/图例，为省一个消费者已有的依赖重造轮子。**分发影响**：registry 拷贝制下 recharts 落消费方——registry.json item `dependencies` 声明（registry-build 扫描块裸导入自动追加）+ root devDeps 供 demo；不进 @lynx-go/uikit-core core，/adapters 预算门不受影响。
 
 对齐真实消费者的形态裁决（fleetly metric-chart.tsx 实证）：
 
@@ -590,7 +590,7 @@ FilterBar/Pagination 等是 ListPage 的**兄弟组件**（示例代码未画 fi
 
 ### 6.4 为什么不需要 CustomPage
 
-`CustomPage`/`<CustomRoutes>` 的存在前提是**框架拥有页面类型系统**。@lynx-go/ui 不拥有路由——**TanStack Router 文件路由就是全部页面**，自定义内容页是缺省状态。承接机制：① `Page` 外壳块服务所有页面；② 横切关注点与页面类型正交（导航 = navSections prop、错误边界 = 每路由、权限 = beforeLoad + useCan、Suspense = 根路由）。
+`CustomPage`/`<CustomRoutes>` 的存在前提是**框架拥有页面类型系统**。@lynx-go/uikit 不拥有路由——**TanStack Router 文件路由就是全部页面**，自定义内容页是缺省状态。承接机制：① `Page` 外壳块服务所有页面；② 横切关注点与页面类型正交（导航 = navSections prop、错误边界 = 每路由、权限 = beforeLoad + useCan、Suspense = 根路由）。
 
 ---
 
@@ -636,9 +636,9 @@ FilterBar/Pagination 等是 ListPage 的**兄弟组件**（示例代码未画 fi
 
 **超越（收敛为五点，措辞经对竞品 v5 实测校准）**：
 1. **全链路类型安全**——资源寻址（branded ResourceName vs 竞品 string）、谓词（类型化 Predicate vs 松散 CrudFilters/filters）、URL（typed search + Standard Schema vs 弱类型）。注明：react-admin v5"Stricter TypeScript"、refine v5"更一致的类型化 hook 接口"已收窄差距——超越集中在**资源寻址+谓词+URL 三处**，非全面。
-2. **流式帧消费（代差）**——竞品 live 契约是 pub/sub 事件（refine auto=失效重取、**manual=事件回调——消费方可自建缓冲**；ra-realtime=EE 付费重取模型）；@lynx-go/ui 的契约原生携带**游标定位/backlog→follow/断档重同步/暂停/退避转轮询/环形缓冲**——这些机制在竞品中须消费方全部自建。结论（代差）保留，"字面上无法表达"的过度断言删除。
+2. **流式帧消费（代差）**——竞品 live 契约是 pub/sub 事件（refine auto=失效重取、**manual=事件回调——消费方可自建缓冲**；ra-realtime=EE 付费重取模型）；@lynx-go/uikit 的契约原生携带**游标定位/backlog→follow/断档重同步/暂停/退避转轮询/环形缓冲**——这些机制在竞品中须消费方全部自建。结论（代差）保留，"字面上无法表达"的过度断言删除。
 3. **分页方言的类型化 + URL 化**——结构类型 QueryWindow vs 模式枚举/字符串游标（refine 有 cursor 约定、ra 有 getPaginationCursor+pageInfo——表达力存在，差距在**类型化与 URL 历史**）。
-4. **具名动词命令 + 声明式失效**——refine `useCustomMutation` 文档自认"不失效查询"（消费方手接 useInvalidate）；react-admin 自定义动词=裸 useMutation+手动 queryClient——@lynx-go/ui 的 invalidates 声明反而更硬。
+4. **具名动词命令 + 声明式失效**——refine `useCustomMutation` 文档自认"不失效查询"（消费方手接 useInvalidate）；react-admin 自定义动词=裸 useMutation+手动 queryClient——@lynx-go/uikit 的 invalidates 声明反而更硬。
 5. **Subscription/Command 的领域契约**（失败/结果两分、OCC、reveal、gapped）与 **TanStack Router/Form 全栈**。
 
 **持平**：CRUD 页面三件套、数据契约、认证/权限、引用**读侧**（写侧见缺失）、无头+皮肤分离、registry 源码分发、链接预取（Router preload 等价）、**Agent 文档**（kit 已自带 SKILL.md——跟进持平而非首创）。
@@ -646,17 +646,17 @@ FilterBar/Pagination 等是 ListPage 的**兄弟组件**（示例代码未画 fi
 **缺失三类处置**：
 - **A 类（补齐，进计划）**：ReferenceSelect、usePreference（含 SavedQueriesList 配方块后排）、mockResource/mockTransport、**useCollectionInfinite（升格：双竞品一等 + fleetly 消费）**
 - **B 类（配方化）**：实时失效=invalidateOnFrame；导出 CSV=rows+unparse 配方；clone=useRecord+create 配方；Inferencer→脚手架 devtool（kit 的 guessers 对应物，open-code 哲学，后排）；向导=Stepper；translatable 字段=自定义字段块；日历/看板/树=自定义块等第二消费者（**注：react-admin 树组件是 EE 付费——我们的处置反而占优**）
-- **C 类（持证拒签）**：**undo/乐观更新（明码标价：ra/kit 默认 undoable，@lynx-go/ui 默认同步等待——重启条件：真实消费者需求，作为命令时机策略加回）**、SSR/元框架、后端适配器生态（kit 50+ providers、ra 同）、完整 i18n 语言包、provider 动物园/多租户 EE
+- **C 类（持证拒签）**：**undo/乐观更新（明码标价：ra/kit 默认 undoable，@lynx-go/uikit 默认同步等待——重启条件：真实消费者需求，作为命令时机策略加回）**、SSR/元框架、后端适配器生态（kit 50+ providers、ra 同）、完整 i18n 语言包、provider 动物园/多租户 EE
 
-**shadcn-admin-kit 专门对照（诚实版）**：kit v2.0（2026-09）= ra-core + shadcn/Base UI + React Router v7 + RHF + Zod，98+ 组件、guessers、saved-queries、undoable 默认、自带 SKILL.md、EE realtime/locks/soft-delete。@lynx-go/ui 真实差异化收敛为上述五点超越；kit 优势如实：组件数量（98+ vs 首批 ~25）、十年数据层打磨、50+ data providers、undo/export/guessers 开箱。**诚实提醒**：react-admin 十年、refine 六年，npm 周下载 core 各 ~16 万/~9 万（ra-core ~12 万）；@lynx-go/ui 成熟度只能靠垂直切片+双 console 迁移逐步挣得。
+**shadcn-admin-kit 专门对照（诚实版）**：kit v2.0（2026-09）= ra-core + shadcn/Base UI + React Router v7 + RHF + Zod，98+ 组件、guessers、saved-queries、undoable 默认、自带 SKILL.md、EE realtime/locks/soft-delete。@lynx-go/uikit 真实差异化收敛为上述五点超越；kit 优势如实：组件数量（98+ vs 首批 ~25）、十年数据层打磨、50+ data providers、undo/export/guessers 开箱。**诚实提醒**：react-admin 十年、refine 六年，npm 周下载 core 各 ~16 万/~9 万（ra-core ~12 万）；@lynx-go/uikit 成熟度只能靠垂直切片+双 console 迁移逐步挣得。
 
 ---
 
 ## 9. 包结构与分发
 
 ```
-ui/                              # @lynx-go/ui（pnpm monorepo + catalog 单源版本）
-├── packages/ui-kit                # @lynx-go/ui-kit
+ui/                              # @lynx-go/uikit（pnpm monorepo + catalog 单源版本）
+├── packages/core                # @lynx-go/uikit-core
 │   ├── src/kernel/              # 契约+类型+查询/游标代数（零依赖，零 react import）
 │   ├── src/schema/              # Effect Schema 工厂（依赖 effect ~4.0；公开面零 effect/schema 泄漏）
 │   ├── src/adapters/            # http 管线(Effect 内部+runApi+401)/订阅引擎(零 React)/
@@ -885,7 +885,7 @@ torchwood console 取证要点（裁决依据）：react-router-dom **v7** 集�
 3. **profile = `scripts/profiles/<name>.json`**：`tokenMap`（类名→类名）+ `cnImport`（规范化目标）+ 可选 note。fleetly/torchwood 两条从两 console 实证 vendored 头提取落仓（差异实证：text-err 与 bg-panel-2 双 console 不同目标；warn/ok/accent 系**不设默认映射**——那是每块语境判断（torchwood amber/emerald、fleetly status vars），工具以警告面呈现而非假装可机械）。
 4. **token 引擎 = 词边界类名重写**：`(?<![\w-])token(?![\w-])`——`text-muted` 不得误伤 `text-muted-foreground`（连字符是 token 内部字符，边界须含它）。替换后面源再扫一遍源词表：仍出现的 = 未映射警告（列 token + 出现处）。registry 源不含 `-foreground` 形（demo 方言独占词表），无反向污染。
 5. **cn import 规范化 = `@/lib/utils`**：块源恒 `@/lib/utils`，fleetly 走已建 shim（src/lib/utils.ts 转发 cn npm——两世界单源）；torchwood 原生同路径。存量 fleetly 3 文件直 `import { cn } from "cn"` 是 shim 前形态，不回改（copy 默认不覆盖已存在文件）。
-6. **vendored 头生成**：既有格式自动化——`// vendored from @lynx-go/ui registry/<family>/<file> @<kitVersion>（<日期> <note>）` + 适配清单（tokenMap 已应用/cn 规范化）+ 手工步骤提示区（未映射 token、检测到的 `tone=`（Badge 方言面）、`@/components/ui/chart`（需随批拷基元））。kitVersion 从 packages/ui-kit/package.json 读。
+6. **vendored 头生成**：既有格式自动化——`// vendored from @lynx-go/uikit registry/<family>/<file> @<kitVersion>（<日期> <note>）` + 适配清单（tokenMap 已应用/cn 规范化）+ 手工步骤提示区（未映射 token、检测到的 `tone=`（Badge 方言面）、`@/components/ui/chart`（需随批拷基元））。kitVersion 从 packages/core/package.json 读。
 7. **判断题不自动化**：Badge tone→variant、文案中文化、结构剥离（页壳）、Select 桥——工具把机械面吃掉、把判断题显式列出来（警告即交接单）。痛点 ⑤（tsr generate）⑥（table-core 主入口——上游可直接修，另行处理）⑦（shell-agnostic 化）⑧（严格度穿透——已修）不在本工具面。
 8. **registry-build 瑕疵修复（三态）**：`blockDependencies` 排除 `@lynx-go/ui-kit`（core 依赖单源 = 硬编码 semver）；`catalog:` 协议解析——读 pnpm-workspace.yaml catalogs 还原真 semver（recharts ^3.10.1）；解析不到硬错（协议泄漏必须在构建期爆，不能流到 registry.json）。
 9. **测试 = `node --test scripts/devtool.test.mjs`**（scripts 层非 workspace 包，无 vitest 面；node 24 内建 runner 零配置）：token 引擎矩阵（边界/误伤/未映射警告）、头生成、依赖提示、profile 完备性（两 profile 对源词表的覆盖面 = 警告面断言）、registry-build 依赖收敛。`pnpm check` 链入 `test:devtool`。
@@ -1009,7 +1009,7 @@ torchwood console 取证要点（裁决依据）：react-router-dom **v7** 集�
 - **Q5 scope 类型化**：✅ `ResourceScope` 松散 Record（不进 Resource 泛型——类型噪音大于收益；branded name 已保失效安全，附录 A#9 的"scope 非框架轴"维持）。
 - **Q6 表单映射**：✅ §5.4（onSubmitAsync 返回制；onSettled；重播；v2 监测）。
 - **Q7 FrameSource**：✅ AsyncIterable + closeReason 终态分诊 + AbortError 区分（§2.3）。
-- **Q8 registry 对齐**：块依赖 `@lynx-go/ui-kit` 的 semver range 写进 registry item 的 dependencies（shadcn CLI 原生支持 npm range）。
+- **Q8 registry 对齐**：块依赖 `@lynx-go/uikit-core` 的 semver range 写进 registry item 的 dependencies（shadcn CLI 原生支持 npm range）。
 - **Q9 messages 通道**：MessagesProvider（context）+ 块级 props 覆盖（props > context > 内置英文缺省）——形状简单，实现期定稿即可，不再是阻塞项。
 - **Q10 mock 能力边界**：mockResource 需支持——延迟/失败注入（测试三态与闭环）、keyset/offset 双方言模拟（demo）、命令结果分支注入（rejected/conflict/ok+reveal）。实现期定稿验收。
 
@@ -1043,3 +1043,11 @@ torchwood ui-kit 全量改造（§12.9）收尾后的消费侧审查：三轴并
 - **states/list-page re-vendor 收尾**：上游 ListPage 增 describeError/errorTitle/retryLabel 透传（states 块 describeError 面的 ListPage 侧接通——错误态渲染在 ListPage 内嵌，states 副本六分支中文 describe 手工层由此退役）；torchwood states 副本纯上游化，list-page 方言层收敛为容器全宽 + 中文缺省三行。
 - **devtool diff v2 落地**（§12.7 挂账关闭）：`diff <family>/<name> | --all [--dir] [--check]`——token 映射与 vendored 头归一后行级 diff（LCS 纯函数 lineDiff/stripVendoredHeader + 测试矩阵），残余即手工层或上游更新；多文件块伴生随主块核对；本地新文件不计漂移。torchwood 真块干跑：9 块核对、6 漂移全部命中已知手工层（metric-chart react-refresh 方言 11 行/stat-card tone 14/data-table·fields eslint-disable 各 1/list-page 13/event-feed 17）、4 块 in-sync——升级同步从纯手工对照变为可机械核对，--check 可挂门禁。实现期自咬：diff hunk 折叠窗口以 end 为锚（从 k 起全量 some 会吞并中间未变更行——测试矩阵抓获）。
 - **页面级三件套（shownList 投影/选择态/手绘过滤条）维持挂账**：fleetly 交叉取证——其列表页用 FilterBar 服务端过滤范式、无行选择、无页内搜索，三件模式在第二消费者不存在；torchwood 侧是"行为等价约束"（legacy 页内搜索/批量选择是存量行为）的产物。为单一消费者的存量行为上 kit/registry 面 = 虚假抽象（§12.9 runCommandMapped 复制裁决的反面教训）——等真正的第二消费者再裁。顺带记录：FilterBar 在 fleetly 侧是活块，④ 的纯函数层已使其可被 torchwood 未来采用（若页内搜索换服务端 q）。
+
+**§12.10 品牌对齐批：@lynx-go/ui → @lynx-go/uikit，库包迁 @lynx-go/uikit-core（2026-10-26）**：目录/包名/仓库名/README 四面一次对齐——
+- **更名面**：根包 `@lynx-go/ui` → `@lynx-go/uikit`（private 根，零感知）；库包 `@lynx-go/ui-kit` → `@lynx-go/uikit-core`，目录 `packages/ui-kit` → `packages/core`；GitHub 仓库 `lynx-go/ui-kit` → `lynx-go/uikit`（平台侧改名由人执行，remote URL 与 package.json repository 字段先就位，改名后旧 URL 自动重定向）。
+- **版本裁决**：npm 新名首发即 **0.3.0**——继承 0.2.x 版本脉络（旧名止于 0.2.1 不再发版；内外皆内部使用，无 deprecate 转址必要）。registry.json 依赖单源与 CORE_RANGE 同步升 `^0.3`。
+- **逐面清单**：imports 全仓（demo/registry/scripts/docs）；错误前缀 `@lynx-go/uikit-core:`（transport 1 + options 3 + codec 3）；Standard Schema v1 vendor 字段 ×2；devtool vendored 头来源标识 + kitVersion 读取路径 + 测试断言（**转义斜杠形态 `@lynx-go\/ui` 是 sed 盲区**——测试矩阵抓获，三处手工修）；AppShell brand 缺省 + demo 标题；AGENTS/SKILL/llms.txt/README。
+- **testing 出口 Fleet 尾巴清偿**（§12.10 首批退役漏网，本轮"内部使用无破坏顾虑"裁决放行）：`renderWithFleet`/`RenderWithFleetOptions`/`FleetRenderResult` → `renderWithKit`/`RenderWithKitOptions`/`KitRenderResult`（自称 "kit" 与 §13/§14 对照表一致）；kernel 注释与测试描述 "fleet 键" → "kit 键"。torchwood 测试面同步。
+- **README 重写**：从单行占位符重写为双语实文档——英文 `README.md` + 中文 `README_ZH.md`，互链；四面概念表/双通道分发（npm core + 拷贝制块）/快速上手（resource + search schema + useCollection + CommandResult 分支 + 帧）/五族块表/分层不变量/文档指针。
+- **历史记录保真**：本文件既有 §12.x 条目中的旧名（fleet-ui / @lynx-go/ui / @lynx-go/ui-kit / renderWithFleet）保持原样不改写——历史条目是当时的记录，不是现状的描述；现状以本条与代码为准。

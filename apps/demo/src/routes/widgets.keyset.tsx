@@ -4,7 +4,7 @@ import { KeysetPagination } from "@blocks/query/keyset-pagination";
 import { ListPage } from "@blocks/query/list-page";
 import { RelativeTime } from "@blocks/values/relative-time";
 import { StatusBadge } from "@blocks/values/status-badge";
-import { useCollection } from "@lynx-go/ui-kit";
+import { useCollection } from "@lynx-go/uikit-core";
 import { createFileRoute } from "@tanstack/react-router";
 import { legacyCreateColumnHelper } from "@tanstack/react-table/legacy";
 import type { Widget } from "@/lib/mock-data";

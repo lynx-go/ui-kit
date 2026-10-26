@@ -11,7 +11,7 @@ import { rolldown } from "rolldown";
 const BUDGET_BYTES = 35 * 1024;
 const EXTERNAL = [/^react/, /^react-dom/, /^@tanstack\//];
 
-const input = new URL("../packages/ui-kit/src/adapters/index.ts", import.meta.url).pathname;
+const input = new URL("../packages/core/src/adapters/index.ts", import.meta.url).pathname;
 const bundle = await rolldown({
   input,
   external: (id) => EXTERNAL.some((re) => re.test(id)),

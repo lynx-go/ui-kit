@@ -1,11 +1,11 @@
-# AGENTS.md — @lynx-go/ui 开发指南
+# AGENTS.md — @lynx-go/uikit 开发指南
 
 > 面向在本仓库工作的 AI agent 与人类贡献者。设计依据见 [docs/design.md](docs/design.md)（draft-2，经六视角审查与交叉审核）。
 
 ## 仓库结构
 
 ```
-packages/ui-kit   @lynx-go/ui-kit（npm）
+packages/core   @lynx-go/uikit-core（npm）
   src/kernel    元概念契约+纯代数（零依赖、零 react）
   src/schema    CollectionQuery URL 编解码（依赖 effect；公开面零 effect/schema 泄漏）
   src/adapters  http 管线/订阅引擎（Effect 内部）/ndjson+sse transport/evaluate/clientCollection/mock/mockTransport

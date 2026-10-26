@@ -65,7 +65,7 @@ describe("失效矩阵（selector 匹配 + scope 交运算）", () => {
     );
   });
 
-  it("invalidationPredicate 过滤非 fleet 键", () => {
+  it("invalidationPredicate 过滤非 kit 键", () => {
     const pred = invalidationPredicate([{ resource: "apps" }], {});
     expect(pred({ queryKey: ["collection", "apps", {}, null, null, {}] })).toBe(true);
     expect(pred({ queryKey: ["users"] })).toBe(false);

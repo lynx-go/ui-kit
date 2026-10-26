@@ -1,5 +1,5 @@
 {
-  "name": "@lynx-go/ui",
+  "name": "@lynx-go/uikit",
   "private": true,
   "packageManager": "pnpm@12.9.1",
   "scripts": {
@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:default",
-    "@lynx-go/ui-kit": "workspace:*",
+    "@lynx-go/uikit-core": "workspace:*",
     "@tanstack/react-form": "catalog:default",
     "@tanstack/react-query": "catalog:default",
     "@tanstack/react-router": "catalog:default",

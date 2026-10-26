@@ -1,4 +1,4 @@
-import type { CollectionHandle } from "@lynx-go/ui-kit/react";
+import type { CollectionHandle } from "@lynx-go/uikit-core/react";
 import { flexRender, type RowData } from "@tanstack/react-table";
 import {
   getCoreRowModel,

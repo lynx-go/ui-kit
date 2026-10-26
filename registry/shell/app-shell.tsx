@@ -17,7 +17,7 @@ export interface AppShellProps {
   children: ReactNode;
 }
 
-export function AppShell({ brand = "@lynx-go/ui", nav, children }: AppShellProps) {
+export function AppShell({ brand = "@lynx-go/uikit", nav, children }: AppShellProps) {
   const matchRoute = useMatchRoute();
   return (
     <div className="flex h-full">

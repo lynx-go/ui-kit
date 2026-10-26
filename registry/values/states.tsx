@@ -1,4 +1,4 @@
-import type { ApiError } from "@lynx-go/ui-kit/kernel";
+import type { ApiError } from "@lynx-go/uikit-core/kernel";
 import { RotateCw, SearchX } from "lucide-react";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";

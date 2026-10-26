@@ -4,7 +4,7 @@ import { ListPage } from "@blocks/query/list-page";
 import { Pagination } from "@blocks/query/pagination";
 import { ReferenceSelect } from "@blocks/query/reference-select";
 import { Page } from "@blocks/shell/page";
-import { useBatch, useCollection } from "@lynx-go/ui-kit";
+import { useBatch, useCollection } from "@lynx-go/uikit-core";
 import { createFileRoute } from "@tanstack/react-router";
 import { legacyCreateColumnHelper } from "@tanstack/react-table/legacy";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";

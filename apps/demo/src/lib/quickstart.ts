@@ -1,6 +1,6 @@
-import { mockCollection, mockTransport } from "@lynx-go/ui-kit/adapters";
-import type { CommandResult } from "@lynx-go/ui-kit/kernel";
-import { defineResource } from "@lynx-go/ui-kit/kernel";
+import { mockCollection, mockTransport } from "@lynx-go/uikit-core/adapters";
+import type { CommandResult } from "@lynx-go/uikit-core/kernel";
+import { defineResource } from "@lynx-go/uikit-core/kernel";
 
 /**
  * quickstart 向导链的 mock 数据源（fleetly 实证语义：ensure 幂等——同名复用不重造；

@@ -83,7 +83,7 @@ export function detectManualHints(source) {
 /** vendored 头生成（既有批次的实证格式自动化）。 */
 export function buildVendoredHeader({ sourcePath, kitVersion, date, note, profile, applied, unmapped, manualHints }) {
   const lines = [];
-  lines.push(`// vendored from @lynx-go/ui ${sourcePath} @${kitVersion}（${date}${note ? ` ${note}` : ""}）`);
+  lines.push(`// vendored from @lynx-go/uikit ${sourcePath} @${kitVersion}（${date}${note ? ` ${note}` : ""}）`);
   lines.push(`// 拷贝适配（scripts/devtool.mjs --profile ${profile.name}）：`);
   const mapNote = applied.length > 0
     ? applied.map((a) => `${a.from}→${a.to}`).join("、")
@@ -112,7 +112,7 @@ function loadProfiles() {
 }
 
 function kitVersion() {
-  return JSON.parse(readFileSync(join(root, "packages", "ui-kit", "package.json"), "utf8")).version;
+  return JSON.parse(readFileSync(join(root, "packages", "core", "package.json"), "utf8")).version;
 }
 
 function registryItem(sourcePath) {

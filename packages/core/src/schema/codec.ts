@@ -50,7 +50,7 @@ export type FlatPatch = Partial<
 export interface StandardSchemaV1<Input = unknown, Output = Input> {
   "~standard": {
     version: 1;
-    vendor: "@lynx-go/ui-kit";
+    vendor: "@lynx-go/uikit-core";
     validate(value: Input): { value: Output };
   };
 }
@@ -123,7 +123,7 @@ export function collectionQuerySchema(spec: QuerySchemaSpec = {}): QuerySearchSc
     );
     if (!isText) {
       throw new Error(
-        "@lynx-go/ui-kit: predicate with OR is not URL-serializable — keep it in local state or a custom search param",
+        "@lynx-go/uikit-core: predicate with OR is not URL-serializable — keep it in local state or a custom search param",
       );
     }
     return leaves;
@@ -211,7 +211,7 @@ export function collectionQuerySchema(spec: QuerySchemaSpec = {}): QuerySearchSc
       return {
         "~standard": {
           version: 1,
-          vendor: "@lynx-go/ui-kit",
+          vendor: "@lynx-go/uikit-core",
           validate(value: unknown) {
             return { value: normalize(value) };
           },

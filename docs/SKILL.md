@@ -1,6 +1,6 @@
-# @lynx-go/ui SKILL.md（页面作者册）
+# @lynx-go/uikit SKILL.md（页面作者册）
 
-> 面向用 @lynx-go/ui 写 console 页面的 AI agent 与开发者。适配器作者册见文末指针。
+> 面向用 @lynx-go/uikit 写 console 页面的 AI agent 与开发者。适配器作者册见文末指针。
 > 完整设计：docs/design.md。反模式与幻觉诱饵在最后——先读它们能省一半调试。
 
 ## 心智模型（就 4 个名词）

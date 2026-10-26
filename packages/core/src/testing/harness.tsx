@@ -21,7 +21,7 @@ import type { QuerySearchSchema } from "../schema";
  * commands 覆写）——本 harness 不绑 mock 方案。
  */
 
-export interface RenderWithFleetOptions extends Omit<RenderOptions, "wrapper"> {
+export interface RenderWithKitOptions extends Omit<RenderOptions, "wrapper"> {
   /** 挂载 ui 的路由路径（默认 "/"；支持 $param 段，值由 pathname 给出） */
   path?: string;
   /** 初始 search（经 searchSchema 归一——与真实 validateSearch 同路，非裸对象） */
@@ -32,16 +32,16 @@ export interface RenderWithFleetOptions extends Omit<RenderOptions, "wrapper"> {
   queryClient?: QueryClient;
 }
 
-export interface FleetRenderResult {
+export interface KitRenderResult {
   /** 解析后的 search 对象（断言用解析值，不读原始 query 串——TanStack 数组方言） */
   getSearch(): Record<string, unknown>;
   queryClient: QueryClient;
 }
 
-export async function renderWithFleet(
+export async function renderWithKit(
   ui: ReactElement,
-  options: RenderWithFleetOptions = {},
-): Promise<FleetRenderResult> {
+  options: RenderWithKitOptions = {},
+): Promise<KitRenderResult> {
   const queryClient =
     options.queryClient ?? new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const path = options.path ?? "/";

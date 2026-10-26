@@ -289,9 +289,9 @@ importers:
       '@biomejs/biome':
         specifier: catalog:default
         version: 2.6.2
-      '@lynx-go/ui-kit':
+      '@lynx-go/uikit-core':
         specifier: workspace:*
-        version: link:packages/ui-kit
+        version: link:packages/core
       '@tanstack/react-form':
         specifier: catalog:default
         version: 1.33.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -340,9 +340,9 @@ importers:
 
   apps/demo:
     dependencies:
-      '@lynx-go/ui-kit':
+      '@lynx-go/uikit-core':
         specifier: workspace:*
-        version: link:../../packages/ui-kit
+        version: link:../../packages/core
       '@tanstack/react-form':
         specifier: catalog:default
         version: 1.33.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -402,7 +402,7 @@ importers:
         specifier: catalog:default
         version: 8.3.5(jiti@2.7.0)
 
-  packages/ui-kit:
+  packages/core:
     dependencies:
       effect:
         specifier: catalog:default

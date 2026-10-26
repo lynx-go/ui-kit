@@ -1,4 +1,4 @@
-import { isApiError } from "@lynx-go/ui-kit/kernel";
+import { isApiError } from "@lynx-go/uikit-core/kernel";
 import { RotateCw, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
