@@ -1033,7 +1033,7 @@ torchwood ui-kit 全量改造（§12.9）收尾后的消费侧审查：三轴并
 
 **发版**：0.2.0 + 0.2.1（`pnpm publish --no-git-checks` + publint + 净房冒烟；**npm staged 版本传播延迟**——publish 成功后版本在 registry 元数据可见≠可安装，约 1 分钟窗口，重发得 409 "Cannot publish over previously staged version"）。kit 依赖 CORE_RANGE 升 ^0.2（registry-build 单源）。
 
-**torchwood 采纳三批**（feat/console-uikit-completion，PR #3 追加）：A 样板（api-keys 域：legacyKeys/剥离/句柄挂载）→ B 三组并行铺开（宽前缀 legacyKeys 策略；嵌套 scope 保持显式全量——显式=替换语义；裸 descriptor 不采纳 context；invoke/redeliver 挂资源 + `invalidates: []` 显式保"不失效集合"原义；documents refetch 桥退役走缓存失效，fetchQuery fresh-read 刻意保留）→ C 六块 re-vendor + labels 注入（PAGINATION_ZH 单源 16 页、Form/ListenPanel/metricChart 中文注入）。门禁 165/165（+1 documents 失效行为锚）+ 浏览器对照（Provider 就绪门/labels 分页/total 降级「共 30 条 · 本页 30 条」/游标深链/页大小保游标）全过。
+**torchwood 采纳三批**（feat/console-uikit-completion；推送时 PR #3 已先行合并，本批经 **PR #4** 合入 main，CI 双绿）：A 样板（api-keys 域：legacyKeys/剥离/句柄挂载）→ B 三组并行铺开（宽前缀 legacyKeys 策略；嵌套 scope 保持显式全量——显式=替换语义；裸 descriptor 不采纳 context；invoke/redeliver 挂资源 + `invalidates: []` 显式保"不失效集合"原义；documents refetch 桥退役走缓存失效，fetchQuery fresh-read 刻意保留）→ C 六块 re-vendor + labels 注入（PAGINATION_ZH 单源 16 页、Form/ListenPanel/metricChart 中文注入）。门禁 165/165（+1 documents 失效行为锚）+ 浏览器对照（Provider 就绪门/labels 分页/total 降级「共 30 条 · 本页 30 条」/游标深链/页大小保游标）全过。
 
 **环境坑**：浏览器对照 stub 的三处方言——projects 端点是 `/v1/server/projects`（非 /v1/console）、列表响应是 protojson 键名（api_keys/audit_logs + meta）、auth 形状 `role:"owner"`（ROLE_* 不识别→平台守卫重定向 Dashboard 表现为"页面打不开"）；9080 端口会残留前会话 stub（空壳）——先辨尸再替换。隐藏窗格下 playwright 点击 actionability 超时（快照可见）——URL 直达/选择类操作替代点击验证。
 
