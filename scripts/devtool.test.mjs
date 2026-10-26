@@ -3,7 +3,7 @@
 // CLI 端到端（临时目录真拷贝）。
 import { strict as assert } from "node:assert";
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
@@ -14,6 +14,8 @@ const {
   applyTokenMap,
   buildVendoredHeader,
   detectManualHints,
+  lineDiff,
+  stripVendoredHeader,
 } = await import("./devtool.mjs");
 
 function loadProfile(name) {
@@ -195,4 +197,58 @@ test("list/profiles 命令面", () => {
   const profiles = execFileSync(process.execPath, ["scripts/devtool.mjs", "profiles"], { cwd: root, encoding: "utf8" });
   assert.match(profiles, /torchwood/);
   assert.match(profiles, /警告面/);
+});
+
+test("diff v2：lineDiff/stripVendoredHeader 纯函数矩阵", () => {
+  // 相同输入零差异
+  assert.equal(lineDiff("a\nb", "a\nb").count, 0);
+  // 单行替换 = 1 删除 + 1 新增
+  const d1 = lineDiff("a\nb\nc", "a\nX\nc");
+  assert.equal(d1.count, 2);
+  assert.ok(d1.hunks[0].lines.some((l) => l.mark === "-" && l.text === "b"));
+  assert.ok(d1.hunks[0].lines.some((l) => l.mark === "+" && l.text === "X"));
+  // 纯新增 / 纯删除
+  assert.equal(lineDiff("a", "a\nb").count, 1);
+  assert.equal(lineDiff("a\nb", "a").count, 1);
+  // 多 hunk 分离（context=0 时）
+  const d2 = lineDiff("a\nb\nc\nd\ne", "a\nX\nc\nd\nY", 0);
+  assert.ok(d2.hunks.length >= 2);
+  // 头剥离：首个 import 前的注释行全部去除
+  const stripped = stripVendoredHeader("// vendored from …\n// 手工区\nimport { x } from \"y\";\nexport const z = x;");
+  assert.ok(stripped.startsWith("import"));
+  assert.ok(!stripped.includes("vendored from"));
+});
+
+test("diff v2：CLI 端到端——拷贝后 in-sync，改动后漂移可见", () => {
+  const tmp = mkdtempSync(join(root, "..", "devtool-diff-e2e-"));
+  try {
+    const run = (args) =>
+      execFileSync(process.execPath, ["scripts/devtool.mjs", ...args], {
+        cwd: root,
+        encoding: "utf8",
+      });
+    run(["copy", "values/states", "--to", tmp, "--profile", "torchwood"]);
+    const inSync = run(["diff", "values/states", "--to", tmp, "--profile", "torchwood"]);
+    assert.match(inSync, /与上游一致/);
+    // 改动副本一行 → 漂移 + diff 输出 + --check 退出码 1
+    const target = join(tmp, "components", "lynx", "values", "states.tsx");
+    const mutated = readFileSync(target, "utf8").replace("Something went wrong", "MADE-UP-DRIFT");
+    writeFileSync(target, mutated);
+    const drifted = run(["diff", "values/states", "--to", tmp, "--profile", "torchwood"]);
+    assert.match(drifted, /行差异/);
+    assert.match(drifted, /MADE-UP-DRIFT/);
+    let refused = false;
+    try {
+      execFileSync(
+        process.execPath,
+        ["scripts/devtool.mjs", "diff", "values/states", "--to", tmp, "--profile", "torchwood", "--check"],
+        { cwd: root, encoding: "utf8", stdio: "pipe" },
+      );
+    } catch (e) {
+      refused = e.status === 1;
+    }
+    assert.ok(refused, "--check 漂移时应退出码 1");
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
 });

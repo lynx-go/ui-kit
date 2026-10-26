@@ -1,4 +1,5 @@
 import type { CollectionHandle } from "@lynx-go/ui-kit/react";
+import type { ApiError } from "@lynx-go/ui-kit/kernel";
 import type { ReactNode } from "react";
 import { Card } from "@/components/ui/card";
 import { EmptyState, ErrorState, LoadingState } from "../values/states";
@@ -9,6 +10,8 @@ import { EmptyState, ErrorState, LoadingState } from "../values/states";
  * 只要消费 list 句柄。四态在此切换；DataTable 只渲染 success 表体。
  * header 可选（title/actions 全缺省时不渲染——消费方自有页头架构时
  * shell-agnostic 化，§12.10-⑤；fleetly/torchwood 先例回流）。
+ * 错误态文案透传（describeError/title/retryLabel，§12.10 余款）：消费方
+ * describeApiError 单源经此注入，states 块免于逐副本中文化。
  */
 export interface ListPageProps<T> {
   title?: string;
@@ -21,6 +24,9 @@ export interface ListPageProps<T> {
   emptyTitle?: string;
   emptyDescription?: string;
   emptyAction?: ReactNode;
+  describeError?: (error: ApiError) => string;
+  errorTitle?: string;
+  retryLabel?: string;
   children: ReactNode; // success 态内容（通常 <DataTable list={list} …/>）
 }
 
@@ -35,6 +41,9 @@ export function ListPage<T>({
   emptyTitle = "Nothing here",
   emptyDescription,
   emptyAction,
+  describeError,
+  errorTitle,
+  retryLabel,
   children,
 }: ListPageProps<T>) {
   const showHeader = title !== undefined || description !== undefined || actions !== undefined;
@@ -54,7 +63,13 @@ export function ListPage<T>({
         {list.status === "loading" ? (
           <LoadingState />
         ) : list.status === "error" ? (
-          <ErrorState error={list.error!} onRetry={list.refetch} />
+          <ErrorState
+            error={list.error!}
+            onRetry={list.refetch}
+            describeError={describeError}
+            title={errorTitle}
+            retryLabel={retryLabel}
+          />
         ) : list.status === "empty" ? (
           <EmptyState title={emptyTitle} description={emptyDescription} action={emptyAction} />
         ) : (
