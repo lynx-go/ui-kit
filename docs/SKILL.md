@@ -1,6 +1,6 @@
-# fleet-ui SKILL.md（页面作者册）
+# @lynx-go/ui SKILL.md（页面作者册）
 
-> 面向用 fleet-ui 写 console 页面的 AI agent 与开发者。适配器作者册见文末指针。
+> 面向用 @lynx-go/ui 写 console 页面的 AI agent 与开发者。适配器作者册见文末指针。
 > 完整设计：docs/design.md。反模式与幻觉诱饵在最后——先读它们能省一半调试。
 
 ## 心智模型（就 4 个名词）
@@ -163,7 +163,7 @@ const sub = useSubscription(eventsStream, { cursor: anchor ?? undefined, getCurs
 
 | 你可能想写的                                           | 正确的                                                                    |
 | ------------------------------------------------------ | ------------------------------------------------------------------------- |
-| refine `useSubscription(channel, params, onEvent)`     | fleet `useSubscription(descriptor\|transport, {cursor, getCursor, onFrame})` 返回引擎句柄（完全同名不同义！） |
+| refine `useSubscription(channel, params, onEvent)`     | kit `useSubscription(descriptor\|transport, {cursor, getCursor, onFrame})` 返回引擎句柄（完全同名不同义！） |
 | EventSource 自动重连                                   | 引擎拥有重连（backoffMs 序列）；SSE transport 断开即抛错交引擎退避         |
 | 心跳/中断分不清就当 ended                              | 完成是终态判据（isEnded/endEvent 帧内容裁决）；分不清就抛错让引擎重连     |
 | react-admin `<Resource name list create>`              | Resource = 纯数据契约；路由自己写                                         |

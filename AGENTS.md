@@ -1,4 +1,4 @@
-# AGENTS.md — fleet-ui 开发指南
+# AGENTS.md — @lynx-go/ui 开发指南
 
 > 面向在本仓库工作的 AI agent 与人类贡献者。设计依据见 [docs/design.md](docs/design.md)（draft-2，经六视角审查与交叉审核）。
 

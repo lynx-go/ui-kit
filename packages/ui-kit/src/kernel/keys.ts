@@ -61,10 +61,10 @@ export function batchKey<T, ID, C extends CommandsRecord<ID>, S extends SubsReco
 
 // ============ 失效匹配（scope 交运算在此） ============
 
-const FLEET_KINDS = new Set(["collection", "record", "batch"]);
+const QUERY_KINDS = new Set(["collection", "record", "batch"]);
 
-export function isFleetKey(key: readonly unknown[]): boolean {
-  return typeof key[0] === "string" && FLEET_KINDS.has(key[0]);
+export function isKindedQueryKey(key: readonly unknown[]): boolean {
+  return typeof key[0] === "string" && QUERY_KINDS.has(key[0]);
 }
 
 /**
@@ -94,6 +94,6 @@ export function invalidationPredicate(
   commandScope: ResourceScope,
 ): (query: { queryKey: readonly unknown[] }) => boolean {
   return (query) =>
-    isFleetKey(query.queryKey) &&
+    isKindedQueryKey(query.queryKey) &&
     selectors.some((s) => selectorMatches(s, query.queryKey, commandScope));
 }

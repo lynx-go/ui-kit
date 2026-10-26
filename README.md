@@ -1,1 +1,1 @@
-# fleet-ui
+# @lynx-go/ui

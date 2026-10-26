@@ -60,7 +60,7 @@ export function runApi<A>(eff: Effect.Effect<A, AdapterFailure>): Promise<A> {
           return;
         }
         // defect（程序错误）——归一为可观测的包装，不混入 ApiError 封闭集
-        reject(new Error("fleet-ui: unexpected defect in adapter pipeline", { cause: err }));
+        reject(new Error("@lynx-go/ui-kit: unexpected defect in adapter pipeline", { cause: err }));
       }),
   );
 }
@@ -135,7 +135,7 @@ export function createHttp(options: HttpOptions = {}) {
             catch: () =>
               new HttpFailure({
                 status: response.status,
-                body: { message: `fleet-ui: response is not JSON (${path})` },
+                body: { message: `@lynx-go/ui-kit: response is not JSON (${path})` },
               }) as AdapterFailure,
           });
         }),
