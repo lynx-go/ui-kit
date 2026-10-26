@@ -152,7 +152,7 @@ test("CLI 端到端：copy 真块到临时目录（映射+头+警告面+不覆�
     );
     assert.match(out, /⚠ 未映射/);
     assert.match(out, /tone=/);
-    const target = join(tmp, "components", "lynx", "subscription", "event-feed.tsx");
+    const target = join(tmp, "components", "kit", "subscription", "event-feed.tsx");
     assert.ok(existsSync(target));
     const vendored = readFileSync(target, "utf8");
     assert.match(vendored, /^\/\/ vendored from @lynx-go\/uikit registry\/subscription\/event-feed\.tsx @\d+\.\d+\.\d+/);
@@ -181,7 +181,7 @@ test("CLI 端到端：copy 真块到临时目录（映射+头+警告面+不覆�
       ["scripts/devtool.mjs", "copy", "values/states", "--to", tmp, "--profile", "fleetly", "--force"],
       { cwd: root, encoding: "utf8" },
     );
-    const states = readFileSync(join(tmp, "components", "lynx", "values", "states.tsx"), "utf8");
+    const states = readFileSync(join(tmp, "components", "kit", "values", "states.tsx"), "utf8");
     const statesBody = states.slice(states.indexOf("\nimport"));
     assert.match(statesBody, /text-\[var\(--status-danger\)\]/);
     assert.doesNotMatch(statesBody, /(?<![\w-])text-err(?![\w-])/);
@@ -231,7 +231,7 @@ test("diff v2：CLI 端到端——拷贝后 in-sync，改动后漂移可见", (
     const inSync = run(["diff", "values/states", "--to", tmp, "--profile", "torchwood"]);
     assert.match(inSync, /与上游一致/);
     // 改动副本一行 → 漂移 + diff 输出 + --check 退出码 1
-    const target = join(tmp, "components", "lynx", "values", "states.tsx");
+    const target = join(tmp, "components", "kit", "values", "states.tsx");
     const mutated = readFileSync(target, "utf8").replace("Something went wrong", "MADE-UP-DRIFT");
     writeFileSync(target, mutated);
     const drifted = run(["diff", "values/states", "--to", tmp, "--profile", "torchwood"]);

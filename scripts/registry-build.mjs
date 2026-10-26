@@ -2,7 +2,7 @@
 /**
  * registry 构建脚本 —— 扫描 registry/{values,query,command,subscription,shell}/*.tsx
  * 产出 registry.json（shadcn registry 规范的最小实现）。
- * 消费方经 `shadcn add` 拷贝；target 落在消费方 components/lynx/<family>/。
+ * 消费方经 `shadcn add` 拷贝；target 落在消费方 components/kit/<family>/。
  *
  * dependencies 声明：core semver + 块的裸导入扫描（design.md §6.1 MetricChart 裁决）。
  * UI 生态包（react/lucide/clsx…）假定消费方已有（vendored shadcn 生态）；其余裸包
@@ -125,12 +125,12 @@ for (const family of families) {
       files: [
         {
           path: join("registry", family, file),
-          target: `components/lynx/${family}/${file}`,
+          target: `components/kit/${family}/${file}`,
           type: "registry:block",
         },
         ...own.map((sc) => ({
           path: join("registry", family, sc),
-          target: `components/lynx/${family}/${sc}`,
+          target: `components/kit/${family}/${sc}`,
           type: "registry:block",
         })),
       ],

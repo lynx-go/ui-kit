@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * devtool —— 拷贝制适配的机械化（design.md §12.7）：registry 块 → 消费方
- * components/lynx/<family>/ 的 token 方言重写 + vendored 头生成 + 判断题警告。
+ * components/kit/<family>/ 的 token 方言重写 + vendored 头生成 + 判断题警告。
  *
  * 机械面（工具吃掉）：token 类名映射（词边界，连字符是 token 内部字符）、
  * cn import 规范化、vendored 头、依赖提示（registry.json 单源）。
@@ -163,10 +163,10 @@ function cmdCopy(blockRef, options) {
   if (!to) die(`--to <consumer-root> 必填（拷贝目标仓根，如 ~/workspace/qiulin/torchwood/console）`);
 
   // 多文件块（registry files[]，含 .ts 伴生）：主文件 + 伴生全部拷贝；
-  // 目标基目录缺省 registry 约定 components/lynx（torchwood --dir src/components/fleet）。
+  // 目标基目录缺省 registry 约定 components/kit（torchwood --dir src/components/kit——src 布局例外）。
   const item = registryItem(sourcePath);
   const fileList = item ? item.files.map((f) => f.path) : [sourcePath];
-  const baseDir = dir ?? join("components", "lynx");
+  const baseDir = dir ?? join("components", "kit");
 
   const targets = fileList.map((rel) => {
     const relFromFamily = rel.split("/").slice(-2).join("/");
@@ -290,7 +290,7 @@ function diffBlock(blockRef, options) {
   const profiles = loadProfiles();
   const profile = profiles[profileName];
   if (!profile) die(`profile 不存在：${profileName}`);
-  const baseDir = dir ?? join("components", "lynx");
+  const baseDir = dir ?? join("components", "kit");
 
   const results = [];
   for (const file of item ? item.files : [{ path: sourcePath }]) {
@@ -335,7 +335,7 @@ function cmdDiffAll(options) {
   const profiles = loadProfiles();
   const profile = profiles[options.profileName];
   if (!profile) die(`profile 不存在：${options.profileName}`);
-  const baseDir = options.dir ?? join("components", "lynx");
+  const baseDir = options.dir ?? join("components", "kit");
   const consumerRoot = resolve(options.to);
   let drift = 0;
   let checked = 0;
