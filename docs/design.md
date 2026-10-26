@@ -1038,3 +1038,8 @@ torchwood ui-kit 全量改造（§12.9）收尾后的消费侧审查：三轴并
 **环境坑**：浏览器对照 stub 的三处方言——projects 端点是 `/v1/server/projects`（非 /v1/console）、列表响应是 protojson 键名（api_keys/audit_logs + meta）、auth 形状 `role:"owner"`（ROLE_* 不识别→平台守卫重定向 Dashboard 表现为"页面打不开"）；9080 端口会残留前会话 stub（空壳）——先辨尸再替换。隐藏窗格下 playwright 点击 actionability 超时（快照可见）——URL 直达/选择类操作替代点击验证。
 
 **残余挂账**：页面级三件套重复（shownList 投影 ×15/选择态 ×7/手绘过滤条 ×6——等第二消费者再裁块化）；域码中文表仍只有 documents 一域；states.tsx/sta-card 未 re-vendor（中文 describe 与 tone 方言留在副本，labels 面已备待用）；devtool diff/升级同步 v2 不变。
+
+**§12.10 余款批（同日续，"继续"指令）**：三件挂账的处置——
+- **states/list-page re-vendor 收尾**：上游 ListPage 增 describeError/errorTitle/retryLabel 透传（states 块 describeError 面的 ListPage 侧接通——错误态渲染在 ListPage 内嵌，states 副本六分支中文 describe 手工层由此退役）；torchwood states 副本纯上游化，list-page 方言层收敛为容器全宽 + 中文缺省三行。
+- **devtool diff v2 落地**（§12.7 挂账关闭）：`diff <family>/<name> | --all [--dir] [--check]`——token 映射与 vendored 头归一后行级 diff（LCS 纯函数 lineDiff/stripVendoredHeader + 测试矩阵），残余即手工层或上游更新；多文件块伴生随主块核对；本地新文件不计漂移。torchwood 真块干跑：9 块核对、6 漂移全部命中已知手工层（metric-chart react-refresh 方言 11 行/stat-card tone 14/data-table·fields eslint-disable 各 1/list-page 13/event-feed 17）、4 块 in-sync——升级同步从纯手工对照变为可机械核对，--check 可挂门禁。实现期自咬：diff hunk 折叠窗口以 end 为锚（从 k 起全量 some 会吞并中间未变更行——测试矩阵抓获）。
+- **页面级三件套（shownList 投影/选择态/手绘过滤条）维持挂账**：fleetly 交叉取证——其列表页用 FilterBar 服务端过滤范式、无行选择、无页内搜索，三件模式在第二消费者不存在；torchwood 侧是"行为等价约束"（legacy 页内搜索/批量选择是存量行为）的产物。为单一消费者的存量行为上 kit/registry 面 = 虚假抽象（§12.9 runCommandMapped 复制裁决的反面教训）——等真正的第二消费者再裁。顺带记录：FilterBar 在 fleetly 侧是活块，④ 的纯函数层已使其可被 torchwood 未来采用（若页内搜索换服务端 q）。
