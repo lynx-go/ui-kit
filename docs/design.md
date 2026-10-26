@@ -1053,3 +1053,10 @@ torchwood ui-kit 全量改造（§12.9）收尾后的消费侧审查：三轴并
 - **历史记录保真**：本文件既有 §12.x 条目中的旧名（fleet-ui / @lynx-go/ui / @lynx-go/ui-kit / renderWithFleet）保持原样不改写——历史条目是当时的记录，不是现状的描述；现状以本条与代码为准。
 
 **§12.10 vendoring 落点二改：lynx → kit（2026-10-26，torchwood 消费方迁移批联动）**：品牌对齐批定名 uikit 后，§12.10 首选的 `components/lynx/<family>/` 落点沦为品牌中间态遗物，二改为 `components/kit/<family>/`——kit 词干跨三轮品牌（fleet-ui → ui-kit → uikit）稳定，目录名说角色不绑品牌快照；且避开 `components/uikit` 与消费方 shadcn `components/ui/` 的前缀邻接（首批拒 ui 的同款理由对 uikit 弱化成立）。改动面：devtool copy/diff 缺省基目录（torchwood 仍 `--dir src/components/kit`，src 布局例外）、registry-build target 模板 + registry.json 30 块 target、devtool 测试断言。消费方同步：torchwood 已迁移 `src/fleet → src/kit`、`components/fleet → components/kit`（torchwood 25ea6f32；本地标识符同批去品牌 FleetScopeBinding/FleetListPage 等 → Kit*；vendored 头与「fleet 化」历史字样按惯例保留）；fleetly 迁移时直接落 kit，零特例。
+
+**§12.10 包边界裁决批：core 拆包三清单——现在拆/挂账等触发/永不拆（2026-10-26 同日续）**：提问"哪些该从 core 拆出去"，取证后裁决——
+- **取证三件**：① effect 实测足迹仅 `adapters/http.ts` + `adapters/subscription.ts` 两文件——schema 分层**允许** effect（layer-check 规则）但**事实零 import**（AGENTS.md 原文"依赖 effect"是允许方向非事实依赖，本轮勘误）；② `/testing` 出口（renderWithKit harness）隐含 `@testing-library/react` 依赖（不在 deps/peerDeps 声明）且**零外部消费者**——torchwood 用自建 TestRouter 未采纳；③ react 层 peer 面已收敛：bindings→query+router（URL 写入契约）、command→form+query、invalidate→query。源码分发 + subpath exports 下未 import 的层不进 bundle——拆包对体积零收益，收益全在 install 面与依赖声明诚实度。
+- **现在做（①）**：/testing 闭瑕疵 = 补 `@testing-library/react` optional peer 声明（≥16，0.3.1 发版落地）。**不拆包**：零外部消费者时拆 `@lynx-go/uikit-testing` 会把未验证 API 固化成独立包公开面（虚假抽象的包形态变体）。
+- **挂账两件（触发即拆）**：② `kernel` → 独立包——触发 = 非 React 消费方出现（服务端共享 ApiError/CommandResult/CollectionQuery 契约类型、codegen、第二前端框架）；届时 kernel-only 消费者免装 effect（dependencies 唯一运行时依赖）。③ `schema` → 独立包——触发 = 服务端要解析/校验 CollectionQuery 线格式（"URL 即真相"的另一半消费者）。
+- **永不拆清单**：adapters+react 不拆对——订阅引擎（退避归零、runForEach+Queue.offer）与 useSubscription/useInvalidateOnFrame 帧语义是同一次裁决的两侧，拆开 = 版本对齐税；registry 永不进 npm 包（拷贝制分发是 §12 核心裁决，打包 = 推翻）；mock/mockTransport 留 adapters（demo 活文档与消费方 stub 驱动，非纯 dev-time 工具）。
+- **拆包通用成本（任一触发时认账）**：registry-build 的 CORE_PACKAGE 单源变多源；workspace 版本同步与发版节奏翻倍；消费方 import 再改一轮（torchwood 59 文件前车之鉴）。

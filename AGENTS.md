@@ -7,7 +7,7 @@
 ```
 packages/core   @lynx-go/uikit-core（npm）
   src/kernel    元概念契约+纯代数（零依赖、零 react）
-  src/schema    CollectionQuery URL 编解码（依赖 effect；公开面零 effect/schema 泄漏）
+  src/schema    CollectionQuery URL 编解码（实测零 effect import，分层允许；公开面零 effect/schema 泄漏）
   src/adapters  http 管线/订阅引擎（Effect 内部）/ndjson+sse transport/evaluate/clientCollection/mock/mockTransport
   src/react     绑定 hooks + queryOptions（禁 import effect，目录级 layer-check）
 registry/       UI 块五族（values/query/command/subscription/shell），shadcn 拷贝制分发

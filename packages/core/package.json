@@ -1,6 +1,6 @@
 {
   "name": "@lynx-go/uikit-core",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Headless core for data-dense console UIs — Query / Command / Subscription over TanStack engines",
   "type": "module",
   "license": "MIT",
@@ -55,13 +55,17 @@
     "react": ">=19",
     "@tanstack/react-query": ">=5.100",
     "@tanstack/react-router": ">=1.120",
-    "@tanstack/react-form": ">=1.30"
+    "@tanstack/react-form": ">=1.30",
+    "@testing-library/react": ">=16"
   },
   "peerDependenciesMeta": {
     "@tanstack/react-router": {
       "optional": true
     },
     "@tanstack/react-query": {
+      "optional": true
+    },
+    "@testing-library/react": {
       "optional": true
     }
   },
